@@ -114,9 +114,9 @@ function DropStatus({ delayMs, active }: { delayMs: number; active: boolean }) {
 /* -------------------------------------------------------------------------- */
 
 const thumbs = [
-  photos.brideRed, photos.canopy, photos.riverRock, photos.hennaHands, photos.posing, photos.ritual,
-  photos.brideGold, photos.rings, photos.sherwani, photos.crown, photos.flowerCanopy, photos.attire,
-  photos.traditional, photos.walkPath, photos.woods, photos.lifted, photos.dancer, photos.firstDance,
+  photos.bridalLaugh, photos.mandapCouple, photos.beachTwirl, photos.hennaHands, photos.forestPortrait, photos.pujaRitual,
+  photos.bridalMirror, photos.ringHands, photos.gardenProcession, photos.anandKaraj, photos.gardenArch, photos.bridalPortrait,
+  photos.afghanLaugh, photos.pathTogether, photos.avenueWalk, photos.dupattaDance, photos.sunglassesDance, photos.lakeDance,
 ]
 
 export function CullVisual() {
@@ -201,14 +201,14 @@ export function CullVisual() {
 /* -------------------------------------------------------------------------- */
 
 export function DeliverVisual() {
-  const grid = [photos.sherwani, photos.treeEmbrace, photos.canopy, photos.qipao, photos.attire, photos.confettiSteps]
+  const grid = [photos.gardenProcession, photos.closeEmbrace, photos.mandapCouple, photos.marigoldMandap, photos.bridalPortrait, photos.familyCheer]
   return (
     <div className="relative mx-auto flex max-w-[420px] justify-center pt-20 pb-10" aria-label="Sample client gallery on a phone, with a delivery email" role="img">
       {/* Phone */}
       <div className="relative w-[248px] overflow-hidden rounded-[34px] border border-line-strong bg-surface-sunken p-2 shadow-[0_40px_80px_-30px_rgb(0_0_0/0.7)]">
         <div className="theme-print overflow-hidden rounded-[26px]">
           <div className="relative h-[220px]">
-            <Image src={photos.flowerCanopy.src} alt="" fill sizes="240px" className="object-cover" />
+            <Image src={photos.skyEmbrace.src} alt="" fill sizes="240px" className="object-cover" />
             <span className="absolute top-3 right-3 rounded-full bg-white/85 px-2 py-0.5 type-label text-[8px] text-[#16191f]">Sample</span>
             <div className="absolute inset-0 bg-gradient-to-t from-[rgb(22_25_31/0.75)] via-transparent to-[rgb(22_25_31/0.35)]" />
             <p className="absolute top-3 left-3 font-heading text-[11px] font-bold tracking-[0.2em] text-white uppercase">Saffron Lane</p>

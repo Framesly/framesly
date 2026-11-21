@@ -37,4 +37,4 @@ Then open http://localhost:3000.
 
 ## Demo content
 
-Photos are from Unsplash (Unsplash License) and listed with their source pages in `apps/web/src/lib/photos.ts`. Replace them with a beta photographer's permitted photos before launch. Prices in `apps/web/src/config/plans.ts` and the proof numbers on the landing page are drafts.
+Photos are real weddings by Wow Films, stored as WebP in `apps/web/public/photos` and listed in `apps/web/src/lib/photos.ts`. Get the studio's written permission (and releases for the couples shown) before public launch. Prices in `apps/web/src/config/plans.ts` and the proof numbers on the landing page are drafts.

@@ -90,7 +90,7 @@ export function GalleryTrack() {
   const x = useTransform(pin, [0.04, 0.96], [0, reduce ? 0 : -distance])
   const bar = useTransform(pin, [0.04, 0.96], [0, 1])
 
-  const share = photos.window
+  const share = photos.tealDoor
 
   return (
     <section
@@ -133,7 +133,7 @@ export function GalleryTrack() {
 
               {/* Cover */}
               <article className="relative w-[82vw] shrink-0 overflow-hidden rounded-[var(--radius-cover)] sm:w-[620px]">
-                <ParallaxPhoto photo={photos.flowerCanopy} progress={pin} sizes="620px" className="absolute inset-0" position="50% 35%" strength={10} />
+                <ParallaxPhoto photo={photos.gardenArch} progress={pin} sizes="620px" className="absolute inset-0" position="50% 35%" strength={10} />
                 <div className="absolute inset-0 bg-gradient-to-t from-[rgb(28_23_20/0.78)] via-[rgb(28_23_20/0.1)] to-[rgb(28_23_20/0.35)]" />
                 <p className="absolute top-5 left-5 font-heading text-[13px] font-bold tracking-[0.28em] text-white uppercase">Saffron Lane</p>
                 <span className="absolute top-5 right-5 rounded-full bg-white/85 px-2.5 py-0.5 type-label text-[#16191f]">Sample</span>
@@ -155,7 +155,7 @@ export function GalleryTrack() {
                   ))}
                 </div>
                 <div className="grid h-[calc(100%-45px)] grid-cols-3 grid-rows-2 gap-1 p-1">
-                  {[photos.dancingNight, photos.stageDance, photos.dancer, photos.firstDance, photos.sparklers, photos.dancefloor].map((p) => (
+                  {[photos.tentDance, photos.brideDance, photos.sunglassesDance, photos.lakeDance, photos.receptionStage, photos.danceFloor].map((p) => (
                     <ParallaxPhoto key={p.id} photo={p} progress={pin} sizes="140px" className="h-full" strength={6} />
                   ))}
                 </div>
@@ -163,7 +163,7 @@ export function GalleryTrack() {
 
               {/* Favourites */}
               <Panel label="Favourites" title="Heart, then download" body="Two buttons per photo. Nothing else gets between a client and the picture.">
-                <ParallaxPhoto photo={photos.sunsetVeil} progress={pin} sizes="420px" className="absolute inset-0" position="50% 30%" />
+                <ParallaxPhoto photo={photos.seaBreeze} progress={pin} sizes="420px" className="absolute inset-0" position="50% 30%" />
                 <div className="absolute right-4 bottom-4 flex items-center gap-1 rounded-full bg-[rgb(28_23_20/0.6)] p-1 text-white">
                   <HeartButton on={fav} onToggle={() => setFav((v) => !v)} label={fav ? "Remove from favourites" : "Add to favourites"} className="hover:bg-white/15" />
                   <span className="grid size-11 place-items-center" aria-hidden>

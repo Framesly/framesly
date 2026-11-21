@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     url: "/sample",
     title: `${sampleGallery.couple} · ${sampleGallery.studio.name}`,
     description: `${sampleGallery.place} · ${sampleGallery.dates}`,
-    images: [{ url: `${sampleGallery.cover.src}?w=1200&h=630&fit=crop&auto=format`, width: 1200, height: 630 }],
+    images: [{ url: "/photos/sample-og.jpg", width: 1200, height: 630, alt: "A couple seated in a red floral mandap" }],
   },
 }
 

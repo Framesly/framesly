@@ -10,14 +10,14 @@ import { EdgeLabel } from "@/components/ui/card"
 import { photos } from "@/lib/photos"
 
 const reel = [
-  { p: photos.archway, t: "00:12", label: "Arrival" },
-  { p: photos.dancingNight, t: "01:48", label: "Sangeet" },
-  { p: photos.aisle, t: "03:10", label: "The aisle" },
-  { p: photos.canopy, t: "04:05", label: "Pheras" },
-  { p: photos.stageDance, t: "06:02", label: "First dance" },
-  { p: photos.toast, t: "07:22", label: "Toasts" },
-  { p: photos.sparklers, t: "09:14", label: "Sparkler exit" },
-  { p: photos.sunsetKiss, t: "10:02", label: "Send-off" },
+  { p: photos.brickArches, t: "00:12", label: "Arrival" },
+  { p: photos.tentDance, t: "01:48", label: "Sangeet" },
+  { p: photos.hallEntrance, t: "03:10", label: "Anand Karaj" },
+  { p: photos.mandapCouple, t: "04:05", label: "Mandap" },
+  { p: photos.brideDance, t: "06:02", label: "Bride’s dance" },
+  { p: photos.champagne, t: "07:22", label: "Toasts" },
+  { p: photos.receptionStage, t: "09:14", label: "Reception" },
+  { p: photos.duskShore, t: "10:02", label: "Send-off" },
 ]
 
 /** A film strip that slides sideways as the page scrolls down. */

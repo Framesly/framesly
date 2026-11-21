@@ -22,24 +22,24 @@ import { frameNo } from "@/lib/utils"
 type Item = { photo: Photo; label: string; frame: number }
 
 const rowA: Item[] = [
-  { photo: photos.brideRed, label: "Haldi", frame: 112 },
-  { photo: photos.aisle, label: "The aisle", frame: 1204 },
-  { photo: photos.dancingNight, label: "Sangeet", frame: 604 },
-  { photo: photos.yoruba, label: "Engagement", frame: 318 },
-  { photo: photos.canopy, label: "Pheras", frame: 1288 },
-  { photo: photos.doubleHappiness, label: "Tea ceremony", frame: 742 },
-  { photo: photos.confettiChurch, label: "Confetti", frame: 1530 },
-  { photo: photos.nikah, label: "Nikah", frame: 1366 },
+  { photo: photos.bridalLaugh, label: "Getting ready", frame: 112 },
+  { photo: photos.hallEntrance, label: "Anand Karaj", frame: 1204 },
+  { photo: photos.tentDance, label: "Sangeet", frame: 604 },
+  { photo: photos.emeraldAttire, label: "Engagement", frame: 318 },
+  { photo: photos.mandapCouple, label: "Mandap", frame: 1288 },
+  { photo: photos.jointLaugh, label: "Candids", frame: 742 },
+  { photo: photos.baraat, label: "Baraat", frame: 1530 },
+  { photo: photos.nikahCouple, label: "Nikah", frame: 1366 },
 ]
 const rowB: Item[] = [
-  { photo: photos.sparklers, label: "Sparkler exit", frame: 2101 },
+  { photo: photos.receptionStage, label: "Reception", frame: 2101 },
   { photo: photos.hennaHands, label: "Mehendi", frame: 287 },
-  { photo: photos.altar, label: "Vows", frame: 1250 },
-  { photo: photos.agbada, label: "Arrival", frame: 980 },
-  { photo: photos.firstDance, label: "First dance", frame: 1873 },
-  { photo: photos.maroonGown, label: "Getting ready", frame: 64 },
-  { photo: photos.qipao, label: "Portraits", frame: 911 },
-  { photo: photos.sunsetKiss, label: "Send-off", frame: 2140 },
+  { photo: photos.ceremonyBow, label: "Vows", frame: 1250 },
+  { photo: photos.shawlCanopy, label: "Couple shoot", frame: 980 },
+  { photo: photos.lakeDance, label: "First dance", frame: 1873 },
+  { photo: photos.redDressKiss, label: "Pre-wedding", frame: 64 },
+  { photo: photos.marigoldMandap, label: "Ceremony", frame: 911 },
+  { photo: photos.duskShore, label: "Send-off", frame: 2140 },
 ]
 
 /**

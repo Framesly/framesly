@@ -98,7 +98,7 @@ function Diagram({ progress }: { progress: MotionValue<number> }) {
       >
         {/* The one original every step reads (fix list: card looked empty). */}
         <div className="relative min-h-0 flex-1">
-          <Image src={photos.riverRock.src} alt="" fill sizes="300px" className="object-cover object-[50%_35%]" />
+          <Image src={photos.beachTwirl.src} alt="" fill sizes="300px" className="object-cover object-[50%_35%]" />
           <span className="absolute top-2 left-2 rounded-[var(--radius-chip)] bg-safelight px-1.5 py-0.5 type-label text-[9px] text-on-safelight">
             One file in storage
           </span>
@@ -159,7 +159,7 @@ function ToolBox({
       {/* The same photo, copied into every tool */}
       <div className="relative min-h-0 flex-1">
         <Image
-          src={photos.riverRock.src}
+          src={photos.beachTwirl.src}
           alt=""
           fill
           sizes="220px"

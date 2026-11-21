@@ -8,10 +8,10 @@ import { photos } from "@/lib/photos"
 import { cn, frameNo } from "@/lib/utils"
 
 const slides = [
-  { photo: photos.riverRock, frame: 412, verdict: "Pick", note: "Sharp · eyes open · best of burst", position: "50% 40%" },
-  { photo: photos.brideGold, frame: 414, verdict: "Pick", note: "Strongest expression in a 7-frame burst", position: "50% 30%" },
-  { photo: photos.canopy, frame: 410, verdict: "Pick", note: "Kept over 3 near-duplicates", position: "50% 50%" },
-  { photo: photos.sherwani, frame: 416, verdict: "Pick", note: "Sharp · eyes open · no motion blur", position: "50% 25%" },
+  { photo: photos.beachTwirl, frame: 412, verdict: "Pick", note: "Sharp · eyes open · best of burst", position: "50% 40%" },
+  { photo: photos.bridalMirror, frame: 414, verdict: "Pick", note: "Strongest expression in a 7-frame burst", position: "50% 30%" },
+  { photo: photos.mandapCouple, frame: 410, verdict: "Pick", note: "Kept over 3 near-duplicates", position: "50% 50%" },
+  { photo: photos.gardenProcession, frame: 416, verdict: "Pick", note: "Sharp · eyes open · no motion blur", position: "50% 25%" },
 ]
 
 const develop = [0.22, 1, 0.36, 1] as const
