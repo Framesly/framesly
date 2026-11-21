@@ -13,12 +13,13 @@ import {
   type MotionValue,
 } from "motion/react"
 import Image from "next/image"
-import { useEffect, useRef, useState, type RefObject } from "react"
+import { useEffect, useRef, useState, type RefObject, useMemo } from "react"
 
 import { ButtonArrow, ButtonLink, TextLink } from "@/components/ui/button"
 import { Chip, EdgeLabel } from "@/components/ui/card"
 import { Viewfinder } from "@/components/ui/viewfinder"
-import { photos, type Photo } from "@/lib/photos"
+import { useSitePhotos } from "@/components/site/site-photos"
+import { type SitePhotos, type Photo } from "@/lib/photos"
 import { cn, frameNo } from "@/lib/utils"
 
 /* -------------------------------------------------------------------------- */
@@ -40,7 +41,7 @@ type PrintDef = {
   crop?: string
 }
 
-const prints: PrintDef[] = [
+const buildPrints = (photos: SitePhotos): PrintDef[] => [
   { photo: photos.bridalLaugh, frame: 408, pick: true, d: [-0.84, -0.42], m: [-0.82, -0.74], rotate: -7, depth: 1 },
   { photo: photos.hennaHands, frame: 409, pick: false, reason: "Blur", d: [-0.5, -0.66], m: [-0.3, -0.8], rotate: 5, depth: 0.5 },
   { photo: photos.mandapCouple, frame: 410, pick: true, d: [0.52, -0.64], m: [0.22, -0.72], rotate: -4, depth: 0.8, crop: "50% 50%" },
@@ -57,7 +58,7 @@ const prints: PrintDef[] = [
   { photo: photos.hallEntrance, frame: 425, pick: true, d: [0.4, 0.74], m: [0.1, 0.92], rotate: 5, depth: 0.9, crop: "50% 60%" },
 ]
 
-const pickOrder = prints.filter((p) => p.pick)
+
 
 /* -------------------------------------------------------------------------- */
 /* Layout                                                                      */
@@ -123,6 +124,9 @@ const lerp = (a: number, b: number, t: number) => a + (b - a) * t
  * their grid size, and the idle drift stops as soon as scrolling starts.
  */
 export function HeroScatter() {
+  const photos = useSitePhotos()
+  const prints = useMemo(() => buildPrints(photos), [photos])
+  const pickOrder = useMemo(() => prints.filter((p) => p.pick), [prints])
   const sectionRef = useRef<HTMLElement>(null)
   const reduce = useReducedMotion() ?? false
 

@@ -2,11 +2,12 @@
 
 import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/react"
 import Image from "next/image"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, useMemo } from "react"
 
 import { Chip } from "@/components/ui/card"
 import { Viewfinder } from "@/components/ui/viewfinder"
-import { photos } from "@/lib/photos"
+import { useSitePhotos } from "@/components/site/site-photos"
+import { type SitePhotos } from "@/lib/photos"
 import { cn } from "@/lib/utils"
 
 const develop = [0.22, 1, 0.36, 1] as const
@@ -113,13 +114,15 @@ function DropStatus({ delayMs, active }: { delayMs: number; active: boolean }) {
 /* 02 Cull to N                                                                */
 /* -------------------------------------------------------------------------- */
 
-const thumbs = [
+const buildThumbs = (photos: SitePhotos) => [
   photos.bridalLaugh, photos.mandapCouple, photos.beachTwirl, photos.hennaHands, photos.forestPortrait, photos.pujaRitual,
   photos.bridalMirror, photos.ringHands, photos.gardenProcession, photos.anandKaraj, photos.gardenArch, photos.bridalPortrait,
   photos.afghanLaugh, photos.pathTogether, photos.avenueWalk, photos.dupattaDance, photos.sunglassesDance, photos.lakeDance,
 ]
 
 export function CullVisual() {
+  const photos = useSitePhotos()
+  const thumbs = useMemo(() => buildThumbs(photos), [photos])
   // One example wedding everywhere: 2,184 frames, 612 picks, 41 minutes (fix list).
   const [n, setN] = useState(612)
   const total = 2184
@@ -201,6 +204,7 @@ export function CullVisual() {
 /* -------------------------------------------------------------------------- */
 
 export function DeliverVisual() {
+  const photos = useSitePhotos()
   const grid = [photos.gardenProcession, photos.closeEmbrace, photos.mandapCouple, photos.marigoldMandap, photos.bridalPortrait, photos.familyCheer]
   return (
     <div className="relative mx-auto flex max-w-[420px] justify-center pt-20 pb-10" aria-label="Sample client gallery on a phone, with a delivery email" role="img">

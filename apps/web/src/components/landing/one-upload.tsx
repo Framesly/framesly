@@ -12,7 +12,7 @@ import { useRef } from "react"
 
 import { RevealText } from "@/components/motion/reveal"
 import { EdgeLabel } from "@/components/ui/card"
-import { photos } from "@/lib/photos"
+import { useSitePhotos } from "@/components/site/site-photos"
 import { cn } from "@/lib/utils"
 
 const tools = [
@@ -76,6 +76,7 @@ function Outcome({ progress }: { progress: MotionValue<number> }) {
 }
 
 function Diagram({ progress }: { progress: MotionValue<number> }) {
+  const photos = useSitePhotos()
   const mergedOpacity = useTransform(progress, [0.7, 0.95], [0, 1])
   const mergedScale = useTransform(progress, [0.7, 1], [0.86, 1])
   const linesOpacity = useTransform(progress, [0, 0.35], [1, 0])
@@ -135,6 +136,7 @@ function ToolBox({
   index: number
   progress: MotionValue<number>
 }) {
+  const photos = useSitePhotos()
   // Each box drifts from its corner to the centre and fades as it merges.
   const x = useTransform(progress, [0, 0.8], ["0%", `${-tool.x * 72}%`])
   const y = useTransform(progress, [0, 0.8], ["0%", `${-tool.y * 72}%`])

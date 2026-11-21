@@ -12,16 +12,17 @@ import {
   useVelocity,
 } from "motion/react"
 import Image from "next/image"
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useMemo } from "react"
 
 import { RevealText } from "@/components/motion/reveal"
 import { EdgeLabel } from "@/components/ui/card"
-import { photos, type Photo } from "@/lib/photos"
+import { useSitePhotos } from "@/components/site/site-photos"
+import { type SitePhotos, type Photo } from "@/lib/photos"
 import { frameNo } from "@/lib/utils"
 
 type Item = { photo: Photo; label: string; frame: number }
 
-const rowA: Item[] = [
+const buildRowA = (photos: SitePhotos): Item[] => [
   { photo: photos.bridalLaugh, label: "Getting ready", frame: 112 },
   { photo: photos.hallEntrance, label: "Anand Karaj", frame: 1204 },
   { photo: photos.tentDance, label: "Sangeet", frame: 604 },
@@ -31,7 +32,7 @@ const rowA: Item[] = [
   { photo: photos.baraat, label: "Baraat", frame: 1530 },
   { photo: photos.nikahCouple, label: "Nikah", frame: 1366 },
 ]
-const rowB: Item[] = [
+const buildRowB = (photos: SitePhotos): Item[] => [
   { photo: photos.receptionStage, label: "Reception", frame: 2101 },
   { photo: photos.hennaHands, label: "Mehendi", frame: 287 },
   { photo: photos.ceremonyBow, label: "Vows", frame: 1250 },
@@ -115,6 +116,9 @@ function Row({ items, baseSpeed, height }: { items: Item[]; baseSpeed: number; h
 }
 
 export function PhotoRibbon() {
+  const photos = useSitePhotos()
+  const rowA = useMemo(() => buildRowA(photos), [photos])
+  const rowB = useMemo(() => buildRowB(photos), [photos])
   return (
     <section aria-labelledby="ribbon-title" className="relative overflow-hidden pt-24 pb-12 md:pt-32 md:pb-16">
       <div className="gutter mx-auto max-w-[var(--container-content)]">

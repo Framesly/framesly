@@ -2,8 +2,10 @@ import type { Metadata, Viewport } from "next"
 import { Bricolage_Grotesque, Figtree, JetBrains_Mono } from "next/font/google"
 
 import { MotionProvider } from "@/components/motion/motion-provider"
+import { SitePhotosProvider } from "@/components/site/site-photos"
 import { ThemeProvider, themeScript } from "@/components/theme/theme"
 import { PageTransitionProvider } from "@/components/transition/page-transition"
+import { getSitePhotos } from "@/lib/data/site-photos"
 import { siteConfig } from "@/lib/site"
 import "./globals.css"
 
@@ -42,7 +44,9 @@ export const viewport: Viewport = {
   colorScheme: "light dark",
 }
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  // Cached public catalogue (site_photos), so pages still prerender as static.
+  const photos = await getSitePhotos()
   return (
     <html
       lang="en"
@@ -58,7 +62,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-dvh flex-col">
         <MotionProvider>
           <ThemeProvider>
-            <PageTransitionProvider>{children}</PageTransitionProvider>
+            <SitePhotosProvider photos={photos}>
+              <PageTransitionProvider>{children}</PageTransitionProvider>
+            </SitePhotosProvider>
           </ThemeProvider>
         </MotionProvider>
       </body>

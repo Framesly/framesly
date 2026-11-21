@@ -5,7 +5,7 @@ import { useEffect, useRef, useState, useTransition } from "react"
 
 import { checkSlugAction, type SlugCheck } from "@/features/studio/actions"
 import { validateLogo } from "@/features/studio/upload-logo"
-import { photos } from "@/lib/photos"
+import { useSitePhotos } from "@/components/site/site-photos"
 import { cn } from "@/lib/utils"
 
 /* Shared studio-branding controls, used by onboarding and studio settings. */
@@ -197,6 +197,7 @@ export function GalleryCoverPreview({
   logoUrl: string | null
   compact?: boolean
 }) {
+  const photos = useSitePhotos()
   return (
     <figure className="overflow-hidden rounded-[var(--radius-cover)] border border-line bg-surface-raised shadow-[var(--shadow-print)]">
       <div className="flex items-center gap-2 border-b border-line px-3 py-2">

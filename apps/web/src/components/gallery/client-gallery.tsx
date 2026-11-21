@@ -5,7 +5,8 @@ import Image from "next/image"
 import { TransitionLink as Link } from "@/components/transition/page-transition"
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react"
 
-import { allSamplePhotos, sampleGallery, type GalleryPhoto } from "@/components/gallery/gallery-data"
+import { buildSampleGallery, type GalleryPhoto } from "@/components/gallery/gallery-data"
+import { useSitePhotos } from "@/components/site/site-photos"
 import { HeartButton } from "@/components/gallery/heart-button"
 import { Lightbox } from "@/components/gallery/lightbox"
 import { ToastProvider, useToast } from "@/components/gallery/toast"
@@ -70,8 +71,14 @@ export function ClientGallery() {
   )
 }
 
+/** The sample gallery, built once from the photo catalogue loaded from Supabase. */
+function useSampleGallery() {
+  const photos = useSitePhotos()
+  return useMemo(() => buildSampleGallery(photos), [photos])
+}
+
 function GalleryInner() {
-  const g = sampleGallery
+  const g = useSampleGallery()
   const toast = useToast()
   const { favs, toggle, has } = useFavourites()
   const [view, setView] = useState<"all" | "favourites">("all")
@@ -79,8 +86,8 @@ function GalleryInner() {
   const [active, setActive] = useState(g.sections[0].id)
 
   const visible = useMemo(
-    () => (view === "all" ? allSamplePhotos : allSamplePhotos.filter((p) => favs.has(p.id))),
-    [view, favs]
+    () => (view === "all" ? g.all : g.all.filter((p) => favs.has(p.id))),
+    [g.all, view, favs]
   )
 
   const sections = useMemo(
@@ -117,7 +124,7 @@ function GalleryInner() {
   const downloadAll = () =>
     toast({
       title: "Preparing your ZIP",
-      body: view === "favourites" ? `${favs.size} favourites. We'll email the link.` : "All 32 photos. We'll email the link when it's ready.",
+      body: view === "favourites" ? `${favs.size} favourites. We'll email the link.` : `All ${g.all.length} photos. We'll email the link when it's ready.`,
     })
 
   return (
@@ -252,7 +259,7 @@ function GalleryInner() {
 }
 
 function Cover({ onShare, favCount, onShowFavs }: { onShare: () => void; favCount: number; onShowFavs: () => void }) {
-  const g = sampleGallery
+  const g = useSampleGallery()
   const ref = useRef<HTMLElement>(null)
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] })
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "18%"])

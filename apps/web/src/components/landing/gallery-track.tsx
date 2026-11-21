@@ -7,7 +7,8 @@ import { useEffect, useRef, useState } from "react"
 import { HeartButton } from "@/components/gallery/heart-button"
 import { TextLink } from "@/components/ui/button"
 import { EdgeLabel } from "@/components/ui/card"
-import { photos, type Photo } from "@/lib/photos"
+import { useSitePhotos } from "@/components/site/site-photos"
+import { type Photo } from "@/lib/photos"
 import { cn } from "@/lib/utils"
 
 /** A photo that drifts sideways inside its frame as the track moves. */
@@ -60,6 +61,7 @@ function Panel({ label, title, body, className, children }: { label: string; tit
  * features slides sideways as you scroll down.
  */
 export function GalleryTrack() {
+  const photos = useSitePhotos()
   const sectionRef = useRef<HTMLElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
   const viewportRef = useRef<HTMLDivElement>(null)

@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 
 import { ClientGallery } from "@/components/gallery/client-gallery"
-import { sampleGallery } from "@/components/gallery/gallery-data"
+import { sampleGalleryInfo as sampleGallery } from "@/components/gallery/gallery-data"
 
 export const metadata: Metadata = {
   alternates: { canonical: "/sample" },
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     url: "/sample",
     title: `${sampleGallery.couple} · ${sampleGallery.studio.name}`,
     description: `${sampleGallery.place} · ${sampleGallery.dates}`,
-    images: [{ url: "/photos/sample-og.jpg", width: 1200, height: 630, alt: "A couple seated in a red floral mandap" }],
+    images: [{ url: sampleGallery.shareImage, width: 1200, height: 630, alt: "A couple seated in a red floral mandap" }],
   },
 }
 

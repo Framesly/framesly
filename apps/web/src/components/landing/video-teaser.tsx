@@ -2,14 +2,15 @@
 
 import { motion, useReducedMotion, useScroll, useTransform } from "motion/react"
 import Image from "next/image"
-import { useRef } from "react"
+import { useRef, useMemo } from "react"
 
 import { RevealText } from "@/components/motion/reveal"
 import { TextLink } from "@/components/ui/button"
 import { EdgeLabel } from "@/components/ui/card"
-import { photos } from "@/lib/photos"
+import { useSitePhotos } from "@/components/site/site-photos"
+import { type SitePhotos } from "@/lib/photos"
 
-const reel = [
+const buildReel = (photos: SitePhotos) => [
   { p: photos.brickArches, t: "00:12", label: "Arrival" },
   { p: photos.tentDance, t: "01:48", label: "Sangeet" },
   { p: photos.hallEntrance, t: "03:10", label: "Anand Karaj" },
@@ -22,6 +23,8 @@ const reel = [
 
 /** A film strip that slides sideways as the page scrolls down. */
 export function VideoTeaser({ showLink = true }: { showLink?: boolean }) {
+  const photos = useSitePhotos()
+  const reel = useMemo(() => buildReel(photos), [photos])
   const ref = useRef<HTMLElement>(null)
   const reduce = useReducedMotion()
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] })

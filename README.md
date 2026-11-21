@@ -37,4 +37,4 @@ Then open http://localhost:3000.
 
 ## Demo content
 
-Photos are real weddings by Wow Films, stored as WebP in `apps/web/public/photos` and listed in `apps/web/src/lib/photos.ts`. Get the studio's written permission (and releases for the couples shown) before public launch. Prices in `apps/web/src/config/plans.ts` and the proof numbers on the landing page are drafts.
+Photos are real weddings by Wow Films, stored in Supabase (bucket `site-media`, table `site_photos`; see SETUP.md). Get the studio's written permission (and releases for the couples shown) before public launch. Prices in `apps/web/src/config/plans.ts` and the proof numbers on the landing page are drafts.

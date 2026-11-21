@@ -31,9 +31,11 @@ Auth settings live in `supabase/config.toml` and are applied with:
 npx supabase config push
 ```
 
-That sets the Site URL (`https://framesly-parvathy.vercel.app`), the allowed redirect URLs (production, Vercel previews, `framesly.app`, localhost), and passwords of 8+ characters with letters and digits.
+That sets the Site URL (the Vercel production URL), the allowed redirect URLs (production, Vercel previews, `framesly.app`, localhost), and passwords of 8+ characters with letters and digits.
 
-**Email confirmation is off for now.** New photographers go straight from sign-up to onboarding. Turn it back on once Resend is set up (below): set `enable_confirmations = true` under `[auth.email]` in `supabase/config.toml` and run `npx supabase config push`. The app handles both modes. Run `npx supabase config diff` first to preview.
+**Email confirmation is off for now.** New photographers go straight from sign-up to onboarding. Turn it back on once Resend is set up (below): set `enable_confirmations = true` under `[auth.email]` in `supabase/config.toml` and run `npx supabase config push`. The app handles both modes. Run `npx supabase config diff` first to preview. If you change auth settings in the dashboard, copy them into `config.toml` too, or the next push will undo them.
+
+No credentials belong in `config.toml`: secrets are referenced as `env(NAME)` or set in the dashboard.
 
 **Email sending.** Without your own SMTP, Supabase sends a few emails per hour, only to members of your Supabase organisation, using its default templates. Real signups need Resend:
 
@@ -72,11 +74,35 @@ npx supabase test db
 
 The tests in `supabase/tests/rls_test.sql` check that one studio can never read or change another studio's data.
 
+## Site photos (marketing, login pages, sample gallery)
+
+The photos are not in the repo. They live in Supabase:
+
+- **Files:** Storage bucket `site-media`, folder `showcase/`, each photo as `name-400.webp`, `name-800.webp`, `name-1200.webp` and `name-1800.webp`, plus `sample-og.jpg` for the sample gallery share image. The bucket is public to read; only the service role can upload.
+- **Catalogue:** table `public.site_photos` (key, file, width, height, alt, credit, sort order, active). The root layout loads it once (cached for an hour) and hands it to every page.
+
+To **replace a photo**: upload the four new WebP sizes under the same file name (or a new name and update `file` in the row), then update `width`, `height` and `alt`. To **add a photo**, add its key to `SITE_PHOTO_KEYS` in `apps/web/src/lib/photos.ts`, insert the row, and use `photos.yourKey` in a component. Upload with:
+
+```powershell
+npx supabase storage cp -r .\my-photos ss:///site-media/showcase --remote --experimental --cache-control "public, max-age=31536000, immutable"
+```
+
+Changes show within an hour, or straight away after the next deploy.
+
+## User and studio files
+
+Bucket `studio-assets`, one folder per owner. Row-level security on Storage lets users write only their own folder and studio members only their studio's:
+
+- `users/{userId}/avatar/…`: a photographer's profile photo (`profiles.avatar_path`)
+- `studios/{studioId}/logo/…`: a studio's logo (`studios.logo_path`)
+
+Replacing either removes the old file.
+
 ## How the pieces fit
 
 | Area | Where |
 | --- | --- |
-| Schema, RLS, storage policies | `supabase/migrations/` |
+| Schema, RLS, storage policies, site photo catalogue | `supabase/migrations/` |
 | Supabase clients (server, browser, proxy) | `apps/web/src/lib/supabase/` |
 | Session refresh and `/app` protection | `apps/web/src/proxy.ts` |
 | Current user and studio for server code | `apps/web/src/lib/auth/dal.ts` |

@@ -2,12 +2,13 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import Image from "next/image"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 
-import { photos } from "@/lib/photos"
+import { useSitePhotos } from "@/components/site/site-photos"
+import { type SitePhotos } from "@/lib/photos"
 import { cn, frameNo } from "@/lib/utils"
 
-const slides = [
+const buildSlides = (photos: SitePhotos) => [
   { photo: photos.beachTwirl, frame: 412, verdict: "Pick", note: "Sharp · eyes open · best of burst", position: "50% 40%" },
   { photo: photos.bridalMirror, frame: 414, verdict: "Pick", note: "Strongest expression in a 7-frame burst", position: "50% 30%" },
   { photo: photos.mandapCouple, frame: 410, verdict: "Pick", note: "Kept over 3 near-duplicates", position: "50% 50%" },
@@ -52,6 +53,8 @@ function FocusBrackets({ k, reduce }: { k: number; reduce: boolean }) {
  * caption reports why the AI kept the frame.
  */
 export function AuthShowcase() {
+  const photos = useSitePhotos()
+  const slides = useMemo(() => buildSlides(photos), [photos])
   const reduce = useReducedMotion() ?? false
   const [index, setIndex] = useState(0)
 
@@ -59,7 +62,7 @@ export function AuthShowcase() {
     if (reduce) return
     const t = setInterval(() => setIndex((i) => (i + 1) % slides.length), INTERVAL)
     return () => clearInterval(t)
-  }, [reduce])
+  }, [reduce, slides.length])
 
   const slide = slides[index]
 
@@ -98,7 +101,7 @@ export function AuthShowcase() {
           <span className="absolute inset-0 animate-ping rounded-full bg-safelight" />
           <span className="relative size-1.5 rounded-full bg-safelight" />
         </span>
-        <span className="type-label text-[#f3ece3]">Sample cull · stock photos</span>
+        <span className="type-label text-[#f3ece3]">Sample cull · Wow Films</span>
       </div>
 
       <div className="absolute right-10 bottom-10 left-10 text-white">
@@ -143,13 +146,15 @@ export function AuthShowcase() {
 
 /** Compact version for phones: a short banner above the form. */
 export function AuthBanner() {
+  const photos = useSitePhotos()
+  const slides = useMemo(() => buildSlides(photos), [photos])
   const reduce = useReducedMotion() ?? false
   const [index, setIndex] = useState(0)
   useEffect(() => {
     if (reduce) return
     const t = setInterval(() => setIndex((i) => (i + 1) % slides.length), INTERVAL)
     return () => clearInterval(t)
-  }, [reduce])
+  }, [reduce, slides.length])
   const slide = slides[index]
   return (
     <div className="relative h-36 overflow-hidden rounded-[var(--radius-cover)] bg-surface-sunken">

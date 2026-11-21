@@ -2,17 +2,18 @@
 
 import { motion, useReducedMotion, useScroll, useTransform, type MotionValue } from "motion/react"
 import Image from "next/image"
-import { useRef } from "react"
+import { useRef, useMemo } from "react"
 
 import { RevealText } from "@/components/motion/reveal"
 import { ButtonArrow, ButtonLink } from "@/components/ui/button"
 import { EdgeLabel } from "@/components/ui/card"
 import { Viewfinder } from "@/components/ui/viewfinder"
-import { photos, type Photo } from "@/lib/photos"
+import { useSitePhotos } from "@/components/site/site-photos"
+import { type SitePhotos, type Photo } from "@/lib/photos"
 import { cn } from "@/lib/utils"
 
-const rowA = [photos.bridalLaugh, photos.closeEmbrace, photos.mandapCouple, photos.shawlCanopy, photos.bridalPortrait, photos.hallEntrance, photos.marigoldMandap, photos.avenueWalk, photos.nikahCouple]
-const rowB = [photos.receptionStage, photos.lakeDance, photos.steppingStones, photos.sunglassesDance, photos.seaBreeze, photos.brickArches, photos.veilLaugh, photos.horseMono, photos.jointLaugh]
+const buildRowA = (photos: SitePhotos) => [photos.bridalLaugh, photos.closeEmbrace, photos.mandapCouple, photos.shawlCanopy, photos.bridalPortrait, photos.hallEntrance, photos.marigoldMandap, photos.avenueWalk, photos.nikahCouple]
+const buildRowB = (photos: SitePhotos) => [photos.receptionStage, photos.lakeDance, photos.steppingStones, photos.sunglassesDance, photos.seaBreeze, photos.brickArches, photos.veilLaugh, photos.horseMono, photos.jointLaugh]
 
 /** A row of prints that slides with the scroll; picks get brackets, rejects stay grey. */
 function PrintRow({ items, picks, progress, from, to }: { items: Photo[]; picks: number[]; progress: MotionValue<number>; from: string; to: string }) {
@@ -39,6 +40,9 @@ function PrintRow({ items, picks, progress, from, to }: { items: Photo[]; picks:
 }
 
 export function FinalCta() {
+  const photos = useSitePhotos()
+  const rowA = useMemo(() => buildRowA(photos), [photos])
+  const rowB = useMemo(() => buildRowB(photos), [photos])
   const ref = useRef<HTMLElement>(null)
   const reduce = useReducedMotion() ?? false
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] })

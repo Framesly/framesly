@@ -161,6 +161,32 @@ export type Database = {
         Update: { r2_key?: string; width?: number; height?: number; bytes?: number }
         Relationships: []
       }
+      site_photos: {
+        Row: {
+          key: string
+          file: string
+          width: number
+          height: number
+          alt: string
+          credit: string
+          sort_order: number
+          is_active: boolean
+          created_at: Timestamp
+          updated_at: Timestamp
+        }
+        Insert: {
+          key: string
+          file: string
+          width: number
+          height: number
+          alt: string
+          credit?: string
+          sort_order?: number
+          is_active?: boolean
+        }
+        Update: { file?: string; width?: number; height?: number; alt?: string; credit?: string; sort_order?: number; is_active?: boolean }
+        Relationships: []
+      }
     }
     Views: {
       gallery_overview: {

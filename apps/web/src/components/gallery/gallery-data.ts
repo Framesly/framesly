@@ -1,9 +1,9 @@
-import { photos, type Photo } from "@/lib/photos"
+import { showcaseUrl, type Photo, type SitePhotoKey, type SitePhotos } from "@/lib/photos"
 
 export type GalleryPhoto = Photo & { frame: number; section: string }
 export type GallerySection = { id: string; name: string; day: string; photos: GalleryPhoto[] }
 
-const raw: { id: string; name: string; day: string; keys: (keyof typeof photos)[] }[] = [
+const raw: { id: string; name: string; day: string; keys: SitePhotoKey[] }[] = [
   { id: "getting-ready", name: "Getting ready", day: "Day 1 · Morning", keys: ["bridalMirror", "bridalLaugh", "bridalPortrait", "ringHands", "tealDoor"] },
   { id: "mehendi", name: "Mehendi", day: "Day 1 · Evening", keys: ["hennaHands", "afghanLaugh", "emeraldAttire", "shawlCanopy", "pathTogether"] },
   { id: "sangeet", name: "Sangeet", day: "Day 2 · Night", keys: ["tentDance", "dupattaDance", "sunglassesDance", "danceFloor", "brideDance", "familyCheer"] },
@@ -12,19 +12,26 @@ const raw: { id: string; name: string; day: string; keys: (keyof typeof photos)[
   { id: "reception", name: "Reception", day: "Day 3 · Night", keys: ["receptionStage", "redAisle", "candleTable", "champagne", "jointLaugh", "nikahCouple"] },
 ]
 
-let frame = 1021
-export const sampleGallery = {
+/** Fixed details of the demo wedding (no photos), safe for metadata. */
+export const sampleGalleryInfo = {
   studio: { name: "Saffron Lane", tagline: "Wedding stories from Udaipur", email: "hello@saffronlane.studio" },
   couple: "Aarohi & Kabir",
   place: "Udaipur",
   dates: "12 to 14 February 2026",
-  cover: photos.skyEmbrace,
-  sections: raw.map<GallerySection>((s) => ({
+  /** 1200×630 share image, stored next to the showcase photos. */
+  shareImage: showcaseUrl("sample-og.jpg"),
+}
+
+export type SampleGallery = typeof sampleGalleryInfo & { cover: Photo; sections: GallerySection[]; all: GalleryPhoto[] }
+
+/** The sample gallery, built from the site photo catalogue loaded from Supabase. */
+export function buildSampleGallery(photos: SitePhotos): SampleGallery {
+  let frame = 1021
+  const sections = raw.map<GallerySection>((s) => ({
     id: s.id,
     name: s.name,
     day: s.day,
     photos: s.keys.map((k) => ({ ...photos[k], frame: (frame += 7), section: s.id })),
-  })),
+  }))
+  return { ...sampleGalleryInfo, cover: photos.skyEmbrace, sections, all: sections.flatMap((s) => s.photos) }
 }
-
-export const allSamplePhotos = sampleGallery.sections.flatMap((s) => s.photos)
