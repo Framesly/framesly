@@ -14,7 +14,7 @@ import { isGoogleAuthEnabled } from "@/lib/supabase/env"
 
 const linkErrors: Record<string, string> = {
   link: "That link has expired or was already used. Log in, or request a new one.",
-  oauth: "Google sign-in didn't finish. Try again.",
+  oauth: "Google sign-in didn't finish. Try again, or log in with email.",
   "not-configured": "Sign-in isn't connected yet. Add the Supabase keys (see SETUP.md).",
 }
 

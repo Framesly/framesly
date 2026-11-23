@@ -159,22 +159,19 @@ enabled = false
 enabled = true
 # The base URL of your website. Used as an allow-list for redirects and for constructing URLs used
 # in emails.
-site_url = "https://framesly-parvathy-abhisheks-projects-223e5a3e.vercel.app/"
+site_url = "https://framesly.app"
 # The public URL that Auth serves on. Defaults to the API external URL with `/auth/v1` appended.
 # external_url = ""
-# A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
+# Where Supabase may send people back after sign-in, password reset and email links.
+# Wildcards match one host label, so framesly-*.vercel.app covers Vercel preview URLs.
 additional_redirect_urls = [
-  "https://framesly-parvathy.vercel.app/**",
-  "https://framesly-parvathy-*.vercel.app/**",
   "https://framesly.app/**",
+  "https://www.framesly.app/**",
+  "https://framesly.vercel.app/**",
+  "https://framesly-*.vercel.app/**",
   "http://localhost:3000/**",
   "http://localhost:3100/**",
   "http://127.0.0.1:3000/**",
-  # Vercel team URLs (production alias and preview deployments)
-  "https://framesly-parvathy-abhisheks-projects-223e5a3e.vercel.app/",
-  "https://framesly-parvathy-abhisheks-projects-223e5a3e.vercel.app/**",
-  "https://framesly-*-parvathy-abhisheks-projects-223e5a3e.vercel.app",
-  "https://framesly-*-parvathy-abhisheks-projects-223e5a3e.vercel.app/**",
 ]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600
@@ -448,9 +445,11 @@ enabled = true
 # subject = "Reset your Framesly password"
 # content_path = "./supabase/templates/recovery.html"
 
-# Turn on once a Google OAuth client exists (see SETUP.md), then `supabase config push`.
+# Google sign-in. The client ID and secret are set in the Supabase dashboard
+# (Authentication > Providers > Google), never in this file.
 [auth.external.google]
-enabled = false
-client_id = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID)"
+enabled = true
+# Client IDs are public. The secret is never written here: it lives only in the dashboard.
+client_id = "1054101012947-97n8uuj32cpnfsd0rv73f1v2akgstju8.apps.googleusercontent.com"
 secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET)"
 skip_nonce_check = false
