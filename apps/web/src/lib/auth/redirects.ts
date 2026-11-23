@@ -9,12 +9,20 @@ export function safeNext(next: unknown, fallback = "/app") {
   return next
 }
 
-/** Absolute origin for auth email and OAuth redirect links. */
+/**
+ * Absolute origin for auth email and OAuth redirect links: the site the person
+ * is actually on (framesly.app, framesly.vercel.app, a preview, localhost), so
+ * they come back to the same place and keep their session cookie.
+ * NEXT_PUBLIC_APP_URL is only a fallback when the request has no host.
+ * Supabase still checks every redirect against its allow-list (config.toml).
+ */
 export async function siteOrigin() {
-  const configured = process.env.NEXT_PUBLIC_APP_URL
-  if (configured) return configured.replace(/\/$/, "")
   const h = await headers()
-  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000"
-  const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") || host.startsWith("127.") ? "http" : "https")
-  return `${proto}://${host}`
+  const host = h.get("x-forwarded-host") ?? h.get("host")
+  if (host) {
+    const local = host.startsWith("localhost") || host.startsWith("127.")
+    const proto = h.get("x-forwarded-proto") ?? (local ? "http" : "https")
+    return `${proto}://${host}`
+  }
+  return (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/$/, "")
 }
