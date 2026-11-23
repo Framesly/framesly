@@ -8,3 +8,4 @@ dist
 *.tsbuildinfo
 .vercel
 next-env.d.ts
+.DS_Store
