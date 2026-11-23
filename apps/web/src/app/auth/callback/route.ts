@@ -23,7 +23,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${origin}${next}`)
     }
   }
-  return NextResponse.redirect(`${origin}/login?error=link`)
+  // Google cancelled or blocked (e.g. app still in Testing), or the session
+  // couldn't be finished (sign-in started on a different domain).
+  return NextResponse.redirect(`${origin}/login?error=oauth`)
 }
 
 function sanitize(next: string | null) {
