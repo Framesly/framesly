@@ -83,6 +83,23 @@ export const createGallerySchema = z.object({
 
 export const sectionNameSchema = z.string().trim().min(1, "Name the section.").max(60, "Use 60 characters or fewer.")
 
+/** Client link name: framesly.app/g/<slug>. Same rule as the database check. */
+export const publicSlugSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .regex(/^[a-z0-9](?:[a-z0-9-]{1,58}[a-z0-9])$/, "Use 3 to 60 letters, numbers or hyphens, starting and ending with a letter or number.")
+
+export const publishGallerySchema = z.object({
+  slug: publicSlugSchema,
+  /** New password; empty keeps the current one (or none). */
+  password: z.string().max(72, "Use 72 characters or fewer.").optional().transform((v) => (v ? v : undefined))
+    .refine((v) => v === undefined || v.length >= 4, "Use at least 4 characters."),
+  removePassword: z.boolean().optional().default(false),
+  /** ISO timestamp from the browser (end of the chosen day, local time), or null for no expiry. */
+  expiresAt: z.iso.datetime({ offset: true }).nullable().optional().default(null),
+})
+
 /** Turn zod errors into { field: message } for forms. */
 export function fieldErrors(error: z.ZodError): Record<string, string> {
   const out: Record<string, string> = {}

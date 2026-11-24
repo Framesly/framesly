@@ -92,6 +92,13 @@ export type Database = {
           created_by: string | null
           created_at: Timestamp
           updated_at: Timestamp
+          /** Client link name, unique across all studios: framesly.app/g/<public_slug> */
+          public_slug: string | null
+          /** null = draft (clients can't open it) */
+          published_at: Timestamp | null
+          expires_at: Timestamp | null
+          /** Display hint only; the password hash itself is in gallery_secrets (server-only) */
+          has_password: boolean
         }
         Insert: {
           id?: string
@@ -212,6 +219,12 @@ export type Database = {
     }
     Functions: {
       slug_available: { Args: { p_slug: string }; Returns: boolean }
+      public_slug_available: { Args: { p_slug: string; p_gallery_id?: string }; Returns: boolean }
+      publish_gallery: {
+        Args: { p_gallery_id: string; p_slug: string; p_password_hash?: string | null; p_remove_password?: boolean; p_expires_at?: string | null }
+        Returns: { public_slug: string; published_at: Timestamp; expires_at: Timestamp | null; has_password: boolean }[]
+      }
+      unpublish_gallery: { Args: { p_gallery_id: string }; Returns: undefined }
       create_studio: {
         Args: { p_name: string; p_slug: string; p_region?: string; p_brand_color?: string }
         Returns: Database["public"]["Tables"]["studios"]["Row"]
