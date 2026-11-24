@@ -30,3 +30,18 @@ export const getGalleryWithSections = cache(async (galleryId: string) => {
   if (!gallery.data) return null
   return { gallery: gallery.data, sections: sections.data ?? [] }
 })
+
+export const PHOTO_PAGE_SIZE = 48
+
+/** Newest photos of a gallery (RLS limits this to the signed-in member's studio). */
+export const listGalleryPhotos = cache(async (galleryId: string) => {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from("photos")
+    .select("id, original_name, web_key, width, height, status")
+    .eq("gallery_id", galleryId)
+    .order("created_at", { ascending: false })
+    .limit(PHOTO_PAGE_SIZE)
+  if (error) throw new Error(error.message)
+  return data ?? []
+})

@@ -2,18 +2,24 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
+import Image from "next/image"
+
 import { DeleteGallery, GalleryDetails, SectionsManager } from "@/components/app/gallery-editor"
+import { PhotoUploader } from "@/components/app/photo-uploader"
 import { requireStudio } from "@/lib/auth/dal"
-import { getGalleryWithSections } from "@/lib/data/galleries"
+import { getGalleryWithSections, listGalleryPhotos } from "@/lib/data/galleries"
+import { presignGet } from "@/lib/r2"
 
 export const metadata: Metadata = { title: "Gallery" }
 
-/** One gallery: details, sections, uploads (FR-09 groundwork). */
+/** One gallery: details, uploads, photos and sections. */
 export default async function GalleryPage({ params, searchParams }: PageProps<"/app/galleries/[galleryId]">) {
   const [{ galleryId }, query, { studio }] = await Promise.all([params, searchParams, requireStudio()])
   const data = await getGalleryWithSections(galleryId)
   if (!data || data.gallery.studio_id !== studio.id) notFound()
   const { gallery, sections } = data
+  const photos = await listGalleryPhotos(galleryId)
+  const thumbs = await Promise.all(photos.map(async (p) => ({ ...p, src: p.status === "ready" && p.web_key ? await presignGet(p.web_key) : null })))
 
   return (
     <div className="mx-auto max-w-[var(--container-content)]">
@@ -45,20 +51,34 @@ export default async function GalleryPage({ params, searchParams }: PageProps<"/
       </dl>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-        <section aria-labelledby="upload-title" className="flex min-h-72 flex-col items-center justify-center rounded-[var(--radius-cover)] border border-dashed border-line-strong p-8 text-center">
-          <svg viewBox="0 0 24 24" className="size-10 text-ink-muted" aria-hidden>
-            <path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M4 17v2.5h16V17" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          <h2 id="upload-title" className="mt-4 type-heading-2">Upload the wedding</h2>
-          <p className="mt-2 max-w-sm type-caption font-normal text-ink-muted">
-            Drag in whole folders from every card. Uploads resume after a dropped connection. This arrives with the upload pipeline (FR-05, FR-06).
-          </p>
-        </section>
+        <PhotoUploader galleryId={gallery.id} />
         <div className="space-y-6">
           <SectionsManager galleryId={gallery.id} sections={sections} />
           <DeleteGallery id={gallery.id} title={gallery.title} />
         </div>
       </div>
+
+      {thumbs.length > 0 && (
+        <section aria-labelledby="photos-title" className="mt-10">
+          <h2 id="photos-title" className="type-heading-2">Photos</h2>
+          <p className="mt-1 type-caption font-normal text-ink-muted">
+            {gallery.photo_count > thumbs.length ? `Showing the latest ${thumbs.length} of ${gallery.photo_count.toLocaleString("en")}.` : `${gallery.photo_count.toLocaleString("en")} in this gallery.`}
+          </p>
+          <ul className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+            {thumbs.map((p) => (
+              <li key={p.id} className="relative aspect-[4/5] overflow-hidden rounded-[var(--radius-chip)] bg-surface-sunken">
+                {p.src ? (
+                  <Image src={p.src} alt={p.original_name} fill unoptimized sizes="(min-width: 1024px) 16vw, 25vw" className="object-cover" />
+                ) : (
+                  <span className="absolute inset-0 grid place-items-center px-2 text-center type-caption font-normal text-ink-muted">
+                    {p.status === "failed" ? "Failed" : "Uploading…"}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </div>
   )
 }

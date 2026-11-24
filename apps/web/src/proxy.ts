@@ -41,5 +41,6 @@ function withCookies(redirect: NextResponse, from: NextResponse) {
 }
 
 export const config = {
-  matcher: ["/app", "/app/:path*", "/login", "/signup", "/forgot-password", "/reset-password"],
+  // The upload routes are listed so a long upload session keeps its token fresh.
+  matcher: ["/app", "/app/:path*", "/login", "/signup", "/forgot-password", "/reset-password", "/api/uploads/:path*", "/api/photos"],
 }
