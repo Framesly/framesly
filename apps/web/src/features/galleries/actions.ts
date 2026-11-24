@@ -5,6 +5,7 @@ import { redirect } from "next/navigation"
 
 import { formValues, type ActionState } from "@/lib/action-state"
 import { requireStudio } from "@/lib/auth/dal"
+import { deleteGalleryObjects } from "@/lib/r2"
 import { createClient } from "@/lib/supabase/server"
 import { createGallerySchema, fieldErrors, sectionNameSchema, sectionPresets } from "@/lib/validation"
 
@@ -61,7 +62,15 @@ export async function updateGalleryAction(galleryId: string, input: { title?: st
 export async function deleteGalleryAction(galleryId: string) {
   await requireStudio()
   const supabase = await createClient()
-  // TODO(FR-09): also delete the R2 originals and renditions once uploads exist.
+  // RLS only lets a member see their studio's galleries, so this also proves ownership
+  // before anything is deleted from R2.
+  const { data: gallery } = await supabase.from("galleries").select("id").eq("id", galleryId).maybeSingle()
+  if (!gallery) return { ok: false, message: "Gallery not found." }
+  try {
+    await deleteGalleryObjects(galleryId)
+  } catch {
+    return { ok: false, message: "Couldn't remove the photos from storage. Nothing was deleted; try again." }
+  }
   const { error } = await supabase.from("galleries").delete().eq("id", galleryId)
   if (error) return { ok: false, message: error.message }
   revalidatePath("/app")

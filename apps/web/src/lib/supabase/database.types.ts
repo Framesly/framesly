@@ -124,6 +124,7 @@ export type Database = {
           section_id: string | null
           original_name: string
           r2_key: string
+          web_key: string | null
           bytes: number
           mime: string
           width: number | null
@@ -140,11 +141,13 @@ export type Database = {
           section_id?: string | null
           original_name: string
           r2_key: string
+          web_key?: string | null
           bytes: number
           mime: string
           status?: PhotoStatus
         }
         Update: {
+          web_key?: string | null
           section_id?: string | null
           status?: PhotoStatus
           error?: string | null
