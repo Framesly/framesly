@@ -17,7 +17,7 @@ export function ProsePage({
       <EdgeLabel tone="safelight">{eyebrow}</EdgeLabel>
       <h1 className="mt-4 type-display-l text-balance">{title}</h1>
       {updated && <p className="mt-4 type-label text-ink-muted">{updated}</p>}
-      <div className="mt-10 space-y-5 type-body-l text-ink-muted [&_h2]:mt-12 [&_h2]:type-heading-2 [&_h2]:text-ink">
+      <div className="mt-10 space-y-5 type-body-l text-ink-muted [&_h2]:mt-12 [&_h2]:type-heading-2 [&_h2]:text-ink [&_strong]:font-medium [&_strong]:text-ink [&_ul]:list-disc [&_ul]:space-y-2 [&_ul]:pl-6 [&_a]:text-safelight-text [&_a]:underline [&_a]:underline-offset-4">
         {children}
       </div>
     </section>
