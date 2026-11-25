@@ -6,8 +6,8 @@ import { Counter, Reveal } from "@/components/motion/reveal"
 import { EdgeLabel } from "@/components/ui/card"
 
 /*
- * TODO(before launch): replace these example figures with a real beta
- * photographer's numbers (brief: "time saved on a real wedding").
+ * Example figures. Before launch, replace them with a real photographer's
+ * numbers from a beta wedding.
  */
 const metrics = [
   { value: 2184, label: "Frames uploaded" },

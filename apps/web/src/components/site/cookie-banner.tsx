@@ -9,9 +9,9 @@ import { Button } from "@/components/ui/button"
 const KEY = "framesly-consent"
 
 /**
- * Cookie consent (brief: required for EU visitors).
- * TODO: show only to EU/UK visitors once geo is available (e.g. a header set
- * by the CDN), and gate PostHog on `analytics === "granted"`.
+ * Cookie consent, required for EU and UK visitors.
+ * Planned: show it only to EU/UK visitors once a country header is available
+ * from the CDN, and load analytics only when `analytics === "granted"`.
  */
 export function CookieBanner() {
   const [show, setShow] = useState(false)

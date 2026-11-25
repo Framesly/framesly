@@ -6,7 +6,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useSyncExte
 import { cn } from "@/lib/utils"
 
 /*
- * Theme rules (brand decision, Nov 21):
+ * Theme rules:
  * - Public site: light (ivory) by default.
  * - App after login (/app/*): Darkroom by default.
  * - Anyone can switch light/dark; the choice is remembered on this device and

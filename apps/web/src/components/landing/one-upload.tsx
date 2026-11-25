@@ -97,7 +97,7 @@ function Diagram({ progress }: { progress: MotionValue<number> }) {
         style={{ opacity: mergedOpacity, scale: mergedScale }}
         className="theme-maroon absolute inset-[20%] flex flex-col overflow-hidden rounded-[var(--radius-cover)] border-2 border-safelight shadow-[var(--shadow-print)]"
       >
-        {/* The one original every step reads (fix list: card looked empty). */}
+        {/* The single original that every step reads from */}
         <div className="relative min-h-0 flex-1">
           <Image src={photos.beachTwirl.src} alt="" fill sizes="300px" className="object-cover object-[50%_35%]" />
           <span className="absolute top-2 left-2 rounded-[var(--radius-chip)] bg-safelight px-1.5 py-0.5 type-label text-[9px] text-on-safelight">
@@ -142,7 +142,7 @@ function ToolBox({
   const y = useTransform(progress, [0, 0.8], ["0%", `${-tool.y * 72}%`])
   const opacity = useTransform(progress, [0.55, 0.8], [1, 0])
   // Each copy rests at its own tilt and tint, so they read as four separate
-  // copies of one photo rather than a rendering glitch (fix list).
+  // copies of one photo rather than a rendering glitch.
   const rest = copyLook[index]
   const rotate = useTransform(progress, [0, 0.8], [rest.tilt, 0])
 

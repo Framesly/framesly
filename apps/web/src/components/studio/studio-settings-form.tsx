@@ -15,7 +15,7 @@ type StudioProps = { id: string; name: string; slug: string; brandColor: string;
 
 const regionLabel: Record<string, string> = { in: "India (Mumbai)", us: "United States", eu: "Europe (Frankfurt)" }
 
-/** Studio profile: what clients see on every gallery (FR-04). */
+/** Studio profile: what clients see on every gallery. */
 export function StudioSettingsForm({ studio }: { studio: StudioProps }) {
   const router = useRouter()
   const [state, action] = useActionState(updateStudioAction, idle)

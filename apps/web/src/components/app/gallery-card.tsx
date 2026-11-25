@@ -14,8 +14,8 @@ const dateFmt = new Intl.DateTimeFormat("en", { day: "numeric", month: "short", 
 
 /**
  * A gallery on the dashboard. Photo-first: the cover fills the card; until
- * photos exist (uploads arrive in FR-06) it shows a print-style placeholder
- * tinted with the studio colour.
+ * the gallery has photos it shows a print-style placeholder tinted with the
+ * studio colour.
  */
 export function GalleryCard({ gallery, brandColor }: { gallery: GalleryOverview; brandColor: string }) {
   const initials = gallery.title

@@ -4,7 +4,7 @@ import { Viewfinder } from "@/components/ui/viewfinder"
 import { cn } from "@/lib/utils"
 
 /**
- * Flat card with a --line border (brief: no shadows on cards). On hover or
+ * Flat card with a --line border and no shadow. On hover or
  * keyboard focus inside it, viewfinder brackets frame the card.
  */
 export function Card({
@@ -51,7 +51,7 @@ export function EdgeLabel({
   )
 }
 
-/** Small status chip. Done and error states always carry a word (brief). */
+/** Small status chip. Done and error states always carry a word, not only colour. */
 export function Chip({
   className,
   tone = "neutral",

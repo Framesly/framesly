@@ -11,9 +11,8 @@ import { createClient } from "@/lib/supabase/server"
 /*
  * Data Access Layer: the only place that reads the session. Each helper is
  * wrapped in React.cache so a request reads the session once, however many
- * components ask (vercel-react-best-practices: server-cache-react).
- * Every page and server action authorises through these, never through
- * values sent from the browser (server-auth-actions).
+ * components ask. Every page and server action authorises through these,
+ * never through values sent from the browser.
  */
 
 export type SessionUser = { id: string; email: string; fullName: string }

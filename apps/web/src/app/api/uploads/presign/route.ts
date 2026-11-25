@@ -17,7 +17,7 @@ const bodySchema = z.object({
     )
     .min(1)
     .max(MAX_FILES_PER_BATCH),
-  /** Failed photos being retried: their old rows are dropped so counts stay honest. */
+  /** Failed photos being retried: their old rows are dropped so counts stay accurate. */
   replaces: z.array(z.uuid()).max(MAX_FILES_PER_BATCH).optional(),
 })
 
@@ -57,12 +57,23 @@ export async function POST(request: Request) {
   const { error } = await supabase.from("photos").insert(rows)
   if (error) return Response.json({ error: error.message }, { status: 500 })
 
-  const items = await Promise.all(
-    rows.map(async (row) => ({
-      photoId: row.id,
-      originalUrl: await presignPut(row.r2_key, row.mime),
-      webUrl: await presignPut(row.web_key, "image/jpeg"),
-    }))
-  )
-  return Response.json({ items })
+  try {
+    const items = await Promise.all(
+      rows.map(async (row) => ({
+        photoId: row.id,
+        originalUrl: await presignPut(row.r2_key, row.mime),
+        webUrl: await presignPut(row.web_key, "image/jpeg"),
+      }))
+    )
+    return Response.json({ items })
+  } catch (err) {
+    // Usually missing or wrong R2_* variables on the server. Don't leave the
+    // rows stuck as "uploading": mark them failed so they can be retried.
+    console.error("[presign] could not sign R2 upload URLs:", err)
+    await supabase
+      .from("photos")
+      .update({ status: "failed", error: "Storage isn't available. Try again later." })
+      .in("id", rows.map((r) => r.id))
+    return Response.json({ error: "Uploads aren't available right now. Try again later." }, { status: 503 })
+  }
 }

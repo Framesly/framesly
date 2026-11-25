@@ -1,0 +1,17 @@
+# media.framesly.app: serves gallery photos from R2 through signed links.
+# Deploy:  pnpm --filter @framesly/media-worker run deploy
+# Secret:  pnpm --filter @framesly/media-worker exec wrangler secret put MEDIA_TOKEN_SECRET
+#          (same value as MEDIA_TOKEN_SECRET in Vercel)
+name = "framesly-media"
+main = "src/index.js"
+compatibility_date = "2026-11-01"
+account_id = "18ca6f95c9e6853efb73d315ed8a0142"
+
+# The account has no workers.dev subdomain; the Worker runs on its own domain.
+# framesly.app's DNS is on Cloudflare, so the record and certificate are created on deploy.
+workers_dev = false
+routes = [{ pattern = "media.framesly.app", custom_domain = true }]
+
+[[r2_buckets]]
+binding = "MEDIA"
+bucket_name = "framesly-media"
