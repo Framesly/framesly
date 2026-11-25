@@ -1,7 +1,18 @@
 import { showcaseUrl, type Photo, type SitePhotoKey, type SitePhotos } from "@/lib/photos"
 
-export type GalleryPhoto = Photo & { frame: number; section: string }
+export type GalleryPhoto = Photo & { frame: number; section: string; /** Signed link to the original (live galleries) */ download?: string }
 export type GallerySection = { id: string; name: string; day: string; photos: GalleryPhoto[] }
+
+/** What the client gallery view renders: the sample gallery or a real published one. */
+export type GalleryViewData = {
+  studio: { name: string; email?: string | null; logoUrl?: string | null }
+  couple: string
+  /** Line above the names on the cover, e.g. "Udaipur · 12 to 14 February 2026". */
+  subtitle: string
+  cover: Photo | null
+  sections: GallerySection[]
+  all: GalleryPhoto[]
+}
 
 const raw: { id: string; name: string; day: string; keys: SitePhotoKey[] }[] = [
   { id: "getting-ready", name: "Getting ready", day: "Day 1 · Morning", keys: ["bridalMirror", "bridalLaugh", "bridalPortrait", "ringHands", "tealDoor"] },
