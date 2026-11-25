@@ -3,22 +3,20 @@
 import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
 
-type Studio = { name: string; logoUrl: string | null }
+import { StudioLogo } from "@/components/studio/studio-logo"
 
-function StudioMark({ studio }: { studio: Studio }) {
-  return studio.logoUrl ? (
-    // eslint-disable-next-line @next/next/no-img-element -- photographer's logo from Storage, any format incl. SVG
-    <img src={studio.logoUrl} alt={studio.name} className="mx-auto max-h-14 max-w-[200px] object-contain" />
-  ) : (
-    <p className="font-heading text-[15px] font-bold tracking-[0.3em] text-ink uppercase">{studio.name}</p>
-  )
-}
+type Studio = { name: string; logoUrl: string | null }
 
 function Shell({ studio, children }: { studio: Studio; children: React.ReactNode }) {
   return (
     <main className="theme-print grid min-h-dvh place-items-center bg-surface px-4 py-16">
       <div className="w-full max-w-sm text-center">
-        <StudioMark studio={studio} />
+        <StudioLogo
+          name={studio.name}
+          logoUrl={studio.logoUrl}
+          imageClassName="mx-auto max-h-14 max-w-[200px]"
+          textClassName="text-[15px] tracking-[0.3em] text-ink"
+        />
         <div className="mt-10">{children}</div>
         <p className="mt-16 type-label text-ink-muted">Delivered with Framesly</p>
       </div>

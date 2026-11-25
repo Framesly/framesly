@@ -33,7 +33,7 @@ const items = [
 type Variant = "sidebar" | "tabs"
 
 /**
- * App navigation: sidebar on desktop, bottom tab bar on phones (FR-08).
+ * App navigation: sidebar on desktop, bottom tab bar on phones.
  * The links are part of the static shell; the active highlight needs the URL
  * (runtime data), so it streams in under Suspense with no layout shift.
  */

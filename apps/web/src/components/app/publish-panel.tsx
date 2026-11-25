@@ -26,8 +26,8 @@ function endOfDay(date: string) {
 }
 
 /**
- * Turns a draft gallery into a private client link (build map stage 1):
- * link name, optional password, optional expiry, copy and unpublish.
+ * Turns a draft gallery into a private client link: link name, optional
+ * password, optional expiry, copy and unpublish.
  */
 export function PublishPanel({ galleryId, title, origin, initial }: { galleryId: string; title: string; origin: string; initial: PublishState }) {
   const router = useRouter()

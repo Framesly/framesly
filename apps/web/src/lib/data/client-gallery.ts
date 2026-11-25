@@ -9,7 +9,7 @@ import { createAdminClient } from "@/lib/supabase/admin"
 import { studioAssetUrl } from "@/lib/supabase/env"
 
 /*
- * Client galleries (build map stage 3): what a couple can see at
+ * Client galleries: what a couple can see at
  * framesly.app/g/<slug>. Clients have no account, so this reads with the
  * service role and does every check itself, in this order:
  *   not published → "not_found"   (404)

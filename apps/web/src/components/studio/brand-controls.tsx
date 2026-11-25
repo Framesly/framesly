@@ -6,6 +6,7 @@ import { useEffect, useRef, useState, useTransition } from "react"
 import { checkSlugAction, type SlugCheck } from "@/features/studio/actions"
 import { validateLogo } from "@/features/studio/upload-logo"
 import { useSitePhotos } from "@/components/site/site-photos"
+import { StudioLogo } from "@/components/studio/studio-logo"
 import { cn } from "@/lib/utils"
 
 /* Shared studio-branding controls, used by onboarding and studio settings. */
@@ -181,8 +182,7 @@ export function useSlugCheck(slug: string, enabled = true) {
 }
 
 /**
- * Live preview of the client gallery cover: what couples see. The one
- * memorable element of onboarding (frontend-design).
+ * Live preview of the client gallery cover: what couples will see.
  */
 export function GalleryCoverPreview({
   studioName,
@@ -214,12 +214,13 @@ export function GalleryCoverPreview({
         <Image src={photos.skyEmbrace.src} alt="" fill sizes="(min-width: 1024px) 560px, 100vw" className="object-cover object-[50%_40%]" priority />
         <div className="absolute inset-0 bg-gradient-to-t from-[rgb(20_16_14/0.82)] via-[rgb(20_16_14/0.15)] to-[rgb(20_16_14/0.4)]" />
         <div className="absolute top-4 left-4 flex items-center gap-2 text-white">
-          {logoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element -- live preview of a local file or a Storage URL
-            <img src={logoUrl} alt="" className="max-h-9 max-w-[140px] object-contain drop-shadow" />
-          ) : (
-            <span className="font-heading text-[13px] font-bold tracking-[0.25em] uppercase">{studioName || "Your studio"}</span>
-          )}
+          <StudioLogo
+            name={studioName || "Your studio"}
+            logoUrl={logoUrl}
+            alt=""
+            imageClassName="max-h-9 max-w-[140px] drop-shadow"
+            textClassName="text-[13px] tracking-[0.25em]"
+          />
         </div>
         <span className="absolute top-4 right-4 rounded-full bg-white/85 px-2 py-0.5 type-label text-[9px] text-[#16191f]">Preview</span>
         <figcaption className="absolute inset-x-4 bottom-4 text-white">

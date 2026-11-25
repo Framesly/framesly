@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils"
 /*
  * Darkroom buttons.
  *
- * - `primary` is the safelight button. Use one per screen (brief rule).
+ * - `primary` is the safelight button. Use one per screen.
  * - Every press plays a "shutter blink": a dark band closes and reopens over
  *   the button from its centre line, like camera shutter blades.
  * - Heights are 44px or more to meet the touch-target rule; `sm` (40px) is

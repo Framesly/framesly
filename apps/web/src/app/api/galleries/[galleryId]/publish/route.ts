@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server"
 import { fieldErrors, publicSlugSchema, publishGallerySchema } from "@/lib/validation"
 
 /*
- * Publishing a gallery (build map stage 1). The photographer must belong to
+ * Publishing a gallery. The photographer must belong to
  * the gallery's studio; the database functions check that again (security
  * definer + is_member), so a forged request can't publish someone else's work.
  * Passwords are bcrypt-hashed here and only the hash reaches the database.

@@ -2,14 +2,15 @@
 
 import { AnimatePresence, motion, useScroll, useTransform } from "motion/react"
 import Image from "next/image"
-import { TransitionLink as Link } from "@/components/transition/page-transition"
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react"
 
 import { buildSampleGallery, type GalleryPhoto, type GalleryViewData } from "@/components/gallery/gallery-data"
-import { useSitePhotos } from "@/components/site/site-photos"
 import { HeartButton } from "@/components/gallery/heart-button"
 import { Lightbox } from "@/components/gallery/lightbox"
 import { ToastProvider, useToast } from "@/components/gallery/toast"
+import { useSitePhotos } from "@/components/site/site-photos"
+import { StudioLogo } from "@/components/studio/studio-logo"
+import { TransitionLink as Link } from "@/components/transition/page-transition"
 import { cn } from "@/lib/utils"
 
 const develop = [0.22, 1, 0.36, 1] as const
@@ -21,7 +22,7 @@ export type Favourites = { favs: Set<string>; toggle: (id: string) => void; has:
  * Browser-only favourites (the sample gallery). A tiny external store per key
  * keeps server and client renders in agreement and syncs across tabs.
  */
-export function makeLocalFavourites(key: string) {
+function makeLocalFavourites(key: string) {
   const listeners = new Set<() => void>()
   let memory = "[]"
   const read = () => {
@@ -304,18 +305,18 @@ function Cover({ data: g, sample, onShare, favCount, onShowFavs }: { data: Galle
       <motion.div style={{ y }} className="absolute inset-0" initial={{ scale: 1.12 }} animate={{ scale: 1 }} transition={{ duration: 2.4, ease: develop }}>
         {g.cover && <Image src={g.cover.src} alt={g.cover.alt} fill priority sizes="100vw" quality={85} className="object-cover object-[50%_35%]" />}
       </motion.div>
-      {/* Scrim behind the names (brief) */}
+      {/* Scrim so the names stay readable on any photo */}
       <div className="absolute inset-0 bg-gradient-to-t from-[rgb(22_25_31/0.82)] via-[rgb(22_25_31/0.18)] to-[rgb(22_25_31/0.45)]" />
 
       {/* Photographer's logo top-left, never Framesly's */}
       <div className="absolute inset-x-0 top-0 flex items-center justify-between px-4 py-4 text-white sm:px-8 sm:py-6">
         <div className="flex items-center gap-3">
-          {g.studio.logoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element -- photographer's logo from Storage, any format incl. SVG
-            <img src={g.studio.logoUrl} alt={g.studio.name} className="max-h-10 max-w-[160px] object-contain drop-shadow" />
-          ) : (
-            <p className="font-heading text-[14px] font-bold tracking-[0.3em] uppercase sm:text-[15px]">{g.studio.name}</p>
-          )}
+          <StudioLogo
+            name={g.studio.name}
+            logoUrl={g.studio.logoUrl}
+            imageClassName="max-h-10 max-w-[160px] drop-shadow"
+            textClassName="text-[14px] tracking-[0.3em] sm:text-[15px]"
+          />
           {sample && <span className="rounded-full bg-white/85 px-2 py-0.5 type-label text-[10px] text-[#16191f]">Sample</span>}
         </div>
         <div className="flex items-center gap-1">
@@ -363,7 +364,7 @@ function Cover({ data: g, sample, onShare, favCount, onShowFavs }: { data: Galle
   )
 }
 
-/** One photo in the masonry grid. Exactly two controls: favourite and download (brief). */
+/** One photo in the masonry grid, with two controls: favourite and download. */
 function Tile({
   photo,
   fav,
@@ -422,7 +423,7 @@ function Tile({
   )
 }
 
-/** Demo-only note so visitors can get back to the marketing site. */
+/** Sample-only bar that leads visitors back to sign-up. */
 function SampleNotice() {
   const [hidden, setHidden] = useState(false)
   return (

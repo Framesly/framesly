@@ -13,7 +13,7 @@ const REFRESH_BEFORE_EXPIRY = 10 * 60 // seconds: refetch links ~50 min into the
 const dateFmt = new Intl.DateTimeFormat("en", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" })
 
 /** API view → what the gallery UI renders. Photos without a section go under "More photos". */
-export function toViewData(g: ClientGalleryView): GalleryViewData {
+function toViewData(g: ClientGalleryView): GalleryViewData {
   let frame = 0
   const toPhoto = (p: ClientGalleryView["photos"][number], section: string): GalleryPhoto => ({
     id: p.id,
@@ -56,7 +56,7 @@ function downloadPhoto(p: GalleryPhoto) {
 }
 
 /**
- * Hearts saved on the server (stage 5), keyed to this browser's visitor
+ * Hearts saved on the server, keyed to this browser's visitor
  * cookie. The heart flips at once and flips back if saving fails.
  */
 function useServerFavourites(slug: string, initial: string[]): Favourites {

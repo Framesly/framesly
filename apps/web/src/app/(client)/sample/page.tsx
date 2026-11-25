@@ -16,8 +16,8 @@ export const metadata: Metadata = {
 }
 
 /**
- * Public demo of the client gallery (brief: /sample, static). It uses the
- * client gallery layout, with the photographer's brand instead of Framesly's.
+ * Public, static demo of the client gallery, shown with a photographer's
+ * brand rather than Framesly's.
  */
 export default function SampleGalleryPage() {
   return <ClientGallery />

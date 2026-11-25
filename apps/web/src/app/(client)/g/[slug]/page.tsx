@@ -10,7 +10,7 @@ import { loadClientGallery } from "@/lib/data/client-gallery"
 export const metadata: Metadata = { title: "Your gallery", robots: { index: false, follow: false } }
 
 /**
- * framesly.app/g/<slug>: what the couple opens (build map stage 4).
+ * framesly.app/g/<slug>: the client gallery a couple opens.
  * The server checks published / expiry / password before any photo link is
  * made; the browser never talks to Supabase or R2 directly.
  */

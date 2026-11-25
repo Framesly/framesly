@@ -12,8 +12,8 @@ import { createClient } from "@/lib/supabase/server"
 export const metadata: Metadata = { title: "Client picks" }
 
 /**
- * The photos a couple hearted (build map stage 5), newest gallery data every
- * few seconds. RLS limits selections to this photographer's studio.
+ * The photos a couple hearted, refreshed every few seconds.
+ * RLS limits selections to the signed-in photographer's studio.
  */
 export default async function PicksPage({ params }: PageProps<"/app/galleries/[galleryId]/picks">) {
   const [{ galleryId }, { studio }] = await Promise.all([params, requireStudio()])
