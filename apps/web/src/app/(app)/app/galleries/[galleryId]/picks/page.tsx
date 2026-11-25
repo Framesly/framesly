@@ -8,6 +8,7 @@ import { requireStudio } from "@/lib/auth/dal"
 import { getGalleryWithSections } from "@/lib/data/galleries"
 import { presignGet } from "@/lib/r2"
 import { createClient } from "@/lib/supabase/server"
+import { Icon } from "@/components/ui/icon"
 
 export const metadata: Metadata = { title: "Client picks" }
 
@@ -44,7 +45,7 @@ export default async function PicksPage({ params }: PageProps<"/app/galleries/[g
     <div className="mx-auto max-w-[var(--container-content)]">
       <AutoRefresh seconds={5} />
       <Link href={`/app/galleries/${galleryId}`} className="inline-flex h-11 items-center gap-2 type-caption text-ink-muted hover:text-ink">
-        <svg viewBox="0 0 20 20" className="size-4" aria-hidden><path d="M12 5l-5 5 5 5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+        <Icon name="chevron-left" className="size-4" />
         {data.gallery.title}
       </Link>
       <h1 className="mt-2 type-heading-1 md:type-display-l">Client picks</h1>

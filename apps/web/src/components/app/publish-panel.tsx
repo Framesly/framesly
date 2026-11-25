@@ -4,8 +4,11 @@ import { useRouter } from "next/navigation"
 import { useEffect, useState, useTransition } from "react"
 
 import { Aperture } from "@/components/auth/primitives"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Field } from "@/components/ui/field"
+import { useToast } from "@/components/ui/toast"
 import { toSlug } from "@/lib/reserved-slugs"
 import { cn } from "@/lib/utils"
 
@@ -39,7 +42,7 @@ export function PublishPanel({ galleryId, title, origin, initial }: { galleryId:
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [message, setMessage] = useState<{ tone: "error" | "success"; text: string } | null>(null)
   const [availability, setAvailability] = useState<{ slug: string; ok: boolean; text: string } | null>(null)
-  const [copied, setCopied] = useState(false)
+  const toast = useToast()
   const [pending, start] = useTransition()
 
   const published = Boolean(state.publishedAt)
@@ -102,8 +105,7 @@ export function PublishPanel({ galleryId, title, origin, initial }: { galleryId:
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(link)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1800)
+      toast({ title: "Link copied", body: "Send it to your couple.", tone: "success" })
     } catch {
       setMessage({ tone: "error", text: "Couldn't copy. Select the link and copy it yourself." })
     }
@@ -113,9 +115,7 @@ export function PublishPanel({ galleryId, title, origin, initial }: { galleryId:
     <section aria-labelledby="publish-title" className="rounded-[var(--radius-cover)] border border-line bg-surface-raised p-5 sm:p-6">
       <div className="flex items-center justify-between gap-3">
         <h2 id="publish-title" className="type-heading-2">Client link</h2>
-        <span className={cn("rounded-full px-2.5 py-0.5 type-caption", published ? "bg-success text-surface" : "bg-surface-sunken text-ink-muted")}>
-          {published ? "Published" : "Draft"}
-        </span>
+        <Badge tone={published ? "success" : "neutral"}>{published ? "Published" : "Draft"}</Badge>
       </div>
       <p className="mt-1 type-caption font-normal text-ink-muted">
         {published ? "Your couple can open this link." : "Only you can see this gallery until you publish it."}
@@ -130,7 +130,7 @@ export function PublishPanel({ galleryId, title, origin, initial }: { galleryId:
             {state.expiresAt ? `Expires ${dateFmt.format(new Date(state.expiresAt))}` : "Never expires"}
           </p>
           <Button type="button" size="sm" variant="secondary" className="mt-3" onClick={copy}>
-            {copied ? "Copied" : "Copy link"}
+            Copy link
           </Button>
         </div>
       )}
@@ -167,10 +167,7 @@ export function PublishPanel({ galleryId, title, origin, initial }: { galleryId:
           hint={state.hasPassword ? "Leave empty to keep the current password." : "Leave empty for anyone with the link to view."}
         />
         {state.hasPassword && !password && (
-          <label className="flex items-center gap-2 type-caption text-ink">
-            <input type="checkbox" checked={removePassword} onChange={(e) => setRemovePassword(e.target.checked)} className="size-4 accent-[var(--safelight)]" />
-            Remove the password
-          </label>
+          <Checkbox label="Remove the password" checked={removePassword} onChange={(e) => setRemovePassword(e.target.checked)} />
         )}
         <Field
           label="Expiry date (optional)"

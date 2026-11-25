@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 
 import { GalleryView, type Favourites } from "@/components/gallery/client-gallery"
 import type { GalleryPhoto, GallerySection, GalleryViewData } from "@/components/gallery/gallery-data"
-import { ToastProvider, useToast } from "@/components/gallery/toast"
+import { ToastProvider, useToast } from "@/components/ui/toast"
 import type { ClientGalleryView } from "@/lib/data/client-gallery"
 
 const REFRESH_BEFORE_EXPIRY = 10 * 60 // seconds: refetch links ~50 min into their 1-hour life
@@ -35,7 +35,7 @@ function toViewData(g: ClientGalleryView): GalleryViewData {
   const all = sections.flatMap((s) => s.photos)
   const cover = all.find((p) => p.id === g.coverId) ?? all[0] ?? null
   return {
-    studio: { name: g.studio.name, logoUrl: g.studio.logoUrl },
+    studio: { name: g.studio.name, logoUrl: g.studio.logoUrl, brandColor: g.studio.brandColor },
     couple: g.title,
     subtitle: g.eventDate ? dateFmt.format(new Date(g.eventDate)) : "",
     cover,

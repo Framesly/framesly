@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils"
 export const buttonVariants = cva(
   [
     "group/button relative isolate inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden",
-    "rounded-[var(--radius-control)] font-sans font-semibold whitespace-nowrap select-none",
+    "rounded-[var(--radius-control)] font-sans font-semibold whitespace-nowrap select-none forced-colors:border forced-colors:border-[ButtonText]",
     "transition-[background-color,border-color,color,scale] duration-200 ease-[var(--ease-develop)]",
     "active:scale-[0.98] disabled:pointer-events-none disabled:opacity-45",
     "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-[18px]",
@@ -41,7 +41,7 @@ export const buttonVariants = cva(
           "hover:bg-[color-mix(in_oklab,var(--safelight)_88%,black)]",
         ],
         ink: [
-          "bg-ink text-surface before:bg-[rgb(255_255_255/0.18)]",
+          "bg-ink text-surface before:bg-surface/20",
           "hover:bg-[color-mix(in_oklab,var(--ink)_86%,var(--safelight))]",
         ],
         secondary: [
@@ -58,9 +58,10 @@ export const buttonVariants = cva(
         ],
       },
       size: {
-        sm: "h-10 px-4 text-[13px]",
-        md: "h-11 px-5 text-[15px]",
-        lg: "h-[52px] px-6 text-[16px]",
+        // 44px on touch screens; 40px only where a mouse is the main pointer (dense desktop toolbars).
+        sm: "h-11 px-4 text-caption [@media(pointer:fine)]:h-10",
+        md: "h-11 px-5 text-body",
+        lg: "h-[52px] px-6 text-lead",
         icon: "size-11",
       },
     },

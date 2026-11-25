@@ -41,12 +41,12 @@ export function CookieBanner() {
         <motion.div
           role="dialog"
           aria-label="Cookie preferences"
-          className="fixed inset-x-3 bottom-3 z-[60] sm:right-auto sm:left-6 sm:bottom-6 sm:max-w-md"
+          className="fixed inset-x-3 bottom-3 z-(--z-banner) sm:right-auto sm:left-6 sm:bottom-6 sm:max-w-md"
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0, transition: { duration: 0.5 } }}
           exit={{ opacity: 0, y: 24, transition: { duration: 0.25 } }}
         >
-          <div className="rounded-[var(--radius-control)] border border-line-strong bg-surface-raised p-5 shadow-[0_24px_60px_-20px_rgb(0_0_0/0.6)]">
+          <div className="rounded-[var(--radius-control)] border border-line-strong bg-surface-raised p-5 shadow-float">
             <p className="type-label text-ink-muted">Cookies</p>
             <p className="mt-2 text-ink">
               We use essential cookies to run Framesly. With your permission we also measure how the

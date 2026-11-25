@@ -7,11 +7,14 @@ import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore
 import { buildSampleGallery, type GalleryPhoto, type GalleryViewData } from "@/components/gallery/gallery-data"
 import { HeartButton } from "@/components/gallery/heart-button"
 import { Lightbox } from "@/components/gallery/lightbox"
-import { ToastProvider, useToast } from "@/components/gallery/toast"
+import { ToastProvider, useToast } from "@/components/ui/toast"
+import { SkipLink } from "@/components/ui/skip-link"
 import { useSitePhotos } from "@/components/site/site-photos"
 import { StudioLogo } from "@/components/studio/studio-logo"
 import { TransitionLink as Link } from "@/components/transition/page-transition"
+import { ACCENT_SURFACES, brandAccentStyle } from "@/lib/color"
 import { cn } from "@/lib/utils"
+import { Icon } from "@/components/ui/icon"
 
 const develop = [0.22, 1, 0.36, 1] as const
 const FAV_KEY = "framesly-favs:saffron-lane/aarohi-kabir"
@@ -118,6 +121,12 @@ export function GalleryView({
   const [lightbox, setLightbox] = useState<number | null>(null)
   const [active, setActive] = useState(g.sections[0]?.id ?? "")
 
+  // The studio's colour drives the accent (hearts, active section, buttons). It is nudged
+  // per surface so it stays readable: the page follows light/dark, the lightbox is always dark.
+  const brand = g.studio.brandColor
+  const accent = useMemo(() => brandAccentStyle(brand, ACCENT_SURFACES.print, ACCENT_SURFACES.darkroomRaised), [brand])
+  const lightboxAccent = useMemo(() => brandAccentStyle(brand, ACCENT_SURFACES.darkroom), [brand])
+
   const visible = useMemo(
     () => (view === "all" ? g.all : g.all.filter((p) => favs.has(p.id))),
     [g.all, view, favs]
@@ -160,11 +169,12 @@ export function GalleryView({
     })
 
   return (
-    <div className="theme-print min-h-dvh">
+    <div className="theme-print min-h-dvh" style={accent}>
+      <SkipLink href="#photos">Skip to photos</SkipLink>
       <Cover data={g} sample={sample} onShare={share} favCount={favs.size} onShowFavs={() => setView("favourites")} />
 
       {/* Section bar */}
-      <div className="sticky top-0 z-30 border-b border-line bg-surface/95 backdrop-blur-sm">
+      <div className="sticky top-0 z-(--z-sticky) border-b border-line bg-surface/95 backdrop-blur-sm">
         <div className="mx-auto flex max-w-[1600px] items-center gap-2 px-2 sm:px-4">
           <nav aria-label="Events" className="flex flex-1 gap-1 overflow-x-auto [scrollbar-width:none]">
             {sections.map((s) => (
@@ -179,7 +189,7 @@ export function GalleryView({
               >
                 {s.name}
                 {active === s.id && (
-                  <motion.span layoutId="section-active" className="absolute inset-x-3 bottom-0 h-0.5 bg-ink" transition={{ type: "spring", stiffness: 400, damping: 36 }} />
+                  <motion.span layoutId="section-active" className="absolute inset-x-3 bottom-0 h-0.5 bg-safelight" transition={{ type: "spring", stiffness: 400, damping: 36 }} />
                 )}
               </a>
             ))}
@@ -190,15 +200,13 @@ export function GalleryView({
               onClick={() => setView((v) => (v === "all" ? "favourites" : "all"))}
               aria-pressed={view === "favourites"}
               className={cn(
-                "flex h-10 items-center gap-2 rounded-full px-3 type-caption transition-colors",
+                "flex h-11 items-center gap-2 rounded-full px-3 type-caption transition-colors",
                 view === "favourites" ? "bg-safelight-soft text-ink" : "text-ink-muted hover:text-ink"
               )}
             >
-              <svg viewBox="0 0 24 24" className="size-4" aria-hidden>
-                <path d="M12 20.5s-7.5-4.6-9.2-9.1C1.6 8.2 3.6 4.5 7.2 4.5c2 0 3.6 1.1 4.8 2.8 1.2-1.7 2.8-2.8 4.8-2.8 3.6 0 5.6 3.7 4.4 6.9-1.7 4.5-9.2 9.1-9.2 9.1Z" fill={view === "favourites" ? "var(--safelight)" : "none"} stroke="currentColor" strokeWidth="1.75" />
-              </svg>
+              <Icon name="heart" className="size-4" fill={view === "favourites" ? "var(--safelight)" : "none"} />
               <span className="hidden sm:inline">Favourites</span>
-              <motion.span key={favs.size} initial={{ scale: 1.4 }} animate={{ scale: 1 }} className="type-metric text-[13px]">
+              <motion.span key={favs.size} initial={{ scale: 1.4 }} animate={{ scale: 1 }} className="type-metric text-caption">
                 {favs.size}
               </motion.span>
             </button>
@@ -206,11 +214,9 @@ export function GalleryView({
             <button
               type="button"
               onClick={downloadAll}
-              className="flex h-10 items-center gap-2 rounded-full px-3 type-caption text-ink-muted transition-colors hover:text-ink"
+              className="flex h-11 items-center gap-2 rounded-full px-3 type-caption text-ink-muted transition-colors hover:text-ink"
             >
-              <svg viewBox="0 0 24 24" className="size-4" aria-hidden>
-                <path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19.5h14" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+              <Icon name="download" className="size-4" />
               <span className="hidden sm:inline">Download</span>
             </button>
             )}
@@ -269,7 +275,7 @@ export function GalleryView({
 
       <footer className="border-t border-line">
         <div className="mx-auto flex max-w-[1600px] flex-col items-center gap-2 px-4 py-10 text-center">
-          <p className="font-heading text-[15px] font-bold tracking-[0.25em] uppercase">{g.studio.name}</p>
+          <p className="font-heading text-body font-bold tracking-[0.25em] uppercase">{g.studio.name}</p>
           {g.studio.email && (
             <a href={`mailto:${g.studio.email}`} className="type-caption text-ink-muted underline-offset-4 hover:underline">
               {g.studio.email}
@@ -287,6 +293,7 @@ export function GalleryView({
         isFav={has}
         toggleFav={toggle}
         onDownload={download}
+        accentStyle={lightboxAccent}
       />
 
       {sample && <SampleNotice />}
@@ -301,7 +308,7 @@ function Cover({ data: g, sample, onShare, favCount, onShowFavs }: { data: Galle
   const fade = useTransform(scrollYProgress, [0, 0.7], [1, 0])
 
   return (
-    <header ref={ref} className="relative h-[88svh] min-h-[520px] overflow-hidden bg-[#16191f]">
+    <header ref={ref} className="relative h-[88svh] min-h-[520px] overflow-hidden bg-fixed-dark">
       <motion.div style={{ y }} className="absolute inset-0" initial={{ scale: 1.12 }} animate={{ scale: 1 }} transition={{ duration: 2.4, ease: develop }}>
         {g.cover && <Image src={g.cover.src} alt={g.cover.alt} fill priority sizes="100vw" quality={85} className="object-cover object-[50%_35%]" />}
       </motion.div>
@@ -315,21 +322,17 @@ function Cover({ data: g, sample, onShare, favCount, onShowFavs }: { data: Galle
             name={g.studio.name}
             logoUrl={g.studio.logoUrl}
             imageClassName="max-h-10 max-w-[160px] drop-shadow"
-            textClassName="text-[14px] tracking-[0.3em] sm:text-[15px]"
+            textClassName="text-small tracking-[0.3em] sm:text-body"
           />
-          {sample && <span className="rounded-full bg-white/85 px-2 py-0.5 type-label text-[10px] text-[#16191f]">Sample</span>}
+          {sample && <span className="rounded-full bg-white/85 px-2 py-0.5 type-label text-fixed-dark">Sample</span>}
         </div>
         <div className="flex items-center gap-1">
           <button type="button" onClick={onShowFavs} className="flex h-11 items-center gap-2 rounded-full px-3 type-caption text-white/90 transition-colors hover:bg-white/10">
-            <svg viewBox="0 0 24 24" className="size-4" aria-hidden>
-              <path d="M12 20.5s-7.5-4.6-9.2-9.1C1.6 8.2 3.6 4.5 7.2 4.5c2 0 3.6 1.1 4.8 2.8 1.2-1.7 2.8-2.8 4.8-2.8 3.6 0 5.6 3.7 4.4 6.9-1.7 4.5-9.2 9.1-9.2 9.1Z" fill="none" stroke="currentColor" strokeWidth="1.75" />
-            </svg>
-            <span className="type-metric text-[13px]">{favCount}</span>
+            <Icon name="heart" className="size-4" />
+            <span className="type-metric text-caption">{favCount}</span>
           </button>
           <button type="button" onClick={onShare} className="flex h-11 items-center gap-2 rounded-full px-3 type-caption text-white/90 transition-colors hover:bg-white/10">
-            <svg viewBox="0 0 24 24" className="size-4" aria-hidden>
-              <path d="M12 15V4m0 0L8 8m4-4 4 4M5 13v5.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V13" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+            <Icon name="share" className="size-4" />
             <span className="hidden sm:inline">Share</span>
           </button>
         </div>
@@ -352,7 +355,7 @@ function Cover({ data: g, sample, onShare, favCount, onShowFavs }: { data: Galle
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.1, duration: 0.8 }}
-          className="mt-8 inline-flex h-11 items-center gap-3 rounded-full border border-white/40 px-5 type-caption text-white transition-colors hover:bg-white hover:text-[#16191f]"
+          className="mt-8 inline-flex h-11 items-center gap-3 rounded-full border border-white/40 px-5 type-caption text-white transition-colors hover:bg-white hover:text-fixed-dark"
         >
           View the photos
           <motion.svg viewBox="0 0 20 20" className="size-4" animate={{ y: [0, 3, 0] }} transition={{ repeat: Infinity, duration: 1.8 }} aria-hidden>
@@ -378,6 +381,8 @@ function Tile({
   onOpen: () => void
   onDownload: () => void
 }) {
+  // A pulsing block sits under the photo until it has loaded, so slow connections never see empty holes.
+  const [loaded, setLoaded] = useState(false)
   return (
     <motion.figure
       layout
@@ -389,18 +394,21 @@ function Tile({
     >
       <button type="button" onClick={onOpen} aria-label={`Open ${photo.alt}`} className="block w-full cursor-zoom-in">
         <motion.div layoutId={`photo-${photo.id}`} className="relative" style={{ aspectRatio: `${photo.w} / ${photo.h}` }}>
+          {!loaded && <span aria-hidden className="absolute inset-0 animate-pulse bg-surface-raised" />}
           <Image
             src={photo.src}
             alt={photo.alt}
             fill
             sizes="(min-width: 1280px) 25vw, (min-width: 768px) 33vw, 50vw"
+            onLoad={() => setLoaded(true)}
             className="object-cover transition-[scale] duration-700 ease-[var(--ease-develop)] group-hover:scale-[1.03]"
           />
         </motion.div>
       </button>
       <div
         className={cn(
-          // Click-through bar: only the two buttons take taps, so short tiles still open on tap.
+          // Click-through bar: only the buttons take taps, so short tiles still open on tap.
+          // On touch screens the heart is the only control here; download lives in the viewer.
           "pointer-events-none absolute inset-x-0 bottom-0 flex justify-end gap-1 bg-gradient-to-t from-[rgb(22_25_31/0.55)] to-transparent p-1.5 pt-6 text-white transition-opacity duration-300 [&>*]:pointer-events-auto",
           "opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100",
           fav && "opacity-100"
@@ -412,11 +420,9 @@ function Tile({
           whileTap={{ scale: 0.86 }}
           onClick={onDownload}
           aria-label="Download photo"
-          className="grid size-11 place-items-center rounded-full transition-colors hover:bg-white/15"
+          className="grid size-11 place-items-center rounded-full transition-colors hover:bg-white/15 [@media(hover:none)]:hidden"
         >
-          <svg viewBox="0 0 24 24" className="size-5" aria-hidden>
-            <path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19.5h14" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          <Icon name="download" className="size-5" />
         </motion.button>
       </div>
     </motion.figure>
@@ -433,16 +439,16 @@ function SampleNotice() {
           initial={{ y: 80, opacity: 0 }}
           animate={{ y: 0, opacity: 1, transition: { delay: 1.6, duration: 0.5, ease: develop } }}
           exit={{ y: 80, opacity: 0 }}
-          className="theme-darkroom fixed bottom-4 left-1/2 z-40 flex w-[calc(100%-32px)] max-w-md -translate-x-1/2 items-center gap-3 rounded-full border border-line-strong py-1.5 pr-1.5 pl-4 shadow-[0_20px_50px_-20px_rgb(0_0_0/0.6)]"
+          className="theme-darkroom fixed bottom-4 left-1/2 z-(--z-nav) flex w-[calc(100%-32px)] max-w-md -translate-x-1/2 items-center gap-3 rounded-full border border-line-strong py-1.5 pr-1.5 pl-4 shadow-float"
         >
           <p className="flex-1 truncate type-caption text-ink-muted">
             <span className="text-ink">Sample gallery.</span> Yours looks like this.
           </p>
-          <Link href="/signup" className="flex h-9 items-center rounded-full bg-safelight px-4 type-caption text-on-safelight">
+          <Link href="/signup" className="flex h-11 items-center rounded-full bg-safelight px-4 type-caption text-on-safelight">
             Start free
           </Link>
-          <button type="button" aria-label="Hide" onClick={() => setHidden(true)} className="grid size-9 place-items-center rounded-full text-ink-muted hover:text-ink">
-            <svg viewBox="0 0 24 24" className="size-4" aria-hidden><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" /></svg>
+          <button type="button" aria-label="Hide" onClick={() => setHidden(true)} className="grid size-11 place-items-center rounded-full text-ink-muted hover:text-ink">
+            <Icon name="close" className="size-4" />
           </button>
         </motion.div>
       )}

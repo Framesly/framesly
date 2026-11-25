@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useState } from "react"
 
+import { Icon } from "@/components/ui/icon"
 import { cn } from "@/lib/utils"
 
 const sparks = Array.from({ length: 6 }, (_, i) => (i / 6) * Math.PI * 2)
@@ -57,23 +58,15 @@ export function HeartButton({
           </motion.span>
         )}
       </AnimatePresence>
-      <motion.svg
+      <motion.span
         key={on ? "on" : "off"}
-        viewBox="0 0 24 24"
-        className={size === "md" ? "size-5" : "size-6"}
+        className="grid place-items-center"
         initial={on ? { scale: 0.6 } : false}
         animate={{ scale: [0.6, 1.25, 1] }}
         transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-        aria-hidden
       >
-        <path
-          d="M12 20.5s-7.5-4.6-9.2-9.1C1.6 8.2 3.6 4.5 7.2 4.5c2 0 3.6 1.1 4.8 2.8 1.2-1.7 2.8-2.8 4.8-2.8 3.6 0 5.6 3.7 4.4 6.9-1.7 4.5-9.2 9.1-9.2 9.1Z"
-          fill={on ? "var(--safelight)" : "none"}
-          stroke={on ? "var(--safelight)" : "currentColor"}
-          strokeWidth="1.75"
-          strokeLinejoin="round"
-        />
-      </motion.svg>
+        <Icon name="heart" className={size === "md" ? "size-5" : "size-6"} fill={on ? "var(--safelight)" : "none"} stroke={on ? "var(--safelight)" : "currentColor"} />
+      </motion.span>
     </motion.button>
   )
 }

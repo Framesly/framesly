@@ -2,10 +2,13 @@ import type { Metadata } from "next"
 import { Suspense } from "react"
 
 import { AppNav } from "@/components/app/app-nav"
+import { PageSkeleton } from "@/components/app/page-skeleton"
 import { StudioBadge, StudioBadgeSkeleton } from "@/components/app/studio-badge"
 import { Wordmark } from "@/components/site/wordmark"
 import { ThemeArea, ThemeSwitch } from "@/components/theme/theme"
 import { TransitionLink } from "@/components/transition/page-transition"
+import { SkipLink } from "@/components/ui/skip-link"
+import { ToastProvider } from "@/components/ui/toast"
 import { signOutAction } from "@/features/auth/actions"
 import { requireStudio } from "@/lib/auth/dal"
 
@@ -25,48 +28,51 @@ export const metadata: Metadata = {
 export default function AppLayout({ children }: LayoutProps<"/app">) {
   return (
     <ThemeArea area="app">
-      <div className="flex min-h-dvh flex-col lg:flex-row">
-        <aside className="hidden w-64 shrink-0 flex-col border-r border-line bg-surface-sunken lg:flex">
-          <div className="flex h-16 items-center px-5">
-            <TransitionLink href="/" aria-label="Framesly home">
-              <Wordmark />
-            </TransitionLink>
-          </div>
-          <AppNav variant="sidebar" />
-          <div className="mt-auto space-y-4 border-t border-line p-5">
-            <ThemeSwitch id="app-sidebar" labels className="flex w-full" />
-            <form action={signOutAction}>
-              <button type="submit" className="flex h-11 w-full items-center rounded-[var(--radius-control)] px-3 type-caption text-ink-muted transition-colors hover:bg-surface-raised hover:text-ink">
-                Log out
-              </button>
-            </form>
-          </div>
-        </aside>
-
-        <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b border-line bg-surface/95 px-4 sm:px-6 lg:px-8">
-            <Suspense fallback={<StudioBadgeSkeleton />}>
-              <StudioBadge />
-            </Suspense>
-            <div className="flex items-center gap-2 lg:hidden">
-              <ThemeSwitch id="app-header" />
+      <ToastProvider>
+        <SkipLink />
+        <div className="flex min-h-dvh flex-col lg:flex-row">
+          <aside className="hidden w-64 shrink-0 flex-col border-r border-line bg-surface-sunken lg:flex">
+            <div className="flex h-16 items-center px-5">
+              <TransitionLink href="/" aria-label="Framesly home">
+                <Wordmark />
+              </TransitionLink>
+            </div>
+            <AppNav variant="sidebar" />
+            <div className="mt-auto space-y-4 border-t border-line p-5">
+              <ThemeSwitch id="app-sidebar" labels className="flex w-full" />
               <form action={signOutAction}>
-                <button type="submit" className="flex h-11 items-center rounded-[var(--radius-chip)] px-3 type-caption text-ink-muted hover:text-ink">
+                <button type="submit" className="flex h-11 w-full items-center rounded-[var(--radius-control)] px-3 type-caption text-ink-muted transition-colors hover:bg-surface-raised hover:text-ink">
                   Log out
                 </button>
               </form>
             </div>
-          </header>
+          </aside>
 
-          <main id="main" className="flex-1 px-4 pt-8 pb-28 sm:px-6 lg:px-8 lg:pb-12">
-            <Suspense fallback={<PageSkeleton />}>
-              <StudioGate>{children}</StudioGate>
-            </Suspense>
-          </main>
+          <div className="flex min-w-0 flex-1 flex-col">
+            <header className="sticky top-0 z-(--z-sticky) flex h-16 items-center justify-between gap-4 border-b border-line bg-surface/95 px-4 sm:px-6 lg:px-8">
+              <Suspense fallback={<StudioBadgeSkeleton />}>
+                <StudioBadge />
+              </Suspense>
+              <div className="flex items-center gap-2 lg:hidden">
+                <ThemeSwitch id="app-header" />
+                <form action={signOutAction}>
+                  <button type="submit" className="flex h-11 items-center rounded-[var(--radius-chip)] px-3 type-caption text-ink-muted hover:text-ink">
+                    Log out
+                  </button>
+                </form>
+              </div>
+            </header>
+
+            <main id="main" className="flex-1 px-4 pt-8 pb-28 sm:px-6 lg:px-8 lg:pb-12">
+              <Suspense fallback={<PageSkeleton />}>
+                <StudioGate>{children}</StudioGate>
+              </Suspense>
+            </main>
+          </div>
+
+          <AppNav variant="tabs" />
         </div>
-
-        <AppNav variant="tabs" />
-      </div>
+      </ToastProvider>
     </ThemeArea>
   )
 }
@@ -75,18 +81,4 @@ export default function AppLayout({ children }: LayoutProps<"/app">) {
 async function StudioGate({ children }: { children: React.ReactNode }) {
   await requireStudio()
   return <>{children}</>
-}
-
-function PageSkeleton() {
-  return (
-    <div className="mx-auto max-w-[var(--container-content)] animate-pulse" aria-busy aria-label="Loading">
-      <div className="h-10 w-56 rounded bg-surface-raised" />
-      <div className="mt-8 grid grid-cols-3 gap-3">
-        <div className="h-20 rounded-[var(--radius-control)] bg-surface-raised" />
-        <div className="h-20 rounded-[var(--radius-control)] bg-surface-raised" />
-        <div className="h-20 rounded-[var(--radius-control)] bg-surface-raised" />
-      </div>
-      <div className="mt-8 h-64 rounded-[var(--radius-cover)] bg-surface-raised" />
-    </div>
-  )
 }

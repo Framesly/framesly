@@ -60,7 +60,7 @@ export type ClientGalleryView = {
 
 export type ClientGalleryResult =
   | { status: "not_found" }
-  | { status: "expired"; studio: { name: string; logoUrl: string | null } }
+  | { status: "expired"; studio: { name: string; logoUrl: string | null; brandColor: string } }
   | { status: "locked"; title: string; studio: { name: string; logoUrl: string | null; brandColor: string } }
   | { status: "ok"; gallery: ClientGalleryView }
 
@@ -125,7 +125,7 @@ async function visitorId(create: boolean) {
 
 type Access =
   | { status: "not_found" }
-  | { status: "expired"; studio: { name: string; logoUrl: string | null } }
+  | { status: "expired"; studio: { name: string; logoUrl: string | null; brandColor: string } }
   | { status: "locked"; title: string; studio: { name: string; logoUrl: string | null; brandColor: string } }
   | { status: "ok"; gallery: GalleryRow; studio: { name: string; logoUrl: string | null; brandColor: string } }
 
@@ -140,7 +140,7 @@ async function checkAccess(slug: string): Promise<Access> {
 
   const studio = await studioOf(gallery.studio_id)
   if (gallery.expires_at && new Date(gallery.expires_at).getTime() <= Date.now()) {
-    return { status: "expired", studio: { name: studio.name, logoUrl: studio.logoUrl } }
+    return { status: "expired", studio: { name: studio.name, logoUrl: studio.logoUrl, brandColor: studio.brandColor } }
   }
 
   // Decide from the secrets table, not galleries.has_password (a display hint the photographer can edit).
@@ -164,14 +164,7 @@ export async function loadClientGallery(slug: string): Promise<ClientGalleryResu
   const db = createAdminClient()
   const [{ data: sections }, { data: photos }, { data: picks }] = await Promise.all([
     db.from("sections").select("id, name, sort_order").eq("gallery_id", gallery.id).order("sort_order"),
-    db
-      .from("photos")
-      .select("id, original_name, web_key, r2_key, width, height, section_id, taken_at, created_at")
-      .eq("gallery_id", gallery.id)
-      .eq("status", "ready")
-      .not("web_key", "is", null)
-      .order("taken_at", { ascending: true, nullsFirst: false })
-      .order("created_at", { ascending: true }),
+    readPhotos(gallery.id),
     visitor
       ? db.from("selections").select("photo_id").eq("gallery_id", gallery.id).eq("visitor_id", visitor)
       : Promise.resolve({ data: [] as { photo_id: string }[] }),
@@ -201,6 +194,27 @@ export async function loadClientGallery(slug: string): Promise<ClientGalleryResu
       favourites: (picks ?? []).map((p) => p.photo_id),
     },
   }
+}
+
+/**
+ * The gallery's ready photos in display order: the photographer's order first
+ * (photos.sort_order), then capture time, then upload time. Falls back to the
+ * old order until the sort_order migration has been applied.
+ */
+async function readPhotos(galleryId: string) {
+  const db = createAdminClient()
+  const query = (sorted: boolean) => {
+    let q = db
+      .from("photos")
+      .select("id, original_name, web_key, r2_key, width, height, section_id, taken_at, created_at")
+      .eq("gallery_id", galleryId)
+      .eq("status", "ready")
+      .not("web_key", "is", null)
+    if (sorted) q = q.order("sort_order", { ascending: true, nullsFirst: false })
+    return q.order("taken_at", { ascending: true, nullsFirst: false }).order("created_at", { ascending: true }).order("id")
+  }
+  const first = await query(true)
+  return first.error?.code === "42703" ? query(false) : first
 }
 
 /** Heart or un-heart a photo for this browser. Same access rules as viewing. */

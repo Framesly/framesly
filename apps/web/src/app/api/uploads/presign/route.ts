@@ -39,6 +39,19 @@ export async function POST(request: Request) {
   const { data: gallery } = await supabase.from("galleries").select("id, studio_id").eq("id", galleryId).maybeSingle()
   if (!gallery || gallery.studio_id !== membership.studio.id) return Response.json({ error: "Gallery not found." }, { status: 404 })
 
+  // Choosing the same files again after a dropped connection: clear their stale rows (failed, or
+  // stuck "uploading" for a quarter of an hour) so counts stay accurate and nothing is duplicated.
+  const { data: unfinished } = await supabase
+    .from("photos")
+    .select("id, original_name, bytes, status, created_at")
+    .eq("gallery_id", galleryId)
+    .in("status", ["uploading", "failed"])
+    .in("original_name", [...new Set(files.map((f) => f.name))])
+  const incoming = new Set(files.map((f) => `${f.name}|${f.size}`))
+  const staleBefore = Date.now() - 15 * 60 * 1000
+  const stale = (unfinished ?? []).filter((r) => incoming.has(`${r.original_name}|${r.bytes}`) && (r.status === "failed" || new Date(r.created_at).getTime() < staleBefore))
+  if (stale.length) await supabase.from("photos").delete().in("id", stale.map((r) => r.id))
+
   if (replaces?.length) await supabase.from("photos").delete().eq("gallery_id", galleryId).eq("status", "failed").in("id", replaces)
 
   const rows = files.map((f) => {

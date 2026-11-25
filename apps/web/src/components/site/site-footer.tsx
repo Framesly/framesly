@@ -1,6 +1,8 @@
 import { TransitionLink as Link } from "@/components/transition/page-transition"
 
+import { ContactEmail, SocialLinks } from "@/components/site/social-links"
 import { Wordmark } from "@/components/site/wordmark"
+import { parentBrand } from "@/lib/site"
 
 const columns = [
   {
@@ -38,6 +40,12 @@ export function SiteFooter() {
             <p className="mt-4 max-w-xs text-ink-muted">
               Upload a wedding once. Cull it, deliver it and keep it, from the same files.
             </p>
+            <p className="mt-3 type-label text-ink-muted">Framesly is {parentBrand.tagline}</p>
+            <p className="mt-6 type-label text-ink-muted">Get in touch</p>
+            <p className="mt-2 text-ink">
+              <ContactEmail />
+            </p>
+            <SocialLinks className="-ml-3 mt-2" />
           </div>
           <div className="grid grid-cols-2 gap-10 sm:grid-cols-3 md:col-span-7">
             {columns.map((col) => (
@@ -62,7 +70,7 @@ export function SiteFooter() {
 
         <div className="mt-16 flex flex-col gap-2 border-t border-line py-6 sm:flex-row sm:items-center sm:justify-between">
           {/* Static year: reading the clock here would make every page dynamic under Cache Components. */}
-          <p className="type-label text-ink-muted">© 2026 Framesly</p>
+          <p className="type-label text-ink-muted">© 2026 Framesly · {parentBrand.tagline}</p>
           <p className="type-label text-ink-muted">Made for people who shoot the whole day</p>
         </div>
       </div>

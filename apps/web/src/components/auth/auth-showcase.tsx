@@ -101,7 +101,7 @@ export function AuthShowcase() {
           <span className="absolute inset-0 animate-ping rounded-full bg-safelight" />
           <span className="relative size-1.5 rounded-full bg-safelight" />
         </span>
-        <span className="type-label text-[#f3ece3]">Sample cull · Wow Films</span>
+        <span className="type-label text-fixed-light">Sample cull · Wow Films</span>
       </div>
 
       <div className="absolute right-10 bottom-10 left-10 text-white">

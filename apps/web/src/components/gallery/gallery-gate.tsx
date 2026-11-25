@@ -4,18 +4,25 @@ import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
 
 import { StudioLogo } from "@/components/studio/studio-logo"
+import { Button } from "@/components/ui/button"
+import { Field } from "@/components/ui/field"
+import { ACCENT_SURFACES, brandAccentStyle } from "@/lib/color"
 
-type Studio = { name: string; logoUrl: string | null }
+type Studio = { name: string; logoUrl: string | null; brandColor?: string | null }
 
 function Shell({ studio, children }: { studio: Studio; children: React.ReactNode }) {
   return (
-    <main className="theme-print grid min-h-dvh place-items-center bg-surface px-4 py-16">
+    <main
+      className="theme-print grid min-h-dvh place-items-center bg-surface px-4 py-16"
+      // The studio's colour for the button and focus ring, nudged to stay readable.
+      style={brandAccentStyle(studio.brandColor, ACCENT_SURFACES.print, ACCENT_SURFACES.darkroomRaised)}
+    >
       <div className="w-full max-w-sm text-center">
         <StudioLogo
           name={studio.name}
           logoUrl={studio.logoUrl}
           imageClassName="mx-auto max-h-14 max-w-[200px]"
-          textClassName="text-[15px] tracking-[0.3em] text-ink"
+          textClassName="text-body tracking-[0.3em] text-ink"
         />
         <div className="mt-10">{children}</div>
         <p className="mt-16 type-label text-ink-muted">Delivered with Framesly</p>
@@ -53,29 +60,19 @@ export function PasswordScreen({ slug, title, studio }: { slug: string; title: s
     <Shell studio={studio}>
       <h1 className="type-heading-1 text-ink">{title}</h1>
       <p className="mt-2 text-ink-muted">This gallery is private. Enter the password your photographer gave you.</p>
-      <form onSubmit={submit} className="mt-8 space-y-3 text-left" noValidate>
-        <label htmlFor="gallery-password" className="type-caption text-ink">Password</label>
-        <input
-          id="gallery-password"
+      <form onSubmit={submit} className="mt-8 space-y-4 text-left" noValidate>
+        <Field
+          label="Password"
           type="password"
           autoComplete="current-password"
           autoFocus
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          aria-invalid={Boolean(error)}
-          aria-describedby={error ? "gallery-password-error" : undefined}
-          className="block h-12 w-full rounded-[var(--radius-control)] border border-line-strong bg-surface-raised px-4 text-ink outline-none focus:border-ink"
+          error={error}
         />
-        {error && (
-          <p id="gallery-password-error" role="alert" className="type-caption text-danger">{error}</p>
-        )}
-        <button
-          type="submit"
-          disabled={pending || !password}
-          className="h-12 w-full rounded-[var(--radius-control)] bg-ink type-caption text-surface transition-opacity disabled:opacity-50"
-        >
+        <Button type="submit" size="lg" className="w-full" disabled={pending || !password}>
           {pending ? "Checking…" : "View the photos"}
-        </button>
+        </Button>
       </form>
     </Shell>
   )

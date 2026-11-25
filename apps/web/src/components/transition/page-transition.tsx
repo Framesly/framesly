@@ -40,6 +40,9 @@ const labels: Record<string, string> = {
   "/legal/privacy": "Privacy",
 }
 
+/** True for the photographer's app (/app and everything under it). */
+const isAppPath = (pathname: string) => pathname === "/app" || pathname.startsWith("/app/")
+
 const shutter = [0.7, 0, 0.2, 1] as const
 const curtain = [0.76, 0, 0.24, 1] as const
 
@@ -52,7 +55,8 @@ const curtain = [0.76, 0, 0.24, 1] as const
  *            the new page rises into place.
  *
  * Works in every browser (no View Transitions API dependency). Skipped for
- * reduced motion, modified clicks, external links and same-page anchors.
+ * reduced motion, modified clicks, external links, same-page anchors and any
+ * navigation that starts inside the app (/app/*).
  */
 export function PageTransitionProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -77,7 +81,9 @@ export function PageTransitionProvider({ children }: { children: React.ReactNode
         router.push(href)
         return
       }
-      if (reduce || url.origin !== window.location.origin) {
+      // The curtain is for the marketing site and auth. Inside the app, people
+      // navigate all day, so moving between app pages is instant.
+      if (reduce || url.origin !== window.location.origin || isAppPath(window.location.pathname)) {
         router.push(href)
         return
       }
@@ -127,7 +133,7 @@ export function PageTransitionProvider({ children }: { children: React.ReactNode
           aria-hidden={phase === "reveal"}
           role="status"
           aria-live="polite"
-          className="theme-espresso grain fixed inset-0 z-[200] flex flex-col items-center justify-center"
+          className="theme-espresso grain fixed inset-0 z-(--z-transition) flex flex-col items-center justify-center"
           initial={{ clipPath: `circle(0px at ${x}px ${y}px)`, y: "0%" }}
           animate={
             phase === "reveal"

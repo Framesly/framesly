@@ -100,7 +100,7 @@ function Diagram({ progress }: { progress: MotionValue<number> }) {
         {/* The single original that every step reads from */}
         <div className="relative min-h-0 flex-1">
           <Image src={photos.beachTwirl.src} alt="" fill sizes="300px" className="object-cover object-[50%_35%]" />
-          <span className="absolute top-2 left-2 rounded-[var(--radius-chip)] bg-safelight px-1.5 py-0.5 type-label text-[9px] text-on-safelight">
+          <span className="absolute top-2 left-2 rounded-[var(--radius-chip)] bg-safelight px-1.5 py-0.5 type-label text-on-safelight">
             One file in storage
           </span>
         </div>
@@ -108,7 +108,7 @@ function Diagram({ progress }: { progress: MotionValue<number> }) {
           <p className="type-caption font-semibold sm:type-heading-2">DSC_0412.JPG</p>
           <div className="mt-2 flex flex-wrap gap-1">
             {["Cull", "Gallery", "Download", "Prints"].map((s) => (
-              <span key={s} className="rounded-[var(--radius-chip)] bg-safelight-soft px-1.5 py-0.5 type-label text-[9px] text-safelight-text sm:text-[11px]">
+              <span key={s} className="rounded-[var(--radius-chip)] bg-safelight-soft px-1.5 py-0.5 type-label text-safelight-text">
                 {s}
               </span>
             ))}
@@ -168,13 +168,13 @@ function ToolBox({
           className="object-cover"
           style={{ filter: rest.filter, objectPosition: rest.crop }}
         />
-        <span className="absolute top-2 left-2 rounded-[var(--radius-chip)] bg-[rgb(var(--scrim)/0.7)] px-1.5 py-0.5 type-label text-[9px] text-[#f3ece3]">
+        <span className="absolute top-2 left-2 rounded-[var(--radius-chip)] bg-[rgb(var(--scrim)/0.7)] px-1.5 py-0.5 type-label text-fixed-light">
           Copy {index + 1} · {rest.label}
         </span>
       </div>
       <div className="p-3 sm:p-4">
         <p className="type-caption font-semibold text-ink">{tool.name}</p>
-        <p className="type-label text-[10px] text-ink-muted">{tool.note}</p>
+        <p className="type-label text-ink-muted">{tool.note}</p>
       </div>
     </motion.div>
   )

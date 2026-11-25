@@ -125,7 +125,7 @@ export function GalleryTrack() {
                   Lights on for your clients.
                 </h2>
                 <p className="mt-5 max-w-sm type-body-l text-ink-muted">
-                  Your dashboard stays in the darkroom. Couples get a bright, quiet gallery that looks
+                  Your dashboard stays in the darkroom. Couples get a calm, quiet gallery that looks
                   like your studio made it.
                 </p>
                 <TextLink href="/sample" className="mt-6">
@@ -137,8 +137,8 @@ export function GalleryTrack() {
               <article className="relative w-[82vw] shrink-0 overflow-hidden rounded-[var(--radius-cover)] sm:w-[620px]">
                 <ParallaxPhoto photo={photos.gardenArch} progress={pin} sizes="620px" className="absolute inset-0" position="50% 35%" strength={10} />
                 <div className="absolute inset-0 bg-gradient-to-t from-[rgb(28_23_20/0.78)] via-[rgb(28_23_20/0.1)] to-[rgb(28_23_20/0.35)]" />
-                <p className="absolute top-5 left-5 font-heading text-[13px] font-bold tracking-[0.28em] text-white uppercase">Saffron Lane</p>
-                <span className="absolute top-5 right-5 rounded-full bg-white/85 px-2.5 py-0.5 type-label text-[#16191f]">Sample</span>
+                <p className="absolute top-5 left-5 font-heading text-caption font-bold tracking-[0.28em] text-white uppercase">Saffron Lane</p>
+                <span className="absolute top-5 right-5 rounded-full bg-white/85 px-2.5 py-0.5 type-label text-fixed-dark">Sample</span>
                 <div className="absolute right-5 bottom-6 left-5 text-white sm:left-7">
                   <p className="type-label text-white/75">Your logo, your names, your cover</p>
                   <p className="mt-2 font-heading text-[40px] leading-none font-bold tracking-[-0.03em] sm:text-[56px]">Aarohi & Kabir</p>
@@ -178,7 +178,7 @@ export function GalleryTrack() {
               {/* Share preview */}
               <Panel label="Sharing" title="Looks right when shared" body="Links preview with the cover and names in chat apps and email.">
                 <div className="flex h-full flex-col justify-end gap-3 bg-surface-sunken p-5">
-                  <div className="ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-[#dff3d6] px-3 py-2 text-[14px] text-[#1c1714]">
+                  <div className="ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-[#dff3d6] px-3 py-2 text-small text-[#1c1714]">
                     Our photos are here!
                   </div>
                   <div className="ml-auto w-[88%] overflow-hidden rounded-2xl rounded-br-md border border-line bg-surface-raised">

@@ -67,6 +67,12 @@ export async function objectSize(key: string): Promise<number | null> {
   }
 }
 
+/** Delete specific stored files (best effort: missing keys are fine). */
+export async function deleteKeys(keys: string[]) {
+  if (!keys.length) return
+  await r2().send(new DeleteObjectsCommand({ Bucket: bucket(), Delete: { Objects: keys.map((Key) => ({ Key })), Quiet: true } }))
+}
+
 /** Delete everything stored for one gallery (originals and web copies). */
 export async function deleteGalleryObjects(galleryId: string) {
   const Prefix = `galleries/${galleryId}/`

@@ -7,6 +7,7 @@ import { useFormStatus } from "react-dom"
 import { googleSignInAction } from "@/features/auth/actions"
 import { ButtonArrow, buttonVariants } from "@/components/ui/button"
 import { Field } from "@/components/ui/field"
+import { Icon } from "@/components/ui/icon"
 import { cn } from "@/lib/utils"
 
 export const develop = [0.22, 1, 0.36, 1] as const
@@ -137,13 +138,9 @@ export function PasswordField(props: Omit<ComponentProps<typeof Field>, "type" |
           onClick={() => setShow((v) => !v)}
           aria-label={show ? "Hide password" : "Show password"}
           aria-pressed={show}
-          className="mr-1 grid size-9 shrink-0 place-items-center rounded-[var(--radius-chip)] text-ink-muted transition-colors hover:text-ink"
+          className="mr-1 grid h-full w-11 shrink-0 place-items-center rounded-[var(--radius-chip)] text-ink-muted transition-colors hover:text-ink"
         >
-          <svg viewBox="0 0 20 20" className="size-[18px]" aria-hidden>
-            <path d="M1.5 10S4.5 4 10 4s8.5 6 8.5 6-3 6-8.5 6-8.5-6-8.5-6Z" fill="none" stroke="currentColor" strokeWidth="1.5" />
-            <circle cx="10" cy="10" r="2.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
-            {show && <path d="M3 17 17 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />}
-          </svg>
+          <Icon name={show ? "eye-off" : "eye"} className="size-[18px]" />
         </button>
       }
     />

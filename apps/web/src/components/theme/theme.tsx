@@ -3,12 +3,13 @@
 import { motion } from "motion/react"
 import { createContext, useCallback, useContext, useEffect, useMemo, useSyncExternalStore } from "react"
 
+import { Icon } from "@/components/ui/icon"
 import { cn } from "@/lib/utils"
 
 /*
  * Theme rules:
- * - Public site: light (ivory) by default.
- * - App after login (/app/*): Darkroom by default.
+ * - Public site: follows the device's light/dark setting until the visitor chooses.
+ * - App after login (/app/*): Darkroom by default (a brand decision), whatever the device says.
  * - Anyone can switch light/dark; the choice is remembered on this device and
  *   then applies everywhere. Until they choose, each area uses its default.
  */
@@ -26,11 +27,23 @@ export type ThemeAreaName = "site" | "app"
  * Runs in <head> before first paint so the page never flashes the wrong
  * theme. Mirrors resolveTheme() below; keep the two in sync.
  */
-export const themeScript = `(function(){try{var p=null;try{p=localStorage.getItem("${KEY}")}catch(e){}var l=location.pathname,a=l==="/app"||l.indexOf("/app/")===0;var t=p==="light"||p==="dark"?p:a?"dark":"light";var d=document.documentElement;d.setAttribute("data-theme",t);d.style.colorScheme=t}catch(e){}})()`
+export const themeScript = `(function(){try{var p=null;try{p=localStorage.getItem("${KEY}")}catch(e){}var l=location.pathname,a=l==="/app"||l.indexOf("/app/")===0;var t=p==="light"||p==="dark"?p:a||(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light";var d=document.documentElement;d.setAttribute("data-theme",t);d.style.colorScheme=t}catch(e){}})()`
 
-function resolveTheme(pref: Pref, area: ThemeAreaName): Theme {
+function resolveTheme(pref: Pref, area: ThemeAreaName, systemDark: boolean): Theme {
   if (pref === "light" || pref === "dark") return pref
-  return area === "app" ? "dark" : "light"
+  return area === "app" || systemDark ? "dark" : "light"
+}
+
+/* The device's colour scheme. The server snapshot is "light" so hydration matches. */
+const DARK_QUERY = "(prefers-color-scheme: dark)"
+function subscribeSystem(cb: () => void) {
+  const mq = window.matchMedia(DARK_QUERY)
+  mq.addEventListener("change", cb)
+  return () => mq.removeEventListener("change", cb)
+}
+const readSystemDark = () => window.matchMedia(DARK_QUERY).matches
+function useSystemDark() {
+  return useSyncExternalStore(subscribeSystem, readSystemDark, () => false)
 }
 
 /* Preference store: localStorage + same-tab event + cross-tab storage event. */
@@ -60,6 +73,7 @@ function applyTheme(theme: Theme) {
 
 type Ctx = {
   pref: Pref
+  systemDark: boolean
   setTheme: (t: Theme, origin?: { x: number; y: number }) => void
 }
 const ThemeContext = createContext<Ctx | null>(null)
@@ -72,6 +86,7 @@ const AreaContext = createContext<ThemeAreaName>("site")
  */
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const pref = useSyncExternalStore(subscribe, readPref, () => "auto" as Pref)
+  const systemDark = useSystemDark()
 
   const setTheme = useCallback((next: Theme, origin?: { x: number; y: number }) => {
     const commit = () => {
@@ -97,7 +112,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     t.finished.finally(() => d.removeAttribute("data-theme-switching"))
   }, [])
 
-  const value = useMemo(() => ({ pref, setTheme }), [pref, setTheme])
+  const value = useMemo(() => ({ pref, systemDark, setTheme }), [pref, systemDark, setTheme])
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
 }
 
@@ -107,8 +122,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
  * preference changes.
  */
 export function ThemeArea({ area, children }: { area: ThemeAreaName; children: React.ReactNode }) {
-  const pref = useContext(ThemeContext)?.pref ?? "auto"
-  const theme = resolveTheme(pref, area)
+  const ctx = useContext(ThemeContext)
+  const theme = resolveTheme(ctx?.pref ?? "auto", area, ctx?.systemDark ?? false)
   useEffect(() => {
     if (document.documentElement.getAttribute("data-theme") !== theme) applyTheme(theme)
   }, [theme])
@@ -119,20 +134,11 @@ export function useTheme() {
   const ctx = useContext(ThemeContext)
   const area = useContext(AreaContext)
   if (!ctx) throw new Error("useTheme must be used inside ThemeProvider")
-  return { theme: resolveTheme(ctx.pref, area), pref: ctx.pref, setTheme: ctx.setTheme }
+  return { theme: resolveTheme(ctx.pref, area, ctx.systemDark), pref: ctx.pref, setTheme: ctx.setTheme }
 }
 
-const SunIcon = () => (
-  <svg viewBox="0 0 20 20" className="size-[18px]" aria-hidden>
-    <circle cx="10" cy="10" r="3.6" fill="none" stroke="currentColor" strokeWidth="1.6" />
-    <path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.3 4.3l1.4 1.4M14.3 14.3l1.4 1.4M4.3 15.7l1.4-1.4M14.3 5.7l1.4-1.4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-  </svg>
-)
-const MoonIcon = () => (
-  <svg viewBox="0 0 20 20" className="size-[18px]" aria-hidden>
-    <path d="M16.5 12.3A6.8 6.8 0 0 1 7.7 3.5a6.8 6.8 0 1 0 8.8 8.8Z" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-  </svg>
-)
+const SunIcon = () => <Icon name="sun" className="size-[18px]" />
+const MoonIcon = () => <Icon name="moon" className="size-[18px]" />
 
 /**
  * Light / dark switch. A two-option segmented control (not a single toggle)
@@ -162,7 +168,7 @@ export function ThemeSwitch({ className, labels = false, id = "theme" }: { class
             }}
             className={cn(
               "relative flex items-center justify-center gap-2 rounded-full transition-colors",
-              labels ? "h-11 flex-1 px-4 type-caption" : "size-9",
+              labels ? "h-11 flex-1 px-4 type-caption" : "size-11",
               on ? "text-ink" : "text-ink-muted hover:text-ink"
             )}
           >

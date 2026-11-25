@@ -40,7 +40,7 @@ async function Gate({ params }: { params: PageProps<"/g/[slug]">["params"] }) {
 function GallerySkeleton() {
   return (
     <div className="theme-print min-h-dvh bg-surface" aria-busy="true" aria-label="Loading gallery">
-      <div className="h-[88svh] min-h-[520px] animate-pulse bg-[#16191f]" />
+      <div className="h-[88svh] min-h-[520px] animate-pulse bg-fixed-dark" />
     </div>
   )
 }

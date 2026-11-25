@@ -213,17 +213,17 @@ export function DeliverVisual() {
         <div className="theme-print overflow-hidden rounded-[26px]">
           <div className="relative h-[220px]">
             <Image src={photos.skyEmbrace.src} alt="" fill sizes="240px" className="object-cover" />
-            <span className="absolute top-3 right-3 rounded-full bg-white/85 px-2 py-0.5 type-label text-[8px] text-[#16191f]">Sample</span>
+            <span className="absolute top-3 right-3 rounded-full bg-white/85 px-2 py-0.5 type-label text-fixed-dark">Sample</span>
             <div className="absolute inset-0 bg-gradient-to-t from-[rgb(22_25_31/0.75)] via-transparent to-[rgb(22_25_31/0.35)]" />
-            <p className="absolute top-3 left-3 font-heading text-[11px] font-bold tracking-[0.2em] text-white uppercase">Saffron Lane</p>
+            <p className="absolute top-3 left-3 font-heading text-micro font-bold tracking-[0.2em] text-white uppercase">Saffron Lane</p>
             <div className="absolute inset-x-3 bottom-3 text-white">
-              <p className="font-heading text-[22px] leading-6 font-bold">Aarohi & Kabir</p>
-              <p className="mt-1 type-label text-[9px] text-white/80">Udaipur · 3 days</p>
+              <p className="font-heading text-stat leading-6 font-bold">Aarohi & Kabir</p>
+              <p className="mt-1 type-label text-white/80">Udaipur · 3 days</p>
             </div>
           </div>
           <div className="flex gap-3 overflow-hidden border-b border-line px-3 py-2">
             {["Haldi", "Sangeet", "Ceremony"].map((s, i) => (
-              <span key={s} className={cn("type-label text-[9px]", i === 2 ? "text-ink" : "text-ink-muted")}>{s}</span>
+              <span key={s} className={cn("type-label", i === 2 ? "text-ink" : "text-ink-muted")}>{s}</span>
             ))}
           </div>
           <div className="grid grid-cols-3 gap-0.5 p-0.5">
