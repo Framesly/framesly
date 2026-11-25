@@ -2,6 +2,7 @@
 
 import { useEffect } from "react"
 
+import { ContactEmail } from "@/components/site/social-links"
 import { Button } from "@/components/ui/button"
 
 /** Shown instead of the framework's error page when a client gallery fails to load. */
@@ -19,6 +20,9 @@ export default function GalleryError({ error }: { error: Error & { digest?: stri
         <Button type="button" className="mt-6" onClick={() => window.location.reload()}>
           Try again
         </Button>
+        <p className="mt-4 type-caption font-normal text-ink-muted">
+          Still not working? <ContactEmail className="font-semibold text-ink" />
+        </p>
         <p className="mt-16 type-label text-ink-muted">Delivered with Framesly</p>
       </div>
     </main>

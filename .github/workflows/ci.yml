@@ -31,4 +31,6 @@ jobs:
         run: pnpm --filter @framesly/web exec next typegen
 
       - run: pnpm lint
+      # Fails on hard-coded colours, z-index numbers and tiny font sizes (see scripts/check-design-tokens.mjs).
+      - run: pnpm lint:design
       - run: pnpm typecheck

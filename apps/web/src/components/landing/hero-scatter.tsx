@@ -456,7 +456,7 @@ function PrintCard({
 
           {!def.pick && (
             <motion.div style={{ opacity: stamp }} className="absolute top-2 left-2">
-              <Chip tone="reject" className="h-5 px-1.5 text-[9px] sm:h-6 sm:text-[10px]">
+              <Chip tone="reject" className="h-5 px-1.5 sm:h-6">
                 {def.reason}
               </Chip>
             </motion.div>
@@ -465,7 +465,7 @@ function PrintCard({
           {def.pick && (
             <motion.div style={{ opacity: brackets }} className="absolute inset-0">
               <Viewfinder inset={-7} size={layout.mobile ? 10 : 14} />
-              <span className="absolute bottom-2 left-2 rounded-[var(--radius-chip)] bg-[rgb(var(--scrim)/0.7)] px-1.5 py-0.5 type-label text-[9px] text-[#f3ece3] sm:text-[10px]">
+              <span className="absolute bottom-2 left-2 rounded-[var(--radius-chip)] bg-[rgb(var(--scrim)/0.7)] px-1.5 py-0.5 type-label text-fixed-light">
                 {frameNo(def.frame)}
               </span>
             </motion.div>

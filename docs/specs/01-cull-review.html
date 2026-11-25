@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI cull review: layout mock</title>
+<style>
+/* Darkroom tokens, copied from apps/web/src/app/globals.css */
+:root{--surface:#121417;--surface-raised:#1c2026;--surface-sunken:#0b0d10;--line:#2c333e;--line-strong:#6b7482;--ink:#e9ecf1;--ink-muted:#98a0ad;--safelight:#f2a93b;--safelight-text:#f5bb62;--safelight-soft:#3a2a10;--on-safelight:#16191f;--warning:#ff9a5c;--info:#8cbcff;color-scheme:dark}
+*{box-sizing:border-box}body{margin:0;background:var(--surface);color:var(--ink);font:15px/24px system-ui,sans-serif}
+.label{font:500 11px/16px ui-monospace,monospace;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-muted)}
+.app{display:grid;grid-template-rows:auto 1fr auto;min-height:100vh}
+.top{display:flex;flex-wrap:wrap;gap:16px;align-items:center;padding:12px 20px;border-bottom:1px solid var(--line);background:var(--surface-raised)}
+.top h1{font-size:18px;margin:0 auto 0 0}
+.metric{font:500 14px ui-monospace,monospace}.metric b{color:var(--safelight-text)}
+.field,.seg button{height:44px;border:1px solid var(--line-strong);background:var(--surface-sunken);color:var(--ink);border-radius:6px;padding:0 12px;font:inherit}
+.seg{display:inline-flex}.seg button{border-radius:0}.seg button:first-child{border-radius:6px 0 0 6px}.seg button:last-child{border-radius:0 6px 6px 0}.seg [aria-pressed=true]{background:var(--safelight-soft);border-color:var(--safelight);color:var(--ink)}
+.body{display:grid;grid-template-columns:200px 1fr 320px;min-height:0}
+aside{padding:16px;border-right:1px solid var(--line)}aside.right{border-right:0;border-left:1px solid var(--line)}
+.group{display:flex;justify-content:space-between;min-height:44px;align-items:center;border-radius:6px;padding:0 10px}.group[aria-current=true]{background:var(--surface-raised);border:1px solid var(--line)}
+.grid{padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;align-content:start}
+.tile{position:relative;aspect-ratio:4/5;border-radius:6px;overflow:hidden;border:0;padding:0;cursor:pointer;outline-offset:2px}
+.tile::before{content:"";position:absolute;inset:0;background:var(--g)}
+.tile.pick{outline:2px solid var(--safelight)}.tile.reject::before{opacity:.45}.tile.sel{outline:2px solid var(--ink)}
+.chip{position:absolute;left:6px;bottom:6px;padding:2px 6px;border-radius:6px;background:rgba(11,13,16,.78);color:var(--ink);font:500 11px/16px ui-monospace,monospace;text-transform:uppercase;letter-spacing:.08em}
+.chip.pick{background:var(--safelight-soft);color:var(--safelight-text)}
+.mark{position:absolute;right:6px;top:6px;width:22px;height:22px;border-radius:50%;background:var(--safelight);color:var(--on-safelight);display:grid;place-items:center;font:700 13px/1 system-ui}
+.preview{aspect-ratio:4/5;border-radius:10px;background:linear-gradient(160deg,#8a5a49,#3a2a22)}
+.reason{display:flex;gap:8px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line)}
+.badge{padding:2px 8px;border-radius:99px;font-size:13px;line-height:18px;font-weight:500;white-space:nowrap}
+.badge.warn{background:rgba(255,154,92,.15);color:var(--warning)}.badge.info{background:rgba(140,188,255,.15);color:var(--info)}
+.actions{display:flex;gap:8px;margin-top:16px}.btn{flex:1;height:44px;border-radius:10px;border:1px solid var(--line-strong);background:transparent;color:var(--ink);font:600 15px system-ui}.btn.primary{background:var(--safelight);border-color:var(--safelight);color:var(--on-safelight)}
+.hint{display:flex;gap:20px;flex-wrap:wrap;padding:10px 20px;border-top:1px solid var(--line);background:var(--surface-sunken)}
+kbd{font:500 12px ui-monospace,monospace;border:1px solid var(--line-strong);border-bottom-width:2px;border-radius:4px;padding:1px 6px;color:var(--ink)}
+@media (max-width:900px){.body{grid-template-columns:1fr}aside{display:none}}
+:focus-visible{outline:2px solid var(--safelight-text);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <h1>Aarohi &amp; Kabir <span class="label">AI cull review · mock</span></h1>
+    <span class="metric"><b>612</b> picks · target <b>600</b> · 12 over</span>
+    <label class="label" for="n">Cull to N</label>
+    <input id="n" class="field" value="600" size="5" inputmode="numeric" aria-describedby="n-help">
+    <span id="n-help" class="label">your picks always win</span>
+    <div class="seg" role="group" aria-label="View"><button aria-pressed="false">Grid</button><button aria-pressed="true">Review</button><button aria-pressed="false">Compare</button></div>
+  </header>
+  <div class="body">
+    <aside aria-label="Groups">
+      <p class="label">Groups</p>
+      <div class="group" aria-current="true"><span>All frames</span><span class="label">2,184</span></div>
+      <div class="group"><span>Bursts</span><span class="label">214</span></div>
+      <div class="group"><span>Duplicates</span><span class="label">57</span></div>
+      <div class="group"><span>Eyes closed</span><span class="label">38</span></div>
+      <div class="group"><span>Blur</span><span class="label">91</span></div>
+      <div class="group"><span>Your decisions</span><span class="label">23</span></div>
+    </aside>
+    <main class="grid" aria-label="Frames (grid, arrow keys move)">
+      <button class="tile pick" style="--g:linear-gradient(160deg,#c98f6b,#5a3a2e)" aria-label="Frame 1021, picked"><span class="mark">✓</span><span class="chip pick">Pick</span></button>
+      <button class="tile reject" style="--g:linear-gradient(160deg,#8a5a49,#2c1f1a)" aria-label="Frame 1022, rejected: blur"><span class="chip">Blur</span></button>
+      <button class="tile pick sel" style="--g:linear-gradient(160deg,#b9806a,#4a3027)" aria-label="Frame 1023, picked, best of 7"><span class="mark">✓</span><span class="chip pick">Best of 7</span></button>
+      <button class="tile reject" style="--g:linear-gradient(160deg,#6f4b3e,#241a16)" aria-label="Frame 1024, rejected: eyes closed"><span class="chip">Eyes closed</span></button>
+      <button class="tile reject" style="--g:linear-gradient(160deg,#b9806a,#3d2a22)" aria-label="Frame 1025, rejected: duplicate"><span class="chip">Duplicate</span></button>
+      <button class="tile" style="--g:linear-gradient(160deg,#d4a27c,#5c4033)" aria-label="Frame 1026, undecided"></button>
+      <button class="tile pick" style="--g:linear-gradient(160deg,#a9745c,#41302a)" aria-label="Frame 1027, picked by you"><span class="mark">✓</span><span class="chip pick">Your pick</span></button>
+      <button class="tile reject" style="--g:linear-gradient(160deg,#7a5546,#251b17)" aria-label="Frame 1028, rejected: blur"><span class="chip">Blur</span></button>
+      <button class="tile pick" style="--g:linear-gradient(160deg,#c5906f,#53392d)" aria-label="Frame 1029, picked"><span class="mark">✓</span><span class="chip pick">Pick</span></button>
+      <button class="tile" style="--g:linear-gradient(160deg,#9b6b55,#3a2a23)" aria-label="Frame 1030, undecided"></button>
+      <button class="tile reject" style="--g:linear-gradient(160deg,#8b5d49,#2a1e19)" aria-label="Frame 1031, rejected: duplicate"><span class="chip">Duplicate</span></button>
+      <button class="tile pick" style="--g:linear-gradient(160deg,#cf9a78,#5b4034)" aria-label="Frame 1032, picked"><span class="mark">✓</span><span class="chip pick">Pick</span></button>
+    </main>
+    <aside class="right" aria-label="Frame details">
+      <p class="label">Frame 1023 · burst 3 of 7</p>
+      <div class="preview" role="img" aria-label="Preview of frame 1023"></div>
+      <div class="reason"><span class="badge info">Best of 7</span><span>Sharpest and best-lit of the seven frames in this burst.</span></div>
+      <div class="reason"><span class="badge warn">Check</span><span>Groom's eyes are half closed. Frame 1021 is open.</span></div>
+      <div class="actions"><button class="btn primary">Pick <kbd>P</kbd></button><button class="btn">Reject <kbd>X</kbd></button></div>
+    </aside>
+  </div>
+  <footer class="hint"><span><kbd>←</kbd><kbd>→</kbd> move</span><span><kbd>P</kbd> pick</span><span><kbd>X</kbd> reject</span><span><kbd>Z</kbd> undo</span><span><kbd>C</kbd> compare</span><span><kbd>B</kbd> next burst</span><span><kbd>?</kbd> all shortcuts</span></footer>
+</div>
+</body>
+</html>

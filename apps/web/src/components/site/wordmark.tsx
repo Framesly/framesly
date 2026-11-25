@@ -12,7 +12,7 @@ export function Wordmark({ className, compact = false }: { className?: string; c
         <circle cx="12" cy="12" r="3.5" fill="var(--safelight)" />
       </svg>
       {!compact && (
-        <span className="font-heading text-[20px] leading-none font-bold tracking-[-0.03em]">
+        <span className="font-heading text-xl leading-none font-bold tracking-[-0.03em]">
           Framesly
         </span>
       )}

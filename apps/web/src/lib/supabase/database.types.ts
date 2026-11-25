@@ -140,6 +140,7 @@ export type Database = {
           camera: string | null
           status: PhotoStatus
           error: string | null
+          sort_order: number | null
           created_at: Timestamp
         }
         Insert: {
@@ -162,6 +163,7 @@ export type Database = {
           height?: number | null
           taken_at?: Timestamp | null
           camera?: string | null
+          sort_order?: number | null
         }
         Relationships: []
       }
@@ -248,6 +250,7 @@ export type Database = {
         Returns: string
       }
       is_member: { Args: { p_studio_id: string }; Returns: boolean }
+      reorder_photos: { Args: { p_gallery_id: string; p_photo_ids: string[] }; Returns: undefined }
     }
     Enums: Record<string, never>
     CompositeTypes: Record<string, never>

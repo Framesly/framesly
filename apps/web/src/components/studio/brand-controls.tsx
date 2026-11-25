@@ -7,6 +7,8 @@ import { checkSlugAction, type SlugCheck } from "@/features/studio/actions"
 import { validateLogo } from "@/features/studio/upload-logo"
 import { useSitePhotos } from "@/components/site/site-photos"
 import { StudioLogo } from "@/components/studio/studio-logo"
+import { Icon } from "@/components/ui/icon"
+import { readableOn } from "@/lib/color"
 import { cn } from "@/lib/utils"
 
 /* Shared studio-branding controls, used by onboarding and studio settings. */
@@ -61,7 +63,7 @@ export function ColorPicker({ value, onChange, name }: { value: string; onChange
           <input type="color" value={value} onChange={(e) => onChange(e.target.value.toUpperCase())} className="sr-only" aria-label="Custom brand colour" />
         </label>
       </div>
-      <p className="mt-2 type-metric text-[13px] text-ink-muted">{value.toUpperCase()}</p>
+      <p className="mt-2 type-metric text-caption text-ink-muted">{value.toUpperCase()}</p>
     </div>
   )
 }
@@ -112,9 +114,7 @@ export function LogoPicker({
             // eslint-disable-next-line @next/next/no-img-element -- local blob/object URLs and SVG logos
             <img src={previewUrl} alt="Logo preview" className="max-h-14 max-w-14 object-contain" />
           ) : (
-            <svg viewBox="0 0 24 24" className="size-6 text-ink-muted" aria-hidden>
-              <path d="M4 16l4-4 3 3 3-4 6 6M4 5h16v14H4z" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-            </svg>
+            <Icon name="image" className="size-6 text-ink-muted" />
           )}
         </div>
         <div className="min-w-0 flex-1">
@@ -206,7 +206,7 @@ export function GalleryCoverPreview({
           <span className="size-2 rounded-full bg-line" />
           <span className="size-2 rounded-full bg-line" />
         </span>
-        <span className="mx-auto truncate rounded-[var(--radius-chip)] bg-surface-sunken px-2 py-0.5 type-metric text-[11px] text-ink-muted">
+        <span className="mx-auto truncate rounded-[var(--radius-chip)] bg-surface-sunken px-2 py-0.5 type-metric text-micro text-ink-muted">
           framesly.app/<span className="text-ink">{slug || "your-studio"}</span>/aarohi-kabir
         </span>
       </div>
@@ -219,10 +219,10 @@ export function GalleryCoverPreview({
             logoUrl={logoUrl}
             alt=""
             imageClassName="max-h-9 max-w-[140px] drop-shadow"
-            textClassName="text-[13px] tracking-[0.25em]"
+            textClassName="text-caption tracking-[0.25em]"
           />
         </div>
-        <span className="absolute top-4 right-4 rounded-full bg-white/85 px-2 py-0.5 type-label text-[9px] text-[#16191f]">Preview</span>
+        <span className="absolute top-4 right-4 rounded-full bg-white/85 px-2 py-0.5 type-label text-fixed-dark">Preview</span>
         <figcaption className="absolute inset-x-4 bottom-4 text-white">
           <p className={cn("font-heading leading-none font-bold tracking-[-0.03em]", compact ? "text-[26px]" : "text-[40px]")}>Aarohi & Kabir</p>
           <p className="mt-1.5 type-caption font-normal text-white/80">Udaipur · 12 to 14 February</p>
@@ -236,13 +236,4 @@ export function GalleryCoverPreview({
       </div>
     </figure>
   )
-}
-
-/** Black or white text, whichever reads better on the brand colour. */
-export function readableOn(hex: string) {
-  const n = parseInt(hex.replace("#", ""), 16)
-  const r = (n >> 16) & 255
-  const g = (n >> 8) & 255
-  const b = n & 255
-  return (r * 299 + g * 587 + b * 114) / 1000 > 150 ? "#16191f" : "#ffffff"
 }

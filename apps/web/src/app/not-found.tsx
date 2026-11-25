@@ -1,4 +1,5 @@
 import { ButtonLink } from "@/components/ui/button"
+import { ContactEmail } from "@/components/site/social-links"
 import { EdgeLabel } from "@/components/ui/card"
 import { Viewfinder } from "@/components/ui/viewfinder"
 
@@ -15,6 +16,9 @@ export default function NotFound() {
         <ButtonLink href="/" variant="secondary" className="mt-8">
           Back to Framesly
         </ButtonLink>
+        <p className="mt-6 type-caption font-normal text-ink-muted">
+          Still stuck? <ContactEmail className="font-semibold text-ink" />
+        </p>
       </div>
     </main>
   )

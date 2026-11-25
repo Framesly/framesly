@@ -42,7 +42,7 @@ export function SiteHeader() {
     <>
       <header
         className={cn(
-          "fixed inset-x-0 top-0 z-50 border-b transition-[background-color,border-color] duration-300",
+          "fixed inset-x-0 top-0 z-(--z-header) border-b transition-[background-color,border-color] duration-300",
           scrolled || open ? "border-line bg-surface-raised" : "border-transparent bg-transparent"
         )}
       >
@@ -124,7 +124,7 @@ export function SiteHeader() {
         {open && (
           <motion.div
             id="mobile-menu"
-            className="fixed inset-x-0 top-16 bottom-0 z-40 flex flex-col bg-surface-raised md:hidden"
+            className="fixed inset-x-0 top-16 bottom-0 z-(--z-nav) flex flex-col bg-surface-raised md:hidden"
             initial={{ clipPath: "inset(0 0 100% 0)" }}
             animate={{ clipPath: "inset(0 0 0% 0)" }}
             exit={{ clipPath: "inset(0 0 100% 0)" }}

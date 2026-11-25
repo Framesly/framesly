@@ -1,4 +1,6 @@
 import { getMembership } from "@/lib/auth/dal"
+import { Skeleton } from "@/components/ui/skeleton"
+import { readableOn } from "@/lib/color"
 import { studioAssetUrl } from "@/lib/supabase/env"
 
 /** Whole days left on the free trial (0 once it has ended). */
@@ -23,8 +25,9 @@ export async function StudioBadge() {
     <div className="flex min-w-0 items-center gap-3">
       <span
         aria-hidden
-        className="grid size-9 shrink-0 place-items-center overflow-hidden rounded-full border border-line font-heading text-[13px] font-bold"
-        style={{ background: logo ? "var(--surface-raised)" : studio.brand_color, color: "#16191f" }}
+        className="grid size-9 shrink-0 place-items-center overflow-hidden rounded-full border border-line font-heading text-caption font-bold"
+        // Initials sit on the studio's own colour, so pick the ink that reads on it (4.5:1 or better).
+        style={logo ? { background: "var(--surface-raised)" } : { background: studio.brand_color, color: readableOn(studio.brand_color) }}
       >
         {logo ? (
           // eslint-disable-next-line @next/next/no-img-element -- small Storage-hosted logo, any format incl. SVG
@@ -45,12 +48,12 @@ export async function StudioBadge() {
 
 export function StudioBadgeSkeleton() {
   return (
-    <div className="flex animate-pulse items-center gap-3" aria-hidden>
-      <span className="size-9 rounded-full bg-surface-raised" />
-      <span className="space-y-1.5">
-        <span className="block h-3 w-28 rounded bg-surface-raised" />
-        <span className="block h-3 w-20 rounded bg-surface-raised" />
-      </span>
+    <div className="flex items-center gap-3">
+      <Skeleton className="size-9 rounded-full" />
+      <div className="space-y-1.5">
+        <Skeleton className="h-3 w-28" />
+        <Skeleton className="h-3 w-20" />
+      </div>
     </div>
   )
 }

@@ -64,7 +64,7 @@ export function Chip({
         "inline-flex h-6 items-center gap-1.5 rounded-[var(--radius-chip)] px-2 type-label whitespace-nowrap",
         tone === "neutral" && "bg-surface-sunken text-ink-muted",
         tone === "pick" && "bg-safelight-soft text-safelight-text",
-        tone === "reject" && "bg-[rgb(var(--scrim)/0.72)] text-[#e9ecf1]",
+        tone === "reject" && "bg-[rgb(var(--scrim)/0.72)] text-fixed-light",
         tone === "success" && "bg-surface-sunken text-success",
         className
       )}

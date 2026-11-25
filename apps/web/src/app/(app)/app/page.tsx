@@ -1,10 +1,10 @@
 import type { Metadata } from "next"
 
-import { GalleryCard } from "@/components/app/gallery-card"
+import { GalleryList } from "@/components/app/gallery-list"
 import { NewGalleryDialog } from "@/components/app/new-gallery-dialog"
 import { Viewfinder } from "@/components/ui/viewfinder"
 import { requireStudio } from "@/lib/auth/dal"
-import { listGalleries } from "@/lib/data/galleries"
+import { listGalleries, listGalleryCovers } from "@/lib/data/galleries"
 
 export const metadata: Metadata = { title: "Galleries" }
 
@@ -12,6 +12,7 @@ export const metadata: Metadata = { title: "Galleries" }
 export default async function GalleriesPage({ searchParams }: PageProps<"/app">) {
   const [{ studio, user }, params] = await Promise.all([requireStudio(), searchParams])
   const galleries = await listGalleries(studio.id)
+  const covers = await listGalleryCovers(galleries)
   const welcome = params.welcome === "1"
   const totals = galleries.reduce(
     (t, g) => ({ photos: t.photos + g.photo_count, delivered: t.delivered + (g.status === "delivered" ? 1 : 0) }),
@@ -36,7 +37,7 @@ export default async function GalleriesPage({ searchParams }: PageProps<"/app">)
         {galleries.length > 0 && <NewGalleryDialog />}
       </div>
 
-      <dl className="mt-8 grid grid-cols-3 gap-3">
+      <dl className="mt-8 grid grid-cols-1 gap-3 min-[420px]:grid-cols-3">
         {[
           { label: "Galleries", value: galleries.length },
           { label: "Photos", value: totals.photos },
@@ -44,7 +45,7 @@ export default async function GalleriesPage({ searchParams }: PageProps<"/app">)
         ].map((m) => (
           <div key={m.label} className="rounded-[var(--radius-control)] border border-line bg-surface-raised p-4">
             <dt className="type-caption font-normal text-ink-muted">{m.label}</dt>
-            <dd className="mt-1 type-metric text-[22px] leading-8 text-ink">{m.value.toLocaleString("en")}</dd>
+            <dd className="mt-1 type-metric text-stat leading-8 text-ink">{m.value.toLocaleString("en")}</dd>
           </div>
         ))}
       </dl>
@@ -64,13 +65,7 @@ export default async function GalleriesPage({ searchParams }: PageProps<"/app">)
           </div>
         </section>
       ) : (
-        <ul className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {galleries.map((g) => (
-            <li key={g.id}>
-              <GalleryCard gallery={g} brandColor={studio.brand_color} />
-            </li>
-          ))}
-        </ul>
+        <GalleryList items={galleries.map((g) => ({ gallery: g, coverSrc: covers.get(g.id) ?? null }))} brandColor={studio.brand_color} />
       )}
     </div>
   )

@@ -10,6 +10,7 @@ import { Proof } from "@/components/landing/proof"
 import { StepStack } from "@/components/landing/step-stack"
 import { VideoTeaser } from "@/components/landing/video-teaser"
 import { RevealText } from "@/components/motion/reveal"
+import { ContactEmail } from "@/components/site/social-links"
 import { PlanTickets } from "@/components/pricing/plan-tickets"
 import { TextLink } from "@/components/ui/button"
 import { EdgeLabel } from "@/components/ui/card"
@@ -52,7 +53,9 @@ export default function LandingPage() {
             <div className="lg:sticky lg:top-28">
               <EdgeLabel tone="safelight">Questions</EdgeLabel>
               <h2 id="faq-title" className="mt-4 type-heading-1">Before you upload</h2>
-              <p className="mt-4 max-w-xs text-ink-muted">Anything else, write to us and a person replies.</p>
+              <p className="mt-4 max-w-xs text-ink-muted">
+                Anything else, write to <ContactEmail className="font-semibold text-ink" /> and a person replies.
+              </p>
             </div>
           </div>
           <div className="lg:col-span-8">

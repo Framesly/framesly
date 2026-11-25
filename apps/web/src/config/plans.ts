@@ -31,7 +31,7 @@ export const plans: Plan[] = [
     specs: [
       ["Storage", "500 GB"],
       ["Client galleries", "Unlimited"],
-      ["AI culling", "Unlimited"],
+      ["AI culling", "Unlimited, coming soon"],
       ["Branding", "Logo and colours"],
       ["Support", "Email"],
     ],
@@ -46,8 +46,8 @@ export const plans: Plan[] = [
     specs: [
       ["Storage", "2 TB"],
       ["Client galleries", "Unlimited"],
-      ["AI culling", "Unlimited"],
-      ["Branding", "Logo, colours, themes"],
+      ["AI culling", "Unlimited, coming soon"],
+      ["Branding", "Logo and colours; themes coming soon"],
       ["Support", "Priority"],
     ],
     cta: "Start free",
@@ -60,7 +60,7 @@ export const plans: Plan[] = [
     specs: [
       ["Storage", "Pooled, from 10 TB"],
       ["Client galleries", "Unlimited"],
-      ["AI culling", "Unlimited"],
+      ["AI culling", "Unlimited, coming soon"],
       ["Brands", "Several"],
       ["Support", "Named contact"],
     ],

@@ -10,11 +10,11 @@
    - :root                     Ivory: warm print paper, marigold safelight.
    - html[data-theme="dark"]   Darkroom across the page (brief values).
      (set before first paint by the script in app/layout.tsx)
-   - .theme-ivory              Force ivory on one section (e.g. "lights on").
+   - .theme-ivory              Ivory on one section (the "lights on" band). Follows dark mode.
    - .theme-espresso  Warm dark for one or two contrast bands.
    - .theme-maroon    Bridal maroon for accent cards and the footer.
    - .theme-darkroom  The brief's Darkroom values (dashboard, lightbox).
-   - .theme-print     The brief's Print values (client galleries).
+   - .theme-print     The brief's Print values (client galleries). Follows dark mode.
 
    Every theme defines the same token names, so components work in any of
    them. Apply a theme class to a section to switch it.
@@ -35,6 +35,8 @@
   --on-safelight: #1c1714;
   --success: #1d6a80;
   --danger: #b3261e;
+  --warning: #9c4a00;
+  --info: #215ca0;
   --scrim: 28 23 20;
   --print-border: #fffcf7;
   --shadow-print: 0 22px 44px -22px rgb(60 40 20 / 0.45), 0 2px 6px rgb(60 40 20 / 0.08);
@@ -42,8 +44,15 @@
   color-scheme: light;
 }
 
-/* Darkroom for the whole page: the brief's dark-first palette. */
+/*
+ * Darkroom for the whole page: the brief's dark-first palette. Client-facing
+ * surfaces (.theme-print, and the .theme-ivory "lights on" band) are light in
+ * light mode and take the same Darkroom values in dark mode, so the whole
+ * product follows the visitor's choice.
+ */
 html[data-theme="dark"],
+html[data-theme="dark"] .theme-print,
+html[data-theme="dark"] .theme-ivory,
 .theme-darkroom {
   --surface: #121417;
   --surface-raised: #1c2026;
@@ -58,6 +67,8 @@ html[data-theme="dark"],
   --on-safelight: #16191f;
   --success: #6cc4d9;
   --danger: #ff8a7a;
+  --warning: #ff9a5c;
+  --info: #8cbcff;
   --scrim: 11 13 16;
   --print-border: #e9ecf1;
   --shadow-print: 0 24px 50px -24px rgb(0 0 0 / 0.75);
@@ -89,6 +100,8 @@ html[data-theme="dark"],
   --on-safelight: #1c1714;
   --success: #8fc9d6;
   --danger: #ff8a7a;
+  --warning: #ff9a5c;
+  --info: #8cbcff;
   --scrim: 18 15 13;
   --print-border: #f3ece3;
   --shadow-print: 0 24px 50px -24px rgb(0 0 0 / 0.7);
@@ -109,6 +122,8 @@ html[data-theme="dark"],
   --on-safelight: #1c1714;
   --success: #a9dbe6;
   --danger: #ffb3a7;
+  --warning: #ffc38a;
+  --info: #b5d3ff;
   --scrim: 40 10 16;
   --print-border: #f7eadf;
   --shadow-print: 0 24px 50px -24px rgb(20 0 5 / 0.7);
@@ -129,6 +144,8 @@ html[data-theme="dark"],
   --on-safelight: #16191f;
   --success: #1d6a80;
   --danger: #b3261e;
+  --warning: #9c4a00;
+  --info: #215ca0;
   --scrim: 22 25 31;
   color-scheme: light;
 }
@@ -141,6 +158,27 @@ html[data-theme="dark"],
 .theme-maroon {
   background-color: var(--surface);
   color: var(--ink);
+}
+
+/* ---------------------------------------------------------------------------
+   Layers and motion. Use as z-(--z-dialog), duration-(--duration-base).
+   Local stacking inside one component (z-10, z-20) is fine; anything that
+   sits above page content uses one of these.
+   --------------------------------------------------------------------------- */
+:root {
+  --z-sticky: 30; /* sticky bars: app header, gallery section bar */
+  --z-nav: 40; /* mobile tab bar, mobile menu, floating notices */
+  --z-header: 50; /* site header */
+  --z-banner: 60; /* cookie banner */
+  --z-viewer: 70; /* lightbox, skip link */
+  --z-toast: 80;
+  --z-dialog: 100;
+  --z-transition: 200; /* page-transition curtain, above everything */
+
+  --duration-fast: 150ms; /* hover, colour changes */
+  --duration-base: 250ms; /* small movements, fades */
+  --duration-slow: 400ms; /* panels, dialogs, menus */
+  --duration-slower: 700ms; /* reveals, scroll-in */
 }
 
 @theme inline {
@@ -157,6 +195,12 @@ html[data-theme="dark"],
   --color-on-safelight: var(--on-safelight);
   --color-success: var(--success);
   --color-danger: var(--danger);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+
+  /* Colours that do not change with the theme: dark ink for light chips and pills, light ink for text on photo scrims. */
+  --color-fixed-dark: #16191f;
+  --color-fixed-light: #f3ece3;
 
   --font-sans: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
   --font-heading: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
@@ -166,6 +210,17 @@ html[data-theme="dark"],
   --radius-chip: 6px;
   --radius-control: 10px;
   --radius-cover: 16px;
+
+  /* UI text sizes that sit outside the type-* scale (inline labels, form text). Nothing UI-sized goes below --text-micro. */
+  --text-micro: 11px;
+  --text-caption: 13px;
+  --text-small: 14px;
+  --text-body: 15px;
+  --text-lead: 16px;
+  --text-stat: 22px;
+
+  /* Elevation: flat cards use a border; only floating layers get a shadow. */
+  --shadow-float: 0 20px 50px -20px rgb(0 0 0 / 0.6);
 
   --container-content: 1200px;
 
@@ -408,6 +463,38 @@ html[data-theme-switching]::view-transition-new(root) {
   }
   to {
     transform: translateX(0);
+  }
+}
+
+/*
+ * Higher contrast on request (OS "increase contrast"): borders become the
+ * strong line colour and muted text becomes full ink, in every theme.
+ * The selector list repeats each theme's own selector so it wins over it.
+ */
+@media (prefers-contrast: more) {
+  :root,
+  html[data-theme],
+  html[data-theme] .theme-print,
+  html[data-theme] .theme-ivory,
+  .theme-darkroom.theme-darkroom,
+  .theme-espresso.theme-espresso,
+  .theme-maroon.theme-maroon {
+    --line: var(--line-strong);
+    --ink-muted: var(--ink);
+  }
+}
+
+/*
+ * Windows High Contrast / forced colours: the system picks the colours, so
+ * focus must use a system colour, decorative grain goes away, and controls
+ * that rely on a background get a real border (see also Button).
+ */
+@media (forced-colors: active) {
+  :focus-visible {
+    outline: 2px solid Highlight;
+  }
+  .grain::after {
+    display: none;
   }
 }
 

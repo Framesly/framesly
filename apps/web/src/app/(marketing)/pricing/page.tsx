@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { FaqList, type Faq } from "@/components/landing/faq"
 import { RevealText } from "@/components/motion/reveal"
 import { PlanTickets } from "@/components/pricing/plan-tickets"
+import { ContactEmail } from "@/components/site/social-links"
 import { EdgeLabel } from "@/components/ui/card"
 import { pageMeta } from "@/lib/site"
 
@@ -24,18 +25,18 @@ const compare: { group: string; rows: [string, string, string, string][] }[] = [
   {
     group: "AI culling",
     rows: [
-      ["Blur and closed-eye checks", "Yes", "Yes", "Yes"],
-      ["Burst and duplicate grouping", "Yes", "Yes", "Yes"],
-      ["Cull to N with reasons", "Yes", "Yes", "Yes"],
+      ["Blur and closed-eye checks", "Coming soon", "Coming soon", "Coming soon"],
+      ["Burst and duplicate grouping", "Coming soon", "Coming soon", "Coming soon"],
+      ["Cull to N with reasons", "Coming soon", "Coming soon", "Coming soon"],
     ],
   },
   {
     group: "Client galleries",
     rows: [
       ["Your logo and colours", "Yes", "Yes", "Yes"],
-      ["PIN, expiry, share link", "Yes", "Yes", "Yes"],
-      ["ZIP downloads by email", "Yes", "Yes", "Yes"],
-      ["Gallery themes", "One", "All", "All"],
+      ["Password, expiry, share link", "Yes", "Yes", "Yes"],
+      ["ZIP downloads by email", "Coming soon", "Coming soon", "Coming soon"],
+      ["Gallery themes", "One", "Coming soon", "Coming soon"],
     ],
   },
 ]
@@ -87,7 +88,7 @@ export default function PricingPage() {
                     <tr key={f} className="border-b border-line">
                       <th scope="row" className="py-3.5 pr-4 font-normal text-ink">{f}</th>
                       {vals.map((v, i) => (
-                        <td key={i} className={v === "After launch" ? "py-3.5 type-caption font-normal text-ink-muted" : "py-3.5 type-caption text-ink"}>
+                        <td key={i} className={v === "After launch" || v === "Coming soon" ? "py-3.5 type-caption font-normal text-ink-muted" : "py-3.5 type-caption text-ink"}>
                           {v}
                         </td>
                       ))}
@@ -102,7 +103,12 @@ export default function PricingPage() {
 
       <section aria-labelledby="pricing-faq" className="border-t border-line py-20 md:py-28">
         <div className="gutter mx-auto grid max-w-[var(--container-content)] gap-12 lg:grid-cols-12">
-          <h2 id="pricing-faq" className="type-heading-1 lg:col-span-4">Billing questions</h2>
+          <div className="lg:col-span-4">
+            <h2 id="pricing-faq" className="type-heading-1">Billing questions</h2>
+            <p className="mt-4 max-w-xs text-ink-muted">
+              Something not covered? Write to <ContactEmail className="font-semibold text-ink" />.
+            </p>
+          </div>
           <div className="lg:col-span-8">
             <FaqList items={faqs} />
           </div>

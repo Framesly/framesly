@@ -7,6 +7,24 @@ export const siteConfig = {
   url: "https://framesly.app",
 } as const
 
+/** Framesly is a product of Parvathy Studios; the contact details below are the company's. */
+export const parentBrand = {
+  name: "Parvathy Studios",
+  tagline: "a Parvathy Studios SaaS",
+} as const
+
+export const contact = {
+  email: "hello@parvathy.ai",
+  social: [
+    { id: "instagram", label: "Instagram", href: "https://www.instagram.com/parvathyai" },
+    { id: "linkedin", label: "LinkedIn", href: "https://www.linkedin.com/company/parvathyai" },
+    { id: "youtube", label: "YouTube", href: "https://www.youtube.com/@parvathyai" },
+    { id: "x", label: "X", href: "https://x.com/ParvathyAI" },
+  ],
+} as const
+
+export type SocialId = (typeof contact.social)[number]["id"]
+
 export const marketingNav = [
   { href: "/#how-it-works", label: "Product" },
   { href: "/video", label: "Video" },

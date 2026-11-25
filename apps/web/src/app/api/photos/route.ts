@@ -1,7 +1,7 @@
 import { z } from "zod"
 
 import { getMembership } from "@/lib/auth/dal"
-import { objectSize } from "@/lib/r2"
+import { deleteKeys, objectSize } from "@/lib/r2"
 import { createClient } from "@/lib/supabase/server"
 
 const bodySchema = z.object({
@@ -11,6 +11,8 @@ const bodySchema = z.object({
       z.object({
         id: z.uuid(),
         ok: z.boolean(),
+        /** The photographer cancelled this upload: drop the row and any partial files. */
+        cancelled: z.boolean().optional(),
         width: z.number().int().positive().max(100_000).optional(),
         height: z.number().int().positive().max(100_000).optional(),
         error: z.string().max(300).optional(),
@@ -45,6 +47,12 @@ export async function POST(request: Request) {
     photos.map(async (p) => {
       const row = byId.get(p.id)
       if (!row) return { id: p.id, status: "failed" as const }
+      if (p.cancelled) {
+        // Only unfinished rows can be dropped this way; a ready photo is never deleted here.
+        const { data: gone } = await supabase.from("photos").delete().eq("id", row.id).in("status", ["uploading", "failed"]).select("id")
+        if (gone?.length) await deleteKeys([row.r2_key, ...(row.web_key ? [row.web_key] : [])]).catch(() => {})
+        return { id: row.id, status: "cancelled" as const }
+      }
       if (!p.ok) {
         await supabase.from("photos").update({ status: "failed", error: p.error ?? "Upload failed" }).eq("id", row.id)
         return { id: row.id, status: "failed" as const }

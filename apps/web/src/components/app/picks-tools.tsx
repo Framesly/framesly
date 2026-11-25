@@ -29,7 +29,7 @@ export function FilenameList({ names }: { names: string[] }) {
         readOnly
         value={text}
         rows={Math.min(10, Math.max(3, names.length))}
-        className="mt-2 block w-full resize-y rounded-[var(--radius-control)] border border-line-strong bg-surface-sunken p-3 font-mono text-[13px] text-ink"
+        className="mt-2 block w-full resize-y rounded-[var(--radius-control)] border border-line-strong bg-surface-sunken p-3 font-mono text-caption text-ink"
       />
       <Button
         type="button"

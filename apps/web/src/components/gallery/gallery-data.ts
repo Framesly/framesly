@@ -5,7 +5,13 @@ export type GallerySection = { id: string; name: string; day: string; photos: Ga
 
 /** What the client gallery view renders: the sample gallery or a real published one. */
 export type GalleryViewData = {
-  studio: { name: string; email?: string | null; logoUrl?: string | null }
+  studio: {
+    name: string
+    email?: string | null
+    logoUrl?: string | null
+    /** The studio's brand colour (hex). The sample gallery has none and keeps the default accent. */
+    brandColor?: string | null
+  }
   couple: string
   /** Line above the names on the cover, e.g. "Udaipur · 12 to 14 February 2026". */
   subtitle: string

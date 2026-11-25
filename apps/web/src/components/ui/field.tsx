@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils"
  */
 export function Field({
   label,
+  hideLabel = false,
   hint,
   error,
   prefix,
@@ -16,6 +17,8 @@ export function Field({
   ...props
 }: ComponentProps<"input"> & {
   label: string
+  /** Keep the label for screen readers only (the placeholder or layout shows the purpose). */
+  hideLabel?: boolean
   hint?: ReactNode
   error?: string | null
   prefix?: string
@@ -26,23 +29,24 @@ export function Field({
   const describedBy = error ? `${id}-error` : hint ? `${id}-hint` : undefined
   return (
     <div className={className}>
-      <label htmlFor={id} className="type-caption text-ink">
+      <label htmlFor={id} className={hideLabel ? "sr-only" : "type-caption text-ink"}>
         {label}
       </label>
       <div
         className={cn(
-          "mt-2 flex h-11 items-center rounded-[var(--radius-chip)] border bg-surface-sunken transition-colors",
+          hideLabel ? "" : "mt-2",
+          "flex h-11 items-center rounded-[var(--radius-chip)] border bg-surface-sunken transition-colors",
           "focus-within:border-safelight-text focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-safelight-text",
           error ? "border-danger" : "border-line-strong hover:border-ink-muted"
         )}
       >
-        {prefix && <span className="pl-3 type-metric text-[13px] whitespace-nowrap text-ink-muted">{prefix}</span>}
+        {prefix && <span className="pl-3 type-metric text-caption whitespace-nowrap text-ink-muted">{prefix}</span>}
         <input
           id={id}
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
           className={cn(
-            "h-full w-full min-w-0 bg-transparent px-3 text-[15px] text-ink outline-none placeholder:text-ink-muted/70",
+            "h-full w-full min-w-0 bg-transparent px-3 text-body text-ink outline-none placeholder:text-ink-muted/70",
             prefix && "pl-0.5"
           )}
           {...props}
@@ -50,7 +54,7 @@ export function Field({
         {suffix}
       </div>
       {error ? (
-        <p id={`${id}-error`} className="mt-2 type-caption text-danger">
+        <p id={`${id}-error`} role="alert" className="mt-2 type-caption text-danger">
           {error}
         </p>
       ) : hint ? (

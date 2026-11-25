@@ -15,6 +15,7 @@ import {
   type Currency,
   type Period,
 } from "@/config/plans"
+import { contact } from "@/lib/site"
 import { cn } from "@/lib/utils"
 
 const develop = [0.22, 1, 0.36, 1] as const
@@ -44,7 +45,7 @@ function Segmented<T extends string>({
             aria-checked={on}
             onClick={() => onChange(o.value)}
             className={cn(
-              "relative flex h-10 items-center gap-2 rounded-[7px] px-4 type-caption transition-colors",
+              "relative flex h-11 items-center gap-2 rounded-[7px] px-4 type-caption transition-colors",
               on ? "text-ink" : "text-ink-muted hover:text-ink"
             )}
           >
@@ -169,7 +170,7 @@ export function PlanTickets({ defaultCurrency = "USD" }: { defaultCurrency?: Cur
 
                 <div className="p-6 pt-8">
                   <ButtonLink
-                    href={plan.monthly ? `/signup?plan=${plan.id}` : "mailto:hello@framesly.app"}
+                    href={plan.monthly ? `/signup?plan=${plan.id}` : `mailto:${contact.email}`}
                     variant={rec ? "primary" : "secondary"}
                     className="w-full"
                     data-cta={`pricing-${plan.id}`}
@@ -183,8 +184,8 @@ export function PlanTickets({ defaultCurrency = "USD" }: { defaultCurrency?: Cur
                     // mailto can fail silently with no mail app set up, so the address is also shown as text.
                     <p className="mt-3 text-center type-caption font-normal text-ink-muted">
                       or write to{" "}
-                      <a href="mailto:hello@framesly.app" className="font-semibold text-ink underline underline-offset-4 select-all">
-                        hello@framesly.app
+                      <a href={`mailto:${contact.email}`} className="font-semibold text-ink underline underline-offset-4 select-all">
+                        {contact.email}
                       </a>
                     </p>
                   )}
