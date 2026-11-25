@@ -12,7 +12,7 @@ export default function GalleryError({ error }: { error: Error & { digest?: stri
   }, [error])
 
   return (
-    <main className="theme-print grid min-h-dvh place-items-center bg-surface px-4 py-16">
+    <main className="grid min-h-dvh place-items-center bg-surface px-4 py-16">
       <div className="w-full max-w-sm text-center">
         <h1 className="type-heading-1 text-ink">This gallery couldn&apos;t open</h1>
         <p className="mt-2 text-ink-muted">Something went wrong on our side. Try again in a moment.</p>

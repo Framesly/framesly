@@ -124,8 +124,8 @@ export function GalleryView({
   // The studio's colour drives the accent (hearts, active section, buttons). It is nudged
   // per surface so it stays readable: the page follows light/dark, the lightbox is always dark.
   const brand = g.studio.brandColor
-  const accent = useMemo(() => brandAccentStyle(brand, ACCENT_SURFACES.print, ACCENT_SURFACES.darkroomRaised), [brand])
-  const lightboxAccent = useMemo(() => brandAccentStyle(brand, ACCENT_SURFACES.darkroom), [brand])
+  // Checked against the lightest Darkroom surface, so it reads on the page, the cards and the lightbox.
+  const accent = useMemo(() => brandAccentStyle(brand, ACCENT_SURFACES.darkroomRaised), [brand])
 
   const visible = useMemo(
     () => (view === "all" ? g.all : g.all.filter((p) => favs.has(p.id))),
@@ -169,7 +169,7 @@ export function GalleryView({
     })
 
   return (
-    <div className="theme-print min-h-dvh" style={accent}>
+    <div className="min-h-dvh" style={accent}>
       <SkipLink href="#photos">Skip to photos</SkipLink>
       <Cover data={g} sample={sample} onShare={share} favCount={favs.size} onShowFavs={() => setView("favourites")} />
 
@@ -293,7 +293,7 @@ export function GalleryView({
         isFav={has}
         toggleFav={toggle}
         onDownload={download}
-        accentStyle={lightboxAccent}
+        accentStyle={accent}
       />
 
       {sample && <SampleNotice />}
@@ -439,7 +439,7 @@ function SampleNotice() {
           initial={{ y: 80, opacity: 0 }}
           animate={{ y: 0, opacity: 1, transition: { delay: 1.6, duration: 0.5, ease: develop } }}
           exit={{ y: 80, opacity: 0 }}
-          className="theme-darkroom fixed bottom-4 left-1/2 z-(--z-nav) flex w-[calc(100%-32px)] max-w-md -translate-x-1/2 items-center gap-3 rounded-full border border-line-strong py-1.5 pr-1.5 pl-4 shadow-float"
+          className="fixed bottom-4 left-1/2 z-(--z-nav) flex w-[calc(100%-32px)] max-w-md -translate-x-1/2 items-center gap-3 rounded-full border border-line-strong py-1.5 pr-1.5 pl-4 shadow-float"
         >
           <p className="flex-1 truncate type-caption text-ink-muted">
             <span className="text-ink">Sample gallery.</span> Yours looks like this.

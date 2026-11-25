@@ -133,7 +133,7 @@ export function PageTransitionProvider({ children }: { children: React.ReactNode
           aria-hidden={phase === "reveal"}
           role="status"
           aria-live="polite"
-          className="theme-espresso grain fixed inset-0 z-(--z-transition) flex flex-col items-center justify-center"
+          className="grain fixed inset-0 z-(--z-transition) flex flex-col items-center justify-center bg-surface-sunken"
           initial={{ clipPath: `circle(0px at ${x}px ${y}px)`, y: "0%" }}
           animate={
             phase === "reveal"

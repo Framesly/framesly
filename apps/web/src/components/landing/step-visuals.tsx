@@ -210,7 +210,7 @@ export function DeliverVisual() {
     <div className="relative mx-auto flex max-w-[420px] justify-center pt-20 pb-10" aria-label="Sample client gallery on a phone, with a delivery email" role="img">
       {/* Phone */}
       <div className="relative w-[248px] overflow-hidden rounded-[34px] border border-line-strong bg-surface-sunken p-2 shadow-[0_40px_80px_-30px_rgb(0_0_0/0.7)]">
-        <div className="theme-print overflow-hidden rounded-[26px]">
+        <div className="overflow-hidden rounded-[26px] bg-surface">
           <div className="relative h-[220px]">
             <Image src={photos.skyEmbrace.src} alt="" fill sizes="240px" className="object-cover" />
             <span className="absolute top-3 right-3 rounded-full bg-white/85 px-2 py-0.5 type-label text-fixed-dark">Sample</span>

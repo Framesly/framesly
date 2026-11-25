@@ -13,9 +13,9 @@ type Studio = { name: string; logoUrl: string | null; brandColor?: string | null
 function Shell({ studio, children }: { studio: Studio; children: React.ReactNode }) {
   return (
     <main
-      className="theme-print grid min-h-dvh place-items-center bg-surface px-4 py-16"
+      className="grid min-h-dvh place-items-center bg-surface px-4 py-16"
       // The studio's colour for the button and focus ring, nudged to stay readable.
-      style={brandAccentStyle(studio.brandColor, ACCENT_SURFACES.print, ACCENT_SURFACES.darkroomRaised)}
+      style={brandAccentStyle(studio.brandColor, ACCENT_SURFACES.darkroomRaised)}
     >
       <div className="w-full max-w-sm text-center">
         <StudioLogo

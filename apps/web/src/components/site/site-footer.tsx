@@ -32,7 +32,7 @@ const columns = [
 
 export function SiteFooter() {
   return (
-    <footer className="theme-maroon grain overflow-hidden">
+    <footer className="grain overflow-hidden border-t border-line bg-surface-sunken">
       <div className="gutter mx-auto max-w-[var(--container-content)] pt-16">
         <div className="grid gap-12 md:grid-cols-12">
           <div className="md:col-span-5">
@@ -40,7 +40,6 @@ export function SiteFooter() {
             <p className="mt-4 max-w-xs text-ink-muted">
               Upload a wedding once. Cull it, deliver it and keep it, from the same files.
             </p>
-            <p className="mt-3 type-label text-ink-muted">Framesly is {parentBrand.tagline}</p>
             <p className="mt-6 type-label text-ink-muted">Get in touch</p>
             <p className="mt-2 text-ink">
               <ContactEmail />

@@ -98,7 +98,7 @@ export function GalleryTrack() {
     <section
       ref={sectionRef}
       aria-labelledby="gallery-track-title"
-      className={cn("theme-espresso relative", reduce ? "" : "h-[340vh]")}
+      className={cn("relative bg-surface-sunken", reduce ? "" : "h-[340vh]")}
     >
       {/* Seen only while the lights are still off */}
       {!reduce && (
@@ -110,7 +110,7 @@ export function GalleryTrack() {
           </div>
         </div>
       )}
-      <motion.div style={{ clipPath }} className="theme-ivory relative h-full">
+      <motion.div style={{ clipPath }} className="relative h-full bg-surface">
         <div ref={viewportRef} className={cn("flex flex-col overflow-hidden", reduce ? "py-24" : "sticky top-0 h-dvh justify-center")}>
           <div className={cn(reduce && "overflow-x-auto")}>
             <motion.div

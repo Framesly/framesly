@@ -4,18 +4,20 @@ One page. The code in `apps/web/src` is the source of truth; this tells you wher
 
 ## Idea
 
-A photographer's darkroom: warm paper, a marigold safelight, film grain, viewfinder brackets, a shutter for transitions. Photography is the hero; chrome stays quiet. Voice: sentence case, plain words, no emoji. State always has a word, never only a colour.
+A photographer's darkroom: dark surfaces, a marigold safelight, film grain, viewfinder brackets, a shutter for transitions. Photography is the hero; chrome stays quiet. Voice: sentence case, plain words, no emoji. State always has a word, never only a colour.
 
 ## Themes (`app/globals.css`)
+
+**Darkroom everywhere.** The website, auth, onboarding, the app and client galleries are all dark by default. There is no light/dark switch.
 
 Every theme defines the same token names, so any component works in any theme.
 
 | Theme | Where | Notes |
 |---|---|---|
-| Ivory (`:root`) | Marketing site, auth | Default; follows the device's dark mode until the visitor chooses |
-| Darkroom (`html[data-theme=dark]`, `.theme-darkroom`) | The app (`/app`), lightbox, toasts | The app is Darkroom by default, whatever the device says |
-| Print (`.theme-print`) | Client galleries, password and expiry screens | Light; follows dark mode with Darkroom values |
-| Espresso, Maroon | Contrast bands, the page-transition curtain, footer | Use sparingly |
+| Darkroom (`:root`, `.theme-darkroom`) | Everything | The only default. No attribute or class needed |
+| Print (`.theme-print`) | Nowhere yet | Opt-in light gallery theme for a future per-gallery option. Keep its tokens complete so it never breaks |
+
+Ivory, Espresso and Maroon are removed. Contrast bands and the footer use `bg-surface-raised` or `bg-surface-sunken` with a `border-line` edge.
 
 A studio's brand colour only replaces the accent, via `brandAccentStyle()` in `lib/color.ts`, which keeps it readable on the surface it sits on. Never use the raw brand colour for text.
 
@@ -43,13 +45,13 @@ A studio's brand colour only replaces the accent, via `brandAccentStyle()` in `l
 5. Every control has a visible focus ring (the global `:focus-visible` rule); never `outline-none` without a replacement.
 6. State uses words and icons, not colour alone. Errors say what happened and what to do.
 7. Every screen has loading, empty, normal, partial-failure and full-failure states.
-8. Contrast: 4.5:1 for text, 3:1 for controls and graphics, in every theme the screen can appear in.
+8. Contrast: 4.5:1 for text, 3:1 for controls and graphics, on every Darkroom surface the pair can sit on.
 9. Motion never blocks work: the page-transition curtain is for marketing and auth only; nothing in `/app` waits for an animation.
 10. Server-only code stays server-only. Files marked `"use server"` export only the actions they mean to expose.
 
 ## Per-PR checklist
 
-- [ ] Contrast checked in each theme touched (Ivory, Darkroom, Print)
+- [ ] Contrast checked on each Darkroom surface touched (sunken, page, raised)
 - [ ] Keyboard-only pass and visible focus
 - [ ] 44px targets at 360px width
 - [ ] Reduced motion respected

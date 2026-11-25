@@ -12,7 +12,7 @@ export default function manifest(): MetadataRoute.Manifest {
     scope: "/",
     display: "standalone",
     orientation: "portrait",
-    // Darkroom: the app's default look.
+    // Darkroom --surface.
     background_color: "#121417",
     theme_color: "#121417",
     icons: [

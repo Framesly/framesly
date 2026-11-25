@@ -63,40 +63,28 @@ export function ensureContrast(hex: string, surface: string, min = 3) {
 /**
  * CSS custom properties that re-point the safelight accent at a studio's brand
  * colour, safe to read on `surface`. Spread into a style prop on the element
- * that carries the theme class.
+ * that carries the theme (or on any wrapper above the parts that use the accent).
  */
-export function brandAccentStyle(
-  brand: string | null | undefined,
-  surface: string,
-  darkSurface?: string
-): Record<string, string> | undefined {
+export function brandAccentStyle(brand: string | null | undefined, surface: string): Record<string, string> | undefined {
   if (!brand || !parse(brand)) return undefined
-  const on = (s: string) => {
-    const graphic = ensureContrast(brand, s, 3)
-    return {
-      "--safelight": graphic,
-      "--safelight-text": ensureContrast(brand, s, 4.5),
-      "--safelight-soft": `color-mix(in oklab, ${graphic} 18%, ${s})`,
-      "--on-safelight": readableOn(graphic),
-    }
+  const graphic = ensureContrast(brand, surface, 3)
+  return {
+    "--safelight": graphic,
+    "--safelight-text": ensureContrast(brand, surface, 4.5),
+    "--safelight-soft": `color-mix(in oklab, ${graphic} 18%, ${surface})`,
+    "--on-safelight": readableOn(graphic),
   }
-  const light = on(surface)
-  if (!darkSurface) return light
-  // Surfaces that follow dark mode: give both values and let CSS pick by the
-  // element's colour scheme (set by the theme class), so there is no flash.
-  const dark = on(darkSurface)
-  return Object.fromEntries(
-    (Object.keys(light) as (keyof typeof light)[]).map((k) => [k, `light-dark(${light[k]}, ${dark[k]})`])
-  )
 }
 
 /**
- * Surfaces a studio accent has to read on. Keep in step with the tokens in
- * app/globals.css (`.theme-print --surface`, `.theme-darkroom --surface-sunken`).
+ * Surfaces a studio accent has to read on. The one place to update when the
+ * Darkroom surface values in app/globals.css change.
  */
 export const ACCENT_SURFACES = {
-  print: "#f5f3ef",
+  /** `--surface-sunken`: the photo bed and the lightbox stage. */
   darkroom: "#0b0d10",
-  // The lightest Darkroom surface (`--surface-raised`): if an accent reads on it, it reads on them all.
+  /** `--surface-raised`: the lightest Darkroom surface. If an accent reads on it, it reads on them all. */
   darkroomRaised: "#1c2026",
+  /** `.theme-print --surface`: only for the opt-in light gallery theme. */
+  print: "#f5f3ef",
 } as const

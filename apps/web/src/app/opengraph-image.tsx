@@ -9,11 +9,15 @@ export const alt = "Framesly: cull a wedding before dinner. 2,184 frames in, 612
 export const size = { width: 1200, height: 630 }
 export const contentType = "image/png"
 
-const ivory = "#F4EFE6"
-const ink = "#1C1714"
-const muted = "#645A50"
-const marigold = "#D18200"
-const maroon = "#4A1620"
+// Darkroom values (see app/globals.css). Fixed here: ImageResponse is rendered outside the CSS tokens.
+const ground = "#121417"
+const raised = "#1C2026"
+const line = "#2C333E"
+const ink = "#E9ECF1"
+const muted = "#98A0AD"
+const marigold = "#F2A93B"
+const marigoldSoft = "#3A2A10"
+const marigoldText = "#F5BB62"
 
 function Bracket({ corner }: { corner: "tl" | "tr" | "bl" | "br" }) {
   const s = 26
@@ -35,7 +39,7 @@ export default function OpengraphImage() {
   ]
   return new ImageResponse(
     (
-      <div style={{ width: "100%", height: "100%", display: "flex", background: ivory, color: ink, padding: 64, fontFamily: "sans-serif" }}>
+      <div style={{ width: "100%", height: "100%", display: "flex", background: ground, color: ink, padding: 64, fontFamily: "sans-serif" }}>
         <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", width: 640 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
             <div style={{ width: 22, height: 22, borderRadius: 999, background: marigold }} />
@@ -53,7 +57,7 @@ export default function OpengraphImage() {
               ["612", "picks out"],
               ["41 min", "start to finish"],
             ].map(([v, l]) => (
-              <div key={l} style={{ display: "flex", flexDirection: "column", padding: "12px 18px", borderRadius: 10, border: `2px solid ${ink}22`, background: "#FFFCF7" }}>
+              <div key={l} style={{ display: "flex", flexDirection: "column", padding: "12px 18px", borderRadius: 10, border: `2px solid ${line}`, background: raised }}>
                 <div style={{ fontSize: 30, fontWeight: 800 }}>{v}</div>
                 <div style={{ fontSize: 16, color: muted, textTransform: "uppercase", letterSpacing: 2 }}>{l}</div>
               </div>
@@ -70,20 +74,20 @@ export default function OpengraphImage() {
                 width: 120,
                 height: 150,
                 padding: 7,
-                background: "#FFFCF7",
-                boxShadow: "0 18px 30px -16px rgba(60,40,20,0.5)",
+                background: ink,
+                boxShadow: "0 18px 30px -16px rgba(0,0,0,0.7)",
                 transform: `rotate(${t.tilt}deg)`,
                 opacity: t.pick ? 1 : 0.45,
               }}
             >
-              <div style={{ flex: 1, display: "flex", background: t.pick ? t.bg : "#8f8473" }} />
+              <div style={{ flex: 1, display: "flex", background: t.pick ? t.bg : "#4A5059" }} />
               {t.pick && <Bracket corner="tl" />}
               {t.pick && <Bracket corner="tr" />}
               {t.pick && <Bracket corner="bl" />}
               {t.pick && <Bracket corner="br" />}
             </div>
           ))}
-          <div style={{ display: "flex", marginTop: 10, padding: "8px 16px", borderRadius: 999, background: maroon, color: "#F7EADF", fontSize: 18, letterSpacing: 2, textTransform: "uppercase" }}>
+          <div style={{ display: "flex", marginTop: 10, padding: "8px 16px", borderRadius: 999, background: marigoldSoft, color: marigoldText, fontSize: 18, letterSpacing: 2, textTransform: "uppercase" }}>
             One upload · every step
           </div>
         </div>

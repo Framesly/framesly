@@ -213,7 +213,7 @@ export function Lightbox({
           role="dialog"
           aria-modal="true"
           aria-label={`Photo ${index! + 1} of ${items.length}`}
-          className="theme-darkroom fixed inset-0 z-(--z-viewer) flex flex-col bg-surface-sunken"
+          className="fixed inset-0 z-(--z-viewer) flex flex-col bg-surface-sunken"
           style={accentStyle}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

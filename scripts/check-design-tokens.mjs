@@ -20,7 +20,6 @@ const HEX_ALLOWED = {
   "app/layout.tsx": "browser theme-color meta tag needs a literal",
   "app/opengraph-image.tsx": "share image is rendered outside the CSS tokens",
   "lib/brand-icon.tsx": "home-screen icons are rendered by ImageResponse, outside the CSS tokens",
-  "components/theme/theme.tsx": "theme-color meta values per theme",
   "components/studio/brand-controls.tsx": "the studio brand colour presets are data",
   "components/onboarding/onboarding-wizard.tsx": "default studio brand colour is data",
   "components/auth/primitives.tsx": "Google's logo colours are fixed by their brand rules",
