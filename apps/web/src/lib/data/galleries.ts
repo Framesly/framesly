@@ -45,3 +45,14 @@ export const listGalleryPhotos = cache(async (galleryId: string) => {
   if (error) throw new Error(error.message)
   return data ?? []
 })
+
+/** Publishing state of one gallery (link name, published, expiry, password set). */
+export const getPublishState = cache(async (galleryId: string) => {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from("galleries")
+    .select("public_slug, published_at, expires_at, has_password")
+    .eq("id", galleryId)
+    .maybeSingle()
+  return data
+})

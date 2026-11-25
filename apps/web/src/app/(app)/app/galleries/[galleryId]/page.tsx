@@ -6,8 +6,10 @@ import Image from "next/image"
 
 import { DeleteGallery, GalleryDetails, SectionsManager } from "@/components/app/gallery-editor"
 import { PhotoUploader } from "@/components/app/photo-uploader"
+import { PublishPanel } from "@/components/app/publish-panel"
 import { requireStudio } from "@/lib/auth/dal"
-import { getGalleryWithSections, listGalleryPhotos } from "@/lib/data/galleries"
+import { siteOrigin } from "@/lib/auth/redirects"
+import { getGalleryWithSections, getPublishState, listGalleryPhotos } from "@/lib/data/galleries"
 import { presignGet } from "@/lib/r2"
 
 export const metadata: Metadata = { title: "Gallery" }
@@ -18,7 +20,7 @@ export default async function GalleryPage({ params, searchParams }: PageProps<"/
   const data = await getGalleryWithSections(galleryId)
   if (!data || data.gallery.studio_id !== studio.id) notFound()
   const { gallery, sections } = data
-  const photos = await listGalleryPhotos(galleryId)
+  const [photos, publish, origin] = await Promise.all([listGalleryPhotos(galleryId), getPublishState(galleryId), siteOrigin()])
   const thumbs = await Promise.all(photos.map(async (p) => ({ ...p, src: p.status === "ready" && p.web_key ? await presignGet(p.web_key) : null })))
 
   return (
@@ -53,6 +55,17 @@ export default async function GalleryPage({ params, searchParams }: PageProps<"/
       <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <PhotoUploader galleryId={gallery.id} />
         <div className="space-y-6">
+          <PublishPanel
+            galleryId={gallery.id}
+            title={gallery.title}
+            origin={origin}
+            initial={{
+              publicSlug: publish?.public_slug ?? null,
+              publishedAt: publish?.published_at ?? null,
+              expiresAt: publish?.expires_at ?? null,
+              hasPassword: publish?.has_password ?? false,
+            }}
+          />
           <SectionsManager galleryId={gallery.id} sections={sections} />
           <DeleteGallery id={gallery.id} title={gallery.title} />
         </div>
