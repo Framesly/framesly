@@ -171,6 +171,13 @@ export type Database = {
         Update: { r2_key?: string; width?: number; height?: number; bytes?: number }
         Relationships: []
       }
+      /** bcrypt hashes of gallery passwords. Service role only; no API role can read it. */
+      gallery_secrets: {
+        Row: { gallery_id: string; password_hash: string; updated_at: Timestamp }
+        Insert: { gallery_id: string; password_hash: string; updated_at?: Timestamp }
+        Update: { password_hash?: string; updated_at?: Timestamp }
+        Relationships: []
+      }
       site_photos: {
         Row: {
           key: string
