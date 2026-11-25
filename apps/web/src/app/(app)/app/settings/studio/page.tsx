@@ -6,7 +6,7 @@ import { studioAssetUrl } from "@/lib/supabase/env"
 
 export const metadata: Metadata = { title: "Studio" }
 
-/** Studio profile and branding (FR-04): name, address, colour, logo. */
+/** Studio profile and branding: name, address, colour, logo. */
 export default async function StudioSettingsPage() {
   const { studio, role } = await requireStudio()
   return (

@@ -18,7 +18,7 @@ const presets = [
   { value: "none", label: "No sections yet", sections: "Add them later" },
 ] as const
 
-/** "New gallery" dialog: title, date and a section preset (FR-08). */
+/** "New gallery" dialog: title, date and a section preset. */
 export function NewGalleryDialog({ label = "New gallery", variant = "primary" }: { label?: string; variant?: "primary" | "secondary" }) {
   const [open, setOpen] = useState(false)
   return (

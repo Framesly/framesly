@@ -25,9 +25,8 @@ function IconButton({ label, onClick, children }: { label: string; onClick: () =
 }
 
 /**
- * Full-screen viewer on the sunken Darkroom surface (brief: lightbox uses
- * --surface-sunken). The opened photo grows out of its grid tile via a shared
- * layout animation. Arrow keys and swipes move between photos; Esc closes.
+ * Full-screen viewer on the sunken Darkroom surface. The opened photo grows
+ * out of its grid tile via a shared layout animation. Arrow keys and swipes move between photos; Esc closes.
  */
 export function Lightbox({
   items,
@@ -82,6 +81,7 @@ export function Lightbox({
       document.documentElement.style.overflow = ""
       prevFocus?.focus()
     }
+    // Re-run only when the viewer opens or moves; the handlers read the latest props via closure.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, index])
 

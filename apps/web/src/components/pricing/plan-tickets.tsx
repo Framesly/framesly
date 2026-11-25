@@ -67,7 +67,7 @@ function Segmented<T extends string>({
 /**
  * Pricing as lab order tickets: a header stub, a perforated tear line, and a
  * spec sheet with dotted leaders. The recommended plan gets the safelight
- * border (brief). Buttons are secondary except on the recommended ticket, so
+ * border. Buttons are secondary except on the recommended ticket, so
  * the section keeps one safelight button.
  */
 export function PlanTickets({ defaultCurrency = "USD" }: { defaultCurrency?: Currency }) {

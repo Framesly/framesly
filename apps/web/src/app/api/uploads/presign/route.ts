@@ -17,7 +17,7 @@ const bodySchema = z.object({
     )
     .min(1)
     .max(MAX_FILES_PER_BATCH),
-  /** Failed photos being retried: their old rows are dropped so counts stay honest. */
+  /** Failed photos being retried: their old rows are dropped so counts stay accurate. */
   replaces: z.array(z.uuid()).max(MAX_FILES_PER_BATCH).optional(),
 })
 

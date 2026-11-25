@@ -8,7 +8,7 @@ import { listGalleries } from "@/lib/data/galleries"
 
 export const metadata: Metadata = { title: "Galleries" }
 
-/** Dashboard home: the studio's galleries, newest first (FR-08). */
+/** Dashboard home: the studio's galleries, newest first. */
 export default async function GalleriesPage({ searchParams }: PageProps<"/app">) {
   const [{ studio, user }, params] = await Promise.all([requireStudio(), searchParams])
   const galleries = await listGalleries(studio.id)

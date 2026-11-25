@@ -123,7 +123,7 @@ const buildThumbs = (photos: SitePhotos) => [
 export function CullVisual() {
   const photos = useSitePhotos()
   const thumbs = useMemo(() => buildThumbs(photos), [photos])
-  // One example wedding everywhere: 2,184 frames, 612 picks, 41 minutes (fix list).
+  // The same example wedding as the rest of the page: 2,184 frames, 612 picks, 41 minutes.
   const [n, setN] = useState(612)
   const total = 2184
   const picksShown = Math.round((n / total) * thumbs.length * 1.9)

@@ -3,6 +3,8 @@ import { NextResponse, type NextRequest } from "next/server"
 import { updateSession } from "@/lib/supabase/proxy"
 
 const AUTH_PAGES = ["/login", "/signup", "/forgot-password"]
+/** Anonymous visitor id for client gallery favourites (read in lib/data/client-gallery.ts). */
+const VISITOR_COOKIE = "fv"
 
 /**
  * Runs before the app and auth pages (Next.js 16 "proxy", formerly middleware):
@@ -15,8 +17,26 @@ const AUTH_PAGES = ["/login", "/signup", "/forgot-password"]
  * Marketing pages and client galleries aren't matched, so they stay static.
  */
 export async function proxy(request: NextRequest) {
-  const { response, signedIn } = await updateSession(request)
   const { pathname, search } = request.nextUrl
+
+  // Client galleries: no Supabase session at all. Just make sure this browser
+  // has its anonymous visitor id before the couple hearts anything, so quick
+  // taps can't create several ids.
+  if (pathname.startsWith("/g/")) {
+    const response = NextResponse.next()
+    if (!request.cookies.get(VISITOR_COOKIE)) {
+      response.cookies.set(VISITOR_COOKIE, crypto.randomUUID(), {
+        httpOnly: true,
+        secure: request.nextUrl.protocol === "https:",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 365 * 24 * 60 * 60,
+      })
+    }
+    return response
+  }
+
+  const { response, signedIn } = await updateSession(request)
 
   const needsSession = pathname === "/app" || pathname.startsWith("/app/") || pathname === "/reset-password"
   if (needsSession && !signedIn) {
@@ -42,5 +62,5 @@ function withCookies(redirect: NextResponse, from: NextResponse) {
 
 export const config = {
   // The upload routes are listed so a long upload session keeps its token fresh.
-  matcher: ["/app", "/app/:path*", "/login", "/signup", "/forgot-password", "/reset-password", "/api/uploads/:path*", "/api/photos"],
+  matcher: ["/app", "/app/:path*", "/login", "/signup", "/forgot-password", "/reset-password", "/api/uploads/:path*", "/api/photos", "/api/galleries/:path*", "/g/:path*"],
 }

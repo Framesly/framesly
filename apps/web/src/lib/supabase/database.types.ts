@@ -171,6 +171,20 @@ export type Database = {
         Update: { r2_key?: string; width?: number; height?: number; bytes?: number }
         Relationships: []
       }
+      /** bcrypt hashes of gallery passwords. Service role only; no API role can read it. */
+      gallery_secrets: {
+        Row: { gallery_id: string; password_hash: string; updated_at: Timestamp }
+        Insert: { gallery_id: string; password_hash: string; updated_at?: Timestamp }
+        Update: { password_hash?: string; updated_at?: Timestamp }
+        Relationships: []
+      }
+      /** Client favourites. Written only by the server (service role); members of the studio can read. */
+      selections: {
+        Row: { id: string; gallery_id: string; photo_id: string; visitor_id: string; client_name: string | null; created_at: Timestamp }
+        Insert: { id?: string; gallery_id: string; photo_id: string; visitor_id: string; client_name?: string | null }
+        Update: { client_name?: string | null }
+        Relationships: []
+      }
       site_photos: {
         Row: {
           key: string

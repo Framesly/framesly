@@ -1,11 +1,9 @@
 /**
- * Plans for /pricing and the landing page. Prices come from config so the
- * pages stay static (brief).
+ * Plans for /pricing and the landing page. Prices live in config so the
+ * pages stay static.
  *
- * DRAFT: pricing is an open decision. The brief plans India at ₹1,500/month
- * and the US at $25 to $35. Note that Aftershoot's culling plan is now about
- * $8 to $10/month, so check positioning before launch. Stripe price IDs live
- * in the backend, keyed by plan `id`.
+ * Draft prices, to be confirmed before launch. Stripe price IDs live in the
+ * backend, keyed by plan `id`.
  */
 export type Currency = "USD" | "INR"
 export type Period = "monthly" | "yearly"

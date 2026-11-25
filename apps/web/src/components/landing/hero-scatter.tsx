@@ -367,8 +367,8 @@ function PrintCard({
     const [nx, ny] = L.mobile ? def.m : def.d
     const halfW = (L.gw * L.looseScale) / 2
     const halfH = (L.gh * L.looseScale) / 2
-    // Never let a loose print sit under the fixed header (fix list: photos
-    // covered the nav). Its top edge, allowing for tilt, stays below 76px.
+    // Keep loose prints clear of the fixed header: the top edge, allowing for
+    // tilt, stays below 76px.
     const minY = -L.vh / 2 + 76 + halfH * 1.08
     return { x: nx * (L.vw / 2 - halfW * 0.6), y: Math.max(minY, ny * (L.vh / 2 - halfH * 0.55)) }
   }

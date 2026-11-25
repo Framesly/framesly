@@ -3,7 +3,7 @@ import { useId, type ComponentProps, type ReactNode } from "react"
 import { cn } from "@/lib/utils"
 
 /**
- * Labelled text input. 44px tall, 6px radius, --line-strong border (brief).
+ * Labelled text input: 44px tall, 6px radius, --line-strong border.
  * Errors always carry words, not only colour.
  */
 export function Field({

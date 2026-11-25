@@ -2,88 +2,121 @@
 
 import { AnimatePresence, motion, useScroll, useTransform } from "motion/react"
 import Image from "next/image"
-import { TransitionLink as Link } from "@/components/transition/page-transition"
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react"
 
-import { buildSampleGallery, type GalleryPhoto } from "@/components/gallery/gallery-data"
-import { useSitePhotos } from "@/components/site/site-photos"
+import { buildSampleGallery, type GalleryPhoto, type GalleryViewData } from "@/components/gallery/gallery-data"
 import { HeartButton } from "@/components/gallery/heart-button"
 import { Lightbox } from "@/components/gallery/lightbox"
 import { ToastProvider, useToast } from "@/components/gallery/toast"
+import { useSitePhotos } from "@/components/site/site-photos"
+import { StudioLogo } from "@/components/studio/studio-logo"
+import { TransitionLink as Link } from "@/components/transition/page-transition"
 import { cn } from "@/lib/utils"
 
 const develop = [0.22, 1, 0.36, 1] as const
 const FAV_KEY = "framesly-favs:saffron-lane/aarohi-kabir"
 
+export type Favourites = { favs: Set<string>; toggle: (id: string) => void; has: (id: string) => boolean }
+
 /*
- * Favourites live in the browser for the demo (the real app stores them per
- * client session). A tiny external store keeps server and client renders in
- * agreement and syncs across tabs.
+ * Browser-only favourites (the sample gallery). A tiny external store per key
+ * keeps server and client renders in agreement and syncs across tabs.
  */
-const favListeners = new Set<() => void>()
-let favMemory = "[]"
-function readFavs() {
-  try {
-    return localStorage.getItem(FAV_KEY) ?? favMemory
-  } catch {
-    return favMemory
-  }
-}
-function writeFavs(value: string) {
-  favMemory = value
-  try {
-    localStorage.setItem(FAV_KEY, value)
-  } catch {}
-  favListeners.forEach((l) => l())
-}
-function subscribeFavs(listener: () => void) {
-  favListeners.add(listener)
-  window.addEventListener("storage", listener)
-  return () => {
-    favListeners.delete(listener)
-    window.removeEventListener("storage", listener)
-  }
-}
-
-function useFavourites() {
-  const raw = useSyncExternalStore(subscribeFavs, readFavs, () => "[]")
-  const favs = useMemo(() => {
+function makeLocalFavourites(key: string) {
+  const listeners = new Set<() => void>()
+  let memory = "[]"
+  const read = () => {
     try {
-      return new Set<string>(JSON.parse(raw))
+      return localStorage.getItem(key) ?? memory
     } catch {
-      return new Set<string>()
+      return memory
     }
-  }, [raw])
-  const toggle = useCallback((id: string) => {
-    const next = new Set<string>(JSON.parse(readFavs()))
-    if (next.has(id)) next.delete(id)
-    else next.add(id)
-    writeFavs(JSON.stringify([...next]))
-  }, [])
-  return { favs, toggle, has: (id: string) => favs.has(id) }
+  }
+  const write = (value: string) => {
+    memory = value
+    try {
+      localStorage.setItem(key, value)
+    } catch {}
+    listeners.forEach((l) => l())
+  }
+  const subscribe = (listener: () => void) => {
+    listeners.add(listener)
+    window.addEventListener("storage", listener)
+    return () => {
+      listeners.delete(listener)
+      window.removeEventListener("storage", listener)
+    }
+  }
+  return function useLocalFavourites(): Favourites {
+    const raw = useSyncExternalStore(subscribe, read, () => "[]")
+    const favs = useMemo(() => {
+      try {
+        return new Set<string>(JSON.parse(raw))
+      } catch {
+        return new Set<string>()
+      }
+    }, [raw])
+    const toggle = useCallback((id: string) => {
+      const next = new Set<string>(JSON.parse(read()))
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      write(JSON.stringify([...next]))
+    }, [])
+    return { favs, toggle, has: (id: string) => favs.has(id) }
+  }
 }
 
+const useSampleFavourites = makeLocalFavourites(FAV_KEY)
+
+/** The public sample gallery (/sample), built from the site photo catalogue. */
 export function ClientGallery() {
   return (
     <ToastProvider>
-      <GalleryInner />
+      <SampleGallery />
     </ToastProvider>
   )
 }
 
-/** The sample gallery, built once from the photo catalogue loaded from Supabase. */
-function useSampleGallery() {
+function SampleGallery() {
   const photos = useSitePhotos()
-  return useMemo(() => buildSampleGallery(photos), [photos])
+  const g = useMemo(() => buildSampleGallery(photos), [photos])
+  const favourites = useSampleFavourites()
+  const toast = useToast()
+  const data = useMemo<GalleryViewData>(
+    () => ({ studio: g.studio, couple: g.couple, subtitle: `${g.place} · ${g.dates}`, cover: g.cover, sections: g.sections, all: g.all }),
+    [g]
+  )
+  return (
+    <GalleryView
+      data={data}
+      sample
+      favourites={favourites}
+      onDownload={(p) => toast({ title: "Download started", body: `Full-size file for frame ${p.frame}.`, tone: "success" })}
+    />
+  )
 }
 
-function GalleryInner() {
-  const g = useSampleGallery()
+/**
+ * The client gallery: cover, section bar, masonry grid, lightbox, favourites
+ * and download. Used by the sample and by real galleries (/g/[slug]).
+ * Render inside <ToastProvider>.
+ */
+export function GalleryView({
+  data: g,
+  sample = false,
+  favourites,
+  onDownload,
+}: {
+  data: GalleryViewData
+  sample?: boolean
+  favourites: Favourites
+  onDownload: (p: GalleryPhoto) => void
+}) {
   const toast = useToast()
-  const { favs, toggle, has } = useFavourites()
+  const { favs, toggle, has } = favourites
   const [view, setView] = useState<"all" | "favourites">("all")
   const [lightbox, setLightbox] = useState<number | null>(null)
-  const [active, setActive] = useState(g.sections[0].id)
+  const [active, setActive] = useState(g.sections[0]?.id ?? "")
 
   const visible = useMemo(
     () => (view === "all" ? g.all : g.all.filter((p) => favs.has(p.id))),
@@ -109,8 +142,7 @@ function GalleryInner() {
     return () => io.disconnect()
   }, [sections])
 
-  const download = (p: GalleryPhoto) =>
-    toast({ title: "Download started", body: `Full-size file for frame ${p.frame}.`, tone: "success" })
+  const download = onDownload
 
   const share = async () => {
     try {
@@ -129,7 +161,7 @@ function GalleryInner() {
 
   return (
     <div className="theme-print min-h-dvh">
-      <Cover onShare={share} favCount={favs.size} onShowFavs={() => setView("favourites")} />
+      <Cover data={g} sample={sample} onShare={share} favCount={favs.size} onShowFavs={() => setView("favourites")} />
 
       {/* Section bar */}
       <div className="sticky top-0 z-30 border-b border-line bg-surface/95 backdrop-blur-sm">
@@ -170,6 +202,7 @@ function GalleryInner() {
                 {favs.size}
               </motion.span>
             </button>
+            {sample && (
             <button
               type="button"
               onClick={downloadAll}
@@ -180,6 +213,7 @@ function GalleryInner() {
               </svg>
               <span className="hidden sm:inline">Download</span>
             </button>
+            )}
           </div>
         </div>
       </div>
@@ -209,7 +243,7 @@ function GalleryInner() {
             <div className="mb-4 flex items-baseline justify-between gap-4 px-1">
               <h2 id={`${s.id}-title`} className="type-heading-1">{s.name}</h2>
               <p className="type-label text-ink-muted">
-                {s.day} · {s.photos.length} photos
+                {s.day ? `${s.day} · ` : ""}{s.photos.length} {s.photos.length === 1 ? "photo" : "photos"}
               </p>
             </div>
             <div className="columns-2 gap-2 md:columns-3 xl:columns-4">
@@ -236,9 +270,11 @@ function GalleryInner() {
       <footer className="border-t border-line">
         <div className="mx-auto flex max-w-[1600px] flex-col items-center gap-2 px-4 py-10 text-center">
           <p className="font-heading text-[15px] font-bold tracking-[0.25em] uppercase">{g.studio.name}</p>
-          <a href={`mailto:${g.studio.email}`} className="type-caption text-ink-muted underline-offset-4 hover:underline">
-            {g.studio.email}
-          </a>
+          {g.studio.email && (
+            <a href={`mailto:${g.studio.email}`} className="type-caption text-ink-muted underline-offset-4 hover:underline">
+              {g.studio.email}
+            </a>
+          )}
           <p className="mt-6 type-label text-ink-muted">Delivered with Framesly</p>
         </div>
       </footer>
@@ -253,13 +289,12 @@ function GalleryInner() {
         onDownload={download}
       />
 
-      <SampleNotice />
+      {sample && <SampleNotice />}
     </div>
   )
 }
 
-function Cover({ onShare, favCount, onShowFavs }: { onShare: () => void; favCount: number; onShowFavs: () => void }) {
-  const g = useSampleGallery()
+function Cover({ data: g, sample, onShare, favCount, onShowFavs }: { data: GalleryViewData; sample: boolean; onShare: () => void; favCount: number; onShowFavs: () => void }) {
   const ref = useRef<HTMLElement>(null)
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] })
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "18%"])
@@ -268,16 +303,21 @@ function Cover({ onShare, favCount, onShowFavs }: { onShare: () => void; favCoun
   return (
     <header ref={ref} className="relative h-[88svh] min-h-[520px] overflow-hidden bg-[#16191f]">
       <motion.div style={{ y }} className="absolute inset-0" initial={{ scale: 1.12 }} animate={{ scale: 1 }} transition={{ duration: 2.4, ease: develop }}>
-        <Image src={g.cover.src} alt={g.cover.alt} fill priority sizes="100vw" quality={85} className="object-cover object-[50%_35%]" />
+        {g.cover && <Image src={g.cover.src} alt={g.cover.alt} fill priority sizes="100vw" quality={85} className="object-cover object-[50%_35%]" />}
       </motion.div>
-      {/* Scrim behind the names (brief) */}
+      {/* Scrim so the names stay readable on any photo */}
       <div className="absolute inset-0 bg-gradient-to-t from-[rgb(22_25_31/0.82)] via-[rgb(22_25_31/0.18)] to-[rgb(22_25_31/0.45)]" />
 
       {/* Photographer's logo top-left, never Framesly's */}
       <div className="absolute inset-x-0 top-0 flex items-center justify-between px-4 py-4 text-white sm:px-8 sm:py-6">
         <div className="flex items-center gap-3">
-          <p className="font-heading text-[14px] font-bold tracking-[0.3em] uppercase sm:text-[15px]">{g.studio.name}</p>
-          <span className="rounded-full bg-white/85 px-2 py-0.5 type-label text-[10px] text-[#16191f]">Sample</span>
+          <StudioLogo
+            name={g.studio.name}
+            logoUrl={g.studio.logoUrl}
+            imageClassName="max-h-10 max-w-[160px] drop-shadow"
+            textClassName="text-[14px] tracking-[0.3em] sm:text-[15px]"
+          />
+          {sample && <span className="rounded-full bg-white/85 px-2 py-0.5 type-label text-[10px] text-[#16191f]">Sample</span>}
         </div>
         <div className="flex items-center gap-1">
           <button type="button" onClick={onShowFavs} className="flex h-11 items-center gap-2 rounded-full px-3 type-caption text-white/90 transition-colors hover:bg-white/10">
@@ -297,7 +337,7 @@ function Cover({ onShare, favCount, onShowFavs }: { onShare: () => void; favCoun
 
       <motion.div style={{ opacity: fade }} className="absolute inset-x-0 bottom-0 px-4 pb-10 text-white sm:px-8 sm:pb-14">
         <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4, duration: 0.8, ease: develop }} className="type-label text-white/75">
-          {g.place} · {g.dates}
+          {g.subtitle}
         </motion.p>
         <motion.h1
           initial={{ opacity: 0, y: 24 }}
@@ -324,7 +364,7 @@ function Cover({ onShare, favCount, onShowFavs }: { onShare: () => void; favCoun
   )
 }
 
-/** One photo in the masonry grid. Exactly two controls: favourite and download (brief). */
+/** One photo in the masonry grid, with two controls: favourite and download. */
 function Tile({
   photo,
   fav,
@@ -383,7 +423,7 @@ function Tile({
   )
 }
 
-/** Demo-only note so visitors can get back to the marketing site. */
+/** Sample-only bar that leads visitors back to sign-up. */
 function SampleNotice() {
   const [hidden, setHidden] = useState(false)
   return (

@@ -13,9 +13,8 @@ import { cn } from "@/lib/utils"
 
 /**
  * Transparent over the hero. Once scrolled it gets the raised background and
- * a bottom border (brief). The header's "Start free" is a secondary button:
- * each section already has its own safelight button, and the brief allows one
- * per screen.
+ * a bottom border. The header's "Start free" is a secondary button: each
+ * section already has its own safelight button, and a screen has only one.
  */
 export function SiteHeader() {
   const pathname = usePathname()
