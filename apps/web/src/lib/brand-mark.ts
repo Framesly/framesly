@@ -1,0 +1,23 @@
+/*
+ * The Framesly mark: an eight-blade aperture around a lens with a glint.
+ * Traced from logo/Favicon.svg (the brand source file) and rounded to one
+ * decimal, so the UI, app icons and share image all draw the same shape.
+ */
+
+/** viewBox that fits the aperture's circle edge to edge. */
+export const BRAND_MARK_VIEWBOX = "150 150 1200 1200"
+
+/** The brand colour the mark is drawn in (Darkroom --safelight). */
+export const BRAND_MARK_COLOR = "#F2A93B"
+
+export const BRAND_MARK_PATH = [
+  "M969.2 1308.7C1102.1 1256.5 1211.8 1158.3 1278.8 1033.6L694.2 1033.6Z",
+  "M1324.5 576.6L911.1 990L1300 990C1332.1 916.5 1350 835.3 1350 750C1350 689.7 1341.1 631.5 1324.5 576.6Z",
+  "M200 510C167.9 583.5 150 664.7 150 750C150 810.3 158.9 868.5 175.5 923.4L588.9 510Z",
+  "M1033.6 221.2L1033.6 805.8L1308.7 530.8C1256.5 397.9 1158.3 288.2 1033.6 221.2Z",
+  "M510 1300C583.5 1332.1 664.7 1350 750 1350C810.3 1350 868.5 1341.1 923.4 1324.5L510 911.1Z",
+  "M466.4 1278.8L466.4 694.2L191.3 969.2C243.5 1102.1 341.7 1211.8 466.4 1278.8Z",
+  "M990 200C916.5 167.9 835.3 150 750 150C689.7 150 631.5 158.9 576.6 175.5L990 588.9Z",
+  "M530.8 191.3C397.9 243.5 288.2 341.7 221.2 466.4L805.8 466.4Z",
+  "M603 753C593.7 753 584.8 751.1 576.7 747.7C576.6 748.5 576.6 749.2 576.6 750C576.6 845.8 654.2 923.4 750 923.4C845.8 923.4 923.4 845.8 923.4 750C923.4 654.2 845.8 576.6 750 576.6C704.1 576.6 662.4 594.5 631.4 623.6C654.7 634.3 670.8 657.8 670.8 685.2C670.8 722.6 640.5 753 603 753Z",
+].join("")

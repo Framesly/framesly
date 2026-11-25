@@ -1,5 +1,7 @@
 import { ImageResponse } from "next/og"
 
+import { BRAND_MARK_PATH, BRAND_MARK_VIEWBOX } from "@/lib/brand-mark"
+
 /*
  * Designed share image (1200×630) for link previews in WhatsApp, iMessage,
  * Slack, X and LinkedIn. Pure typography and shapes, so it needs no network
@@ -42,8 +44,10 @@ export default function OpengraphImage() {
       <div style={{ width: "100%", height: "100%", display: "flex", background: ground, color: ink, padding: 64, fontFamily: "sans-serif" }}>
         <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", width: 640 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <div style={{ width: 22, height: 22, borderRadius: 999, background: marigold }} />
-            <div style={{ fontSize: 34, fontWeight: 700, letterSpacing: -1 }}>Framesly</div>
+            <svg width={64} height={64} viewBox={BRAND_MARK_VIEWBOX}>
+              <path d={BRAND_MARK_PATH} fill={marigold} />
+            </svg>
+            <div style={{ fontSize: 42, fontWeight: 500, letterSpacing: 3, textTransform: "uppercase" }}>Framesly</div>
           </div>
           <div style={{ display: "flex", flexDirection: "column" }}>
             <div style={{ fontSize: 76, fontWeight: 800, lineHeight: 1.02, letterSpacing: -3 }}>Cull a wedding before dinner.</div>

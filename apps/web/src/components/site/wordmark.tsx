@@ -1,20 +1,24 @@
+import { BRAND_MARK_PATH, BRAND_MARK_VIEWBOX } from "@/lib/brand-mark"
 import { cn } from "@/lib/utils"
 
-/**
- * Placeholder wordmark until the brand book's logo files arrive.
- * The mark is a safelight lamp: a lit dot inside a frame corner.
- */
+/** The Framesly aperture on its own, in the theme's safelight colour. */
+export function BrandMark({ className }: { className?: string }) {
+  return (
+    <svg viewBox={BRAND_MARK_VIEWBOX} className={cn("size-10 shrink-0", className)} aria-hidden>
+      <path d={BRAND_MARK_PATH} fill="var(--safelight)" />
+    </svg>
+  )
+}
+
+/** The Framesly logo: the aperture mark with the uppercase name, as in logo/Primary.png. */
 export function Wordmark({ className, compact = false }: { className?: string; compact?: boolean }) {
   return (
-    <span className={cn("inline-flex items-center gap-2.5 text-ink", className)}>
-      <svg viewBox="0 0 24 24" className="size-6 shrink-0" aria-hidden>
-        <path d="M3 9V3h6M21 15v6h-6" fill="none" stroke="currentColor" strokeWidth="2" />
-        <circle cx="12" cy="12" r="3.5" fill="var(--safelight)" />
-      </svg>
-      {!compact && (
-        <span className="font-heading text-xl leading-none font-bold tracking-[-0.03em]">
-          Framesly
-        </span>
+    <span className={cn("inline-flex items-center gap-3 text-ink", className)}>
+      <BrandMark />
+      {compact ? (
+        <span className="sr-only">Framesly</span>
+      ) : (
+        <span className="font-heading text-2xl leading-none font-medium tracking-[0.06em] uppercase">Framesly</span>
       )}
     </span>
   )
