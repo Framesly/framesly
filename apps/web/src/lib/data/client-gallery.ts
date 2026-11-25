@@ -54,6 +54,8 @@ export type ClientGalleryView = {
   photos: ClientPhoto[]
   /** Unix seconds when the photo links stop working; the page refreshes before then. */
   linksExpireAt: number
+  /** Photo ids this browser has hearted. */
+  favourites: string[]
 }
 
 export type ClientGalleryResult =
@@ -106,8 +108,33 @@ function validUnlock(galleryId: string, version: string, value: string | undefin
   return a.length === b.length && timingSafeEqual(a, b)
 }
 
-/** Full load with all checks. Used by GET /api/g/[slug] and the /g/[slug] page. */
-export async function loadClientGallery(slug: string): Promise<ClientGalleryResult> {
+const VISITOR_COOKIE = "fv"
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+
+/** Anonymous id for this browser (favourites). Created on first heart. */
+async function visitorId(create: boolean) {
+  const jar = await cookies()
+  const current = jar.get(VISITOR_COOKIE)?.value
+  if (current && UUID_RE.test(current)) return current
+  if (!create) return null
+  const id = crypto.randomUUID()
+  // Normally set by proxy.ts when the gallery page loads; this is the fallback.
+  jar.set(VISITOR_COOKIE, id, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/", maxAge: 365 * 24 * 60 * 60 })
+  return id
+}
+
+type Access =
+  | { status: "not_found" }
+  | { status: "expired"; studio: { name: string; logoUrl: string | null } }
+  | { status: "locked"; title: string; studio: { name: string; logoUrl: string | null; brandColor: string } }
+  | { status: "ok"; gallery: GalleryRow; studio: { name: string; logoUrl: string | null; brandColor: string } }
+
+/**
+ * Can this browser see the gallery right now? The one place the rules live:
+ * published, not expired, and unlocked if it has a password. Photo links and
+ * favourites both go through it.
+ */
+async function checkAccess(slug: string): Promise<Access> {
   const gallery = await findPublished(slug)
   if (!gallery) return { status: "not_found" }
 
@@ -124,9 +151,18 @@ export async function loadClientGallery(slug: string): Promise<ClientGalleryResu
       return { status: "locked", title: gallery.title, studio }
     }
   }
+  return { status: "ok", gallery, studio }
+}
+
+/** Full load with all checks. Used by GET /api/g/[slug] and the /g/[slug] page. */
+export async function loadClientGallery(slug: string): Promise<ClientGalleryResult> {
+  const access = await checkAccess(slug)
+  if (access.status !== "ok") return access
+  const { gallery, studio } = access
+  const visitor = await visitorId(false)
 
   const db = createAdminClient()
-  const [{ data: sections }, { data: photos }] = await Promise.all([
+  const [{ data: sections }, { data: photos }, { data: picks }] = await Promise.all([
     db.from("sections").select("id, name, sort_order").eq("gallery_id", gallery.id).order("sort_order"),
     db
       .from("photos")
@@ -136,6 +172,9 @@ export async function loadClientGallery(slug: string): Promise<ClientGalleryResu
       .not("web_key", "is", null)
       .order("taken_at", { ascending: true, nullsFirst: false })
       .order("created_at", { ascending: true }),
+    visitor
+      ? db.from("selections").select("photo_id").eq("gallery_id", gallery.id).eq("visitor_id", visitor)
+      : Promise.resolve({ data: [] as { photo_id: string }[] }),
   ])
 
   const linksExpireAt = Math.floor(Date.now() / 1000) + 60 * 60
@@ -159,8 +198,29 @@ export async function loadClientGallery(slug: string): Promise<ClientGalleryResu
         download: signMediaUrl(p.r2_key, undefined, { download: true, name: p.original_name }),
       })),
       linksExpireAt,
+      favourites: (picks ?? []).map((p) => p.photo_id),
     },
   }
+}
+
+/** Heart or un-heart a photo for this browser. Same access rules as viewing. */
+export async function setFavourite(slug: string, photoId: string, on: boolean): Promise<"ok" | "not_found" | "expired" | "locked" | "no_photo"> {
+  if (!UUID_RE.test(photoId)) return "no_photo"
+  const access = await checkAccess(slug)
+  if (access.status !== "ok") return access.status
+  const db = createAdminClient()
+  const { data: photo } = await db.from("photos").select("id").eq("id", photoId).eq("gallery_id", access.gallery.id).eq("status", "ready").maybeSingle()
+  if (!photo) return "no_photo"
+
+  const visitor = (await visitorId(true))!
+  if (on) {
+    const { error } = await db.from("selections").upsert({ gallery_id: access.gallery.id, photo_id: photoId, visitor_id: visitor }, { onConflict: "photo_id,visitor_id", ignoreDuplicates: true })
+    if (error) throw new Error(error.message)
+  } else {
+    const { error } = await db.from("selections").delete().eq("photo_id", photoId).eq("visitor_id", visitor)
+    if (error) throw new Error(error.message)
+  }
+  return "ok"
 }
 
 /** Check a password and, if right, set the gallery's unlock cookie (24h). */

@@ -52,6 +52,14 @@ export default async function GalleryPage({ params, searchParams }: PageProps<"/
         ))}
       </dl>
 
+      <Link
+        href={`/app/galleries/${gallery.id}/picks`}
+        className="mt-3 flex items-center justify-between rounded-[var(--radius-control)] border border-line bg-surface-raised px-4 py-3 type-caption text-ink hover:border-line-strong"
+      >
+        <span>Client picks</span>
+        <span className="text-ink-muted">See what your couple hearted →</span>
+      </Link>
+
       <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <PhotoUploader galleryId={gallery.id} />
         <div className="space-y-6">

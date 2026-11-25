@@ -1,11 +1,11 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 
-import { GalleryView, makeLocalFavourites, type Favourites } from "@/components/gallery/client-gallery"
+import { GalleryView, type Favourites } from "@/components/gallery/client-gallery"
 import type { GalleryPhoto, GallerySection, GalleryViewData } from "@/components/gallery/gallery-data"
-import { ToastProvider } from "@/components/gallery/toast"
+import { ToastProvider, useToast } from "@/components/gallery/toast"
 import type { ClientGalleryView } from "@/lib/data/client-gallery"
 
 const REFRESH_BEFORE_EXPIRY = 10 * 60 // seconds: refetch links ~50 min into their 1-hour life
@@ -56,16 +56,58 @@ function downloadPhoto(p: GalleryPhoto) {
 }
 
 /**
+ * Hearts saved on the server (stage 5), keyed to this browser's visitor
+ * cookie. The heart flips at once and flips back if saving fails.
+ */
+function useServerFavourites(slug: string, initial: string[]): Favourites {
+  const toast = useToast()
+  const [favs, setFavs] = useState(() => new Set(initial))
+  const toggle = useCallback(
+    (id: string) => {
+      const on = !favs.has(id)
+      setFavs((prev) => {
+        const next = new Set(prev)
+        if (on) next.add(id)
+        else next.delete(id)
+        return next
+      })
+      fetch(`/api/g/${slug}/favourite`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ photoId: id, on }) })
+        .then((res) => {
+          if (!res.ok) throw new Error(String(res.status))
+        })
+        .catch(() => {
+          setFavs((prev) => {
+            const next = new Set(prev)
+            if (on) next.delete(id)
+            else next.add(id)
+            return next
+          })
+          toast({ title: "Couldn't save that heart", body: "Check your connection and try again." })
+        })
+    },
+    [favs, slug, toast]
+  )
+  return { favs, toggle, has: (id: string) => favs.has(id) }
+}
+
+/**
  * A real client gallery at /g/[slug]. Photo links last 1 hour, so this
  * refetches fresh ones shortly before they expire; if the gallery was
  * unpublished, expired or locked meanwhile, the page re-renders that state.
  */
-export function LiveGallery({ slug, initial, useFavourites }: { slug: string; initial: ClientGalleryView; useFavourites?: () => Favourites }) {
+export function LiveGallery({ slug, initial }: { slug: string; initial: ClientGalleryView }) {
+  return (
+    <ToastProvider>
+      <LiveGalleryInner slug={slug} initial={initial} />
+    </ToastProvider>
+  )
+}
+
+function LiveGalleryInner({ slug, initial }: { slug: string; initial: ClientGalleryView }) {
   const router = useRouter()
   const [gallery, setGallery] = useState(initial)
   const data = useMemo(() => toViewData(gallery), [gallery])
-  const localFavourites = useMemo(() => makeLocalFavourites(`framesly-favs:${slug}`), [slug])
-  const favourites = (useFavourites ?? localFavourites)()
+  const favourites = useServerFavourites(slug, initial.favourites)
 
   useEffect(() => {
     const wait = Math.max(30, gallery.linksExpireAt - Math.floor(Date.now() / 1000) - REFRESH_BEFORE_EXPIRY) * 1000
@@ -77,9 +119,5 @@ export function LiveGallery({ slug, initial, useFavourites }: { slug: string; in
     return () => clearTimeout(t)
   }, [gallery.linksExpireAt, slug, router])
 
-  return (
-    <ToastProvider>
-      <GalleryView data={data} favourites={favourites} onDownload={downloadPhoto} />
-    </ToastProvider>
-  )
+  return <GalleryView data={data} favourites={favourites} onDownload={downloadPhoto} />
 }

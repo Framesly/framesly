@@ -178,6 +178,13 @@ export type Database = {
         Update: { password_hash?: string; updated_at?: Timestamp }
         Relationships: []
       }
+      /** Client favourites. Written only by the server (service role); members of the studio can read. */
+      selections: {
+        Row: { id: string; gallery_id: string; photo_id: string; visitor_id: string; client_name: string | null; created_at: Timestamp }
+        Insert: { id?: string; gallery_id: string; photo_id: string; visitor_id: string; client_name?: string | null }
+        Update: { client_name?: string | null }
+        Relationships: []
+      }
       site_photos: {
         Row: {
           key: string
