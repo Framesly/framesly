@@ -1,6 +1,7 @@
 import { z } from "zod"
 
 import { getMembership } from "@/lib/auth/dal"
+import { thumbKeyOf } from "@/lib/media"
 import { deleteKeys, objectSize } from "@/lib/r2"
 import { createClient } from "@/lib/supabase/server"
 
@@ -50,7 +51,7 @@ export async function POST(request: Request) {
       if (p.cancelled) {
         // Only unfinished rows can be dropped this way; a ready photo is never deleted here.
         const { data: gone } = await supabase.from("photos").delete().eq("id", row.id).in("status", ["uploading", "failed"]).select("id")
-        if (gone?.length) await deleteKeys([row.r2_key, ...(row.web_key ? [row.web_key] : [])]).catch(() => {})
+        if (gone?.length) await deleteKeys([row.r2_key, ...(row.web_key ? [row.web_key, thumbKeyOf(row.web_key)] : [])]).catch(() => {})
         return { id: row.id, status: "cancelled" as const }
       }
       if (!p.ok) {

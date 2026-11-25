@@ -2,7 +2,8 @@ import "server-only"
 
 import { cache } from "react"
 
-import { presignGet } from "@/lib/r2"
+import { decryptGalleryKey } from "@/lib/gallery-key"
+import { photoImageUrls } from "@/lib/media"
 import { createClient } from "@/lib/supabase/server"
 
 /*
@@ -33,39 +34,41 @@ export const getGalleryWithSections = cache(async (galleryId: string) => {
 })
 
 /**
- * A short-lived photo URL for each gallery's dashboard card: the chosen cover,
- * else the first ready photo (same order the client gallery uses). Galleries
- * without photos are left out so the card shows its placeholder. One small
- * query per gallery, run in parallel; signing is local, so no extra network.
+ * The cover image for each gallery's dashboard card: the chosen cover, else
+ * the first ready photo (the order the client gallery uses). Galleries
+ * without photos are left out so the card shows its placeholder.
+ *
+ * Chosen covers come back in one query; only galleries without one (or whose
+ * cover is no longer ready) need their own "first photo" query, run in
+ * parallel. Links are signed media thumbnails that stay cacheable.
  */
 export async function listGalleryCovers(galleries: { id: string; cover_photo_id: string | null; photo_count: number }[]) {
   const supabase = await createClient()
-  const entries = await Promise.all(
-    galleries
-      .filter((g) => g.photo_count > 0)
+  const withPhotos = galleries.filter((g) => g.photo_count > 0)
+  const coverIds = withPhotos.map((g) => g.cover_photo_id).filter((id): id is string => Boolean(id))
+  const { data: chosen } = coverIds.length
+    ? await supabase.from("photos").select("id, gallery_id, web_key").in("id", coverIds).eq("status", "ready").not("web_key", "is", null)
+    : { data: [] as { id: string; gallery_id: string; web_key: string | null }[] }
+  const keys = new Map((chosen ?? []).map((p) => [p.gallery_id, p.web_key as string]))
+
+  await Promise.all(
+    withPhotos
+      .filter((g) => !keys.has(g.id))
       .map(async (g) => {
-        let key: string | null = null
-        if (g.cover_photo_id) {
-          const { data } = await supabase.from("photos").select("web_key").eq("id", g.cover_photo_id).eq("status", "ready").maybeSingle()
-          key = data?.web_key ?? null
-        }
-        if (!key) {
-          const { data } = await supabase
-            .from("photos")
-            .select("web_key")
-            .eq("gallery_id", g.id)
-            .eq("status", "ready")
-            .not("web_key", "is", null)
-            .order("taken_at", { ascending: true, nullsFirst: false })
-            .order("created_at", { ascending: true })
-            .limit(1)
-            .maybeSingle()
-          key = data?.web_key ?? null
-        }
-        return [g.id, key ? await presignGet(key) : null] as const
+        const { data } = await supabase
+          .from("photos")
+          .select("web_key")
+          .eq("gallery_id", g.id)
+          .eq("status", "ready")
+          .not("web_key", "is", null)
+          .order("taken_at", { ascending: true, nullsFirst: false })
+          .order("created_at", { ascending: true })
+          .limit(1)
+          .maybeSingle()
+        if (data?.web_key) keys.set(g.id, data.web_key)
       })
   )
-  return new Map(entries.filter((e): e is readonly [string, string] => e[1] !== null))
+  return new Map([...keys].map(([id, key]) => [id, photoImageUrls(key)] as const))
 }
 
 export const PHOTO_PAGE_SIZE = 96
@@ -109,13 +112,17 @@ export async function listGalleryPhotoIds(galleryId: string) {
   }
 }
 
-/** Publishing state of one gallery (link name, published, expiry, password set). */
+/**
+ * Publishing state of one gallery (link name, published, expiry) plus its key
+ * in plain text when one is set and readable. Keys set before keys were
+ * stored encrypted come back as null with hasPassword true: a reset fixes that.
+ */
 export const getPublishState = cache(async (galleryId: string) => {
   const supabase = await createClient()
-  const { data } = await supabase
-    .from("galleries")
-    .select("public_slug, published_at, expires_at, has_password")
-    .eq("id", galleryId)
-    .maybeSingle()
-  return data
+  const [{ data }, cipher] = await Promise.all([
+    supabase.from("galleries").select("public_slug, published_at, expires_at, has_password").eq("id", galleryId).maybeSingle(),
+    supabase.rpc("gallery_key_cipher", { p_gallery_id: galleryId }),
+  ])
+  if (!data) return null
+  return { ...data, key: data.has_password ? decryptGalleryKey(cipher.data) : null }
 })

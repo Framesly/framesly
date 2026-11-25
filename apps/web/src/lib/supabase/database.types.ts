@@ -175,9 +175,9 @@ export type Database = {
       }
       /** bcrypt hashes of gallery passwords. Service role only; no API role can read it. */
       gallery_secrets: {
-        Row: { gallery_id: string; password_hash: string; updated_at: Timestamp }
-        Insert: { gallery_id: string; password_hash: string; updated_at?: Timestamp }
-        Update: { password_hash?: string; updated_at?: Timestamp }
+        Row: { gallery_id: string; password_hash: string; password_cipher: string | null; updated_at: Timestamp }
+        Insert: { gallery_id: string; password_hash: string; password_cipher?: string | null; updated_at?: Timestamp }
+        Update: { password_hash?: string; password_cipher?: string | null; updated_at?: Timestamp }
         Relationships: []
       }
       /** Client favourites. Written only by the server (service role); members of the studio can read. */
@@ -237,10 +237,18 @@ export type Database = {
       slug_available: { Args: { p_slug: string }; Returns: boolean }
       public_slug_available: { Args: { p_slug: string; p_gallery_id?: string }; Returns: boolean }
       publish_gallery: {
-        Args: { p_gallery_id: string; p_slug: string; p_password_hash?: string | null; p_remove_password?: boolean; p_expires_at?: string | null }
+        Args: {
+          p_gallery_id: string
+          p_slug: string
+          p_password_hash?: string | null
+          p_remove_password?: boolean
+          p_expires_at?: string | null
+          p_password_cipher?: string | null
+        }
         Returns: { public_slug: string; published_at: Timestamp; expires_at: Timestamp | null; has_password: boolean }[]
       }
       unpublish_gallery: { Args: { p_gallery_id: string }; Returns: undefined }
+      gallery_key_cipher: { Args: { p_gallery_id: string }; Returns: string | null }
       create_studio: {
         Args: { p_name: string; p_slug: string; p_region?: string; p_brand_color?: string }
         Returns: Database["public"]["Tables"]["studios"]["Row"]

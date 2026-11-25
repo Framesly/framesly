@@ -44,6 +44,7 @@ const bucket = () => process.env.R2_BUCKET as string
 
 export const originalKey = (galleryId: string, photoId: string, ext: string) => `galleries/${galleryId}/original/${photoId}.${ext}`
 export const webKey = (galleryId: string, photoId: string) => `galleries/${galleryId}/web/${photoId}.jpg`
+export const thumbKey = (galleryId: string, photoId: string) => `galleries/${galleryId}/thumb/${photoId}.jpg`
 
 /** A URL the browser can PUT one file to. The content type is part of the signature. */
 export function presignPut(key: string, contentType: string) {

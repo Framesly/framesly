@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore
 
 import { buildSampleGallery, type GalleryPhoto, type GalleryViewData } from "@/components/gallery/gallery-data"
 import { HeartButton } from "@/components/gallery/heart-button"
+import { FallbackImage } from "@/components/ui/fallback-image"
 import { Lightbox } from "@/components/gallery/lightbox"
 import { ToastProvider, useToast } from "@/components/ui/toast"
 import { SkipLink } from "@/components/ui/skip-link"
@@ -395,8 +396,9 @@ function Tile({
       <button type="button" onClick={onOpen} aria-label={`Open ${photo.alt}`} className="block w-full cursor-zoom-in">
         <motion.div layoutId={`photo-${photo.id}`} className="relative" style={{ aspectRatio: `${photo.w} / ${photo.h}` }}>
           {!loaded && <span aria-hidden className="absolute inset-0 animate-pulse bg-surface-raised" />}
-          <Image
-            src={photo.src}
+          <FallbackImage
+            src={photo.thumb ?? photo.src}
+            fallback={photo.thumb ? photo.src : undefined}
             alt={photo.alt}
             fill
             sizes="(min-width: 1280px) 25vw, (min-width: 768px) 33vw, 50vw"

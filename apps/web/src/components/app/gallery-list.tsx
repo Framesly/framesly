@@ -1,8 +1,8 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo, useState, useSyncExternalStore } from "react"
 
-import { GalleryCard } from "@/components/app/gallery-card"
+import { GalleryCard, type CoverUrls, type GalleryView } from "@/components/app/gallery-card"
 import { Button } from "@/components/ui/button"
 import { Field } from "@/components/ui/field"
 import { Select } from "@/components/ui/select"
@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils"
 
 type Status = GalleryOverview["status"]
 type Sort = "newest" | "oldest" | "event" | "name" | "photos"
-type Item = { gallery: GalleryOverview; coverSrc: string | null }
+type Item = { gallery: GalleryOverview; cover: CoverUrls | null }
 
 const statusFilters: { value: Status | "all"; label: string }[] = [
   { value: "all", label: "All" },
@@ -30,14 +30,68 @@ const sorters: Record<Sort, (a: GalleryOverview, b: GalleryOverview) => number> 
   photos: (a, b) => b.photo_count - a.photo_count,
 }
 
-/** Below this many galleries the controls would be clutter, so only the cards show. */
+/** Below this many galleries search and filters would be clutter; the view switch always shows. */
 const CONTROLS_FROM = 4
+const VIEW_KEY = "framesly:gallery-view"
+
+const views: { value: GalleryView; label: string }[] = [
+  { value: "grid", label: "Grid" },
+  { value: "list", label: "List" },
+  { value: "large", label: "Large" },
+]
+
+function ViewIcon({ view }: { view: GalleryView }) {
+  return (
+    <svg viewBox="0 0 20 20" aria-hidden className="size-4" fill="none" stroke="currentColor" strokeWidth="1.6">
+      {view === "grid" && (
+        <>
+          <rect x="3" y="3" width="5.5" height="5.5" rx="1" />
+          <rect x="11.5" y="3" width="5.5" height="5.5" rx="1" />
+          <rect x="3" y="11.5" width="5.5" height="5.5" rx="1" />
+          <rect x="11.5" y="11.5" width="5.5" height="5.5" rx="1" />
+        </>
+      )}
+      {view === "list" && <path d="M3 5h14M3 10h14M3 15h14" strokeLinecap="round" />}
+      {view === "large" && <rect x="3" y="3.5" width="14" height="13" rx="1.5" />}
+    </svg>
+  )
+}
+
+/** Grid, list or large cards, remembered per browser. Storage can be unavailable (private mode), so it is optional. */
+const viewListeners = new Set<() => void>()
+let memoryView: GalleryView = "grid"
+function readView(): GalleryView {
+  try {
+    const saved = localStorage.getItem(VIEW_KEY)
+    if (saved === "grid" || saved === "list" || saved === "large") return saved
+  } catch {}
+  return memoryView
+}
+function useGalleryView() {
+  const view = useSyncExternalStore(
+    (onChange) => {
+      viewListeners.add(onChange)
+      return () => viewListeners.delete(onChange)
+    },
+    readView,
+    () => "grid" as GalleryView
+  )
+  const choose = (v: GalleryView) => {
+    memoryView = v
+    try {
+      localStorage.setItem(VIEW_KEY, v)
+    } catch {}
+    viewListeners.forEach((l) => l())
+  }
+  return [view, choose] as const
+}
 
 /** The studio's galleries with search, a status filter and sorting. Works on the list the server already loaded. */
 export function GalleryList({ items, brandColor }: { items: Item[]; brandColor: string }) {
   const [query, setQuery] = useState("")
   const [status, setStatus] = useState<Status | "all">("all")
   const [sort, setSort] = useState<Sort>("newest")
+  const [view, setView] = useGalleryView()
 
   const counts = useMemo(() => {
     const c: Record<string, number> = { all: items.length }
@@ -56,7 +110,30 @@ export function GalleryList({ items, brandColor }: { items: Item[]; brandColor: 
   const filtered = query.trim() !== "" || status !== "all"
 
   return (
-    <div className="mt-8">
+    <div className="mt-6">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <p className="type-caption font-normal text-ink-muted tabular-nums">
+          {shown.length === items.length ? `${items.length} ${items.length === 1 ? "gallery" : "galleries"}` : `${shown.length} of ${items.length}`}
+        </p>
+        <div role="group" aria-label="Layout" className="flex rounded-full border border-line bg-surface-raised p-0.5">
+          {views.map((v) => (
+            <button
+              key={v.value}
+              type="button"
+              aria-pressed={view === v.value}
+              aria-label={`${v.label} view`}
+              title={`${v.label} view`}
+              onClick={() => setView(v.value)}
+              className={cn(
+                "grid h-9 w-10 place-items-center rounded-full transition-colors",
+                view === v.value ? "bg-surface-overlay text-ink" : "text-ink-muted hover:text-ink"
+              )}
+            >
+              <ViewIcon view={v.value} />
+            </button>
+          ))}
+        </div>
+      </div>
       {showControls && (
         <div className="mb-6 space-y-4">
           <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_220px]">
@@ -115,10 +192,16 @@ export function GalleryList({ items, brandColor }: { items: Item[]; brandColor: 
           )}
         </div>
       ) : (
-        <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {shown.map(({ gallery, coverSrc }) => (
+        <ul
+          className={cn(
+            view === "grid" && "grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5",
+            view === "large" && "grid gap-4 sm:grid-cols-2 xl:grid-cols-3",
+            view === "list" && "divide-y divide-line overflow-hidden rounded-[var(--radius-control)] border border-line bg-surface-raised"
+          )}
+        >
+          {shown.map(({ gallery, cover }) => (
             <li key={gallery.id}>
-              <GalleryCard gallery={gallery} brandColor={brandColor} coverSrc={coverSrc} />
+              <GalleryCard gallery={gallery} brandColor={brandColor} cover={cover} view={view} />
             </li>
           ))}
         </ul>

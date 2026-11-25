@@ -101,6 +101,7 @@
 :root {
   --z-sticky: 30; /* sticky bars: app header, gallery section bar */
   --z-nav: 40; /* mobile tab bar, mobile menu, floating notices */
+  --z-dropdown: 110; /* menus and pickers opened from a control, also inside dialogs */
   --z-header: 50; /* site header */
   --z-banner: 60; /* cookie banner */
   --z-viewer: 70; /* lightbox, skip link */
@@ -334,6 +335,31 @@
   75%,
   100% {
     transform: scaleX(1);
+  }
+}
+
+/*
+ * Loading placeholder: a soft light band sweeps across. Only the pseudo-element
+ * moves (transform), so it stays on the compositor while the page streams in.
+ */
+@keyframes skeleton-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+@utility skeleton {
+  position: relative;
+  overflow: hidden;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.045) 50%, transparent);
+    animation: skeleton-sweep 1.4s var(--ease-develop) infinite;
+    animation-delay: inherit;
   }
 }
 

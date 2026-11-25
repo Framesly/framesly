@@ -4,7 +4,7 @@ import { createHmac, timingSafeEqual } from "node:crypto"
 
 import { cookies } from "next/headers"
 
-import { signMediaUrl } from "@/lib/media"
+import { mediaExpiry, signMediaUrl, thumbKeyOf } from "@/lib/media"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { studioAssetUrl } from "@/lib/supabase/env"
 
@@ -39,6 +39,9 @@ export type ClientPhoto = {
   width: number | null
   height: number | null
   sectionId: string | null
+  /** 800px grid copy; may be missing for photos uploaded before thumbnails existed */
+  thumb: string
+  /** 2048px web copy for the viewer */
   src: string
   download: string
 }
@@ -64,30 +67,34 @@ export type ClientGalleryResult =
   | { status: "locked"; title: string; studio: { name: string; logoUrl: string | null; brandColor: string } }
   | { status: "ok"; gallery: ClientGalleryView }
 
-/** Look the gallery up by slug once; everything after works with its id. */
-async function findPublished(slug: string) {
+type Secret = { password_hash: string; updated_at: string }
+type Published = GalleryRow & { studio: { name: string; logoUrl: string | null; brandColor: string }; secret: Secret | null }
+
+/**
+ * The published gallery for a slug, with its studio's branding and its key
+ * hash, in one query. The secret's updated_at is part of the unlock token, so
+ * changing the key locks everyone out again.
+ */
+async function findPublished(slug: string): Promise<Published | null> {
   if (!/^[a-z0-9](?:[a-z0-9-]{1,58}[a-z0-9])$/.test(slug)) return null
   const db = createAdminClient()
   const { data } = await db
     .from("galleries")
-    .select("id, studio_id, title, event_date, public_slug, published_at, expires_at, cover_photo_id")
+    .select("id, studio_id, title, event_date, public_slug, published_at, expires_at, cover_photo_id, studios(name, logo_path, brand_color), gallery_secrets(password_hash, updated_at)")
     .eq("public_slug", slug)
     .not("published_at", "is", null)
     .maybeSingle()
-  return (data as GalleryRow | null) ?? null
-}
-
-async function studioOf(studioId: string) {
-  const db = createAdminClient()
-  const { data } = await db.from("studios").select("name, logo_path, brand_color").eq("id", studioId).maybeSingle()
-  return { name: data?.name ?? "Your photographer", logoUrl: studioAssetUrl(data?.logo_path), brandColor: data?.brand_color ?? "#F2A93B" }
-}
-
-/** The stored hash's updated_at is part of the token, so changing the password locks everyone out again. */
-async function passwordSecret(galleryId: string) {
-  const db = createAdminClient()
-  const { data } = await db.from("gallery_secrets").select("password_hash, updated_at").eq("gallery_id", galleryId).maybeSingle()
-  return data
+  if (!data) return null
+  const row = data as unknown as GalleryRow & {
+    studios: { name: string; logo_path: string | null; brand_color: string } | null
+    gallery_secrets: Secret | Secret[] | null
+  }
+  const { studios: s, gallery_secrets: sec, ...gallery } = row
+  return {
+    ...gallery,
+    studio: { name: s?.name ?? "Your photographer", logoUrl: studioAssetUrl(s?.logo_path), brandColor: s?.brand_color ?? "#F2A93B" },
+    secret: Array.isArray(sec) ? (sec[0] ?? null) : sec,
+  }
 }
 
 function unlockToken(galleryId: string, version: string, exp: number) {
@@ -135,16 +142,15 @@ type Access =
  * favourites both go through it.
  */
 async function checkAccess(slug: string): Promise<Access> {
-  const gallery = await findPublished(slug)
-  if (!gallery) return { status: "not_found" }
+  const found = await findPublished(slug)
+  if (!found) return { status: "not_found" }
+  const { studio, secret, ...gallery } = found
 
-  const studio = await studioOf(gallery.studio_id)
   if (gallery.expires_at && new Date(gallery.expires_at).getTime() <= Date.now()) {
-    return { status: "expired", studio: { name: studio.name, logoUrl: studio.logoUrl, brandColor: studio.brandColor } }
+    return { status: "expired", studio }
   }
 
   // Decide from the secrets table, not galleries.has_password (a display hint the photographer can edit).
-  const secret = await passwordSecret(gallery.id)
   if (secret) {
     const jar = await cookies()
     if (!validUnlock(gallery.id, secret.updated_at, jar.get(unlockCookie(gallery.id))?.value)) {
@@ -170,7 +176,7 @@ export async function loadClientGallery(slug: string): Promise<ClientGalleryResu
       : Promise.resolve({ data: [] as { photo_id: string }[] }),
   ])
 
-  const linksExpireAt = Math.floor(Date.now() / 1000) + 60 * 60
+  const linksExpireAt = mediaExpiry()
   return {
     status: "ok",
     gallery: {
@@ -187,6 +193,7 @@ export async function loadClientGallery(slug: string): Promise<ClientGalleryResu
         width: p.width,
         height: p.height,
         sectionId: p.section_id,
+        thumb: signMediaUrl(thumbKeyOf(p.web_key!)),
         src: signMediaUrl(p.web_key!),
         download: signMediaUrl(p.r2_key, undefined, { download: true, name: p.original_name }),
       })),
@@ -196,25 +203,36 @@ export async function loadClientGallery(slug: string): Promise<ClientGalleryResu
   }
 }
 
+/** The API returns at most this many rows per request. */
+const PAGE = 1000
+
 /**
- * The gallery's ready photos in display order: the photographer's order first
- * (photos.sort_order), then capture time, then upload time. Falls back to the
- * old order until the sort_order migration has been applied.
+ * Every ready photo of the gallery, in display order: the photographer's
+ * order first (photos.sort_order), then capture time, then upload time.
+ * Big weddings exceed one page: the first page also returns the total, and
+ * the remaining pages are fetched in parallel.
  */
 async function readPhotos(galleryId: string) {
   const db = createAdminClient()
-  const query = (sorted: boolean) => {
-    let q = db
+  const page = (from: number, count: boolean) =>
+    db
       .from("photos")
-      .select("id, original_name, web_key, r2_key, width, height, section_id, taken_at, created_at")
+      .select("id, original_name, web_key, r2_key, width, height, section_id", count ? { count: "exact" } : undefined)
       .eq("gallery_id", galleryId)
       .eq("status", "ready")
       .not("web_key", "is", null)
-    if (sorted) q = q.order("sort_order", { ascending: true, nullsFirst: false })
-    return q.order("taken_at", { ascending: true, nullsFirst: false }).order("created_at", { ascending: true }).order("id")
-  }
-  const first = await query(true)
-  return first.error?.code === "42703" ? query(false) : first
+      .order("sort_order", { ascending: true, nullsFirst: false })
+      .order("taken_at", { ascending: true, nullsFirst: false })
+      .order("created_at", { ascending: true })
+      .order("id")
+      .range(from, from + PAGE - 1)
+  const first = await page(0, true)
+  if (first.error) throw new Error(first.error.message)
+  const total = first.count ?? first.data.length
+  const rest = await Promise.all(Array.from({ length: Math.ceil(total / PAGE) - 1 }, (_, i) => page((i + 1) * PAGE, false)))
+  const failed = rest.find((r) => r.error)
+  if (failed?.error) throw new Error(failed.error.message)
+  return { data: [first.data, ...rest.map((r) => r.data ?? [])].flat() }
 }
 
 /** Heart or un-heart a photo for this browser. Same access rules as viewing. */
@@ -242,7 +260,7 @@ export async function unlockGallery(slug: string, password: string): Promise<"ok
   const gallery = await findPublished(slug)
   if (!gallery) return "not_found"
   if (gallery.expires_at && new Date(gallery.expires_at).getTime() <= Date.now()) return "expired"
-  const secret = await passwordSecret(gallery.id)
+  const { secret } = gallery
   if (!secret) return "open"
 
   const { default: bcrypt } = await import("bcryptjs")

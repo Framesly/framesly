@@ -7,31 +7,56 @@ import { UploadList, type UploadItem } from "@/components/app/upload-list"
 import { Button } from "@/components/ui/button"
 import { Icon } from "@/components/ui/icon"
 import { Progress } from "@/components/ui/progress"
-import { ACCEPTED_IMAGE_TYPES, MAX_FILES_PER_BATCH, MAX_ORIGINAL_BYTES, WEB_COPY_EDGE, WEB_COPY_QUALITY } from "@/lib/uploads"
+import {
+  ACCEPTED_FORMATS_TEXT,
+  ACCEPTED_IMAGE_TYPES,
+  MAX_FILES_PER_BATCH,
+  MAX_ORIGINAL_BYTES,
+  THUMB_EDGE,
+  THUMB_QUALITY,
+  WEB_COPY_EDGE,
+  WEB_COPY_QUALITY,
+  photoTypeOf,
+} from "@/lib/uploads"
 import { cn } from "@/lib/utils"
 
-const CONCURRENCY = 3
+const CONCURRENCY = 4
 const CHECK_CHUNK = 500
 
 type Outcome = { id: string; ok: boolean; width?: number; height?: number; error?: string; cancelled?: boolean }
 
-/** Draw the photo at WEB_COPY_EDGE on its long edge and encode it as a JPEG. */
-async function makeWebCopy(file: File) {
-  const bitmap = await createImageBitmap(file) // honours EXIF rotation
-  const { width, height } = bitmap
-  const scale = Math.min(1, WEB_COPY_EDGE / Math.max(width, height))
-  const w = Math.max(1, Math.round(width * scale))
-  const h = Math.max(1, Math.round(height * scale))
+/** Draw a decoded photo at `edge` px on its long edge and encode it as a JPEG. */
+async function encodeCopy(bitmap: ImageBitmap, edge: number, quality: number) {
+  const scale = Math.min(1, edge / Math.max(bitmap.width, bitmap.height))
   const canvas = document.createElement("canvas")
-  canvas.width = w
-  canvas.height = h
+  canvas.width = Math.max(1, Math.round(bitmap.width * scale))
+  canvas.height = Math.max(1, Math.round(bitmap.height * scale))
   const ctx = canvas.getContext("2d")
   if (!ctx) throw new Error("This browser can't resize photos.")
-  ctx.drawImage(bitmap, 0, 0, w, h)
-  bitmap.close()
-  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", WEB_COPY_QUALITY))
+  ctx.imageSmoothingQuality = "high"
+  ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height)
+  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", quality))
+  canvas.width = canvas.height = 0 // release the pixels now rather than at the next GC
   if (!blob) throw new Error("Couldn't make the web copy.")
-  return { blob, width, height }
+  return blob
+}
+
+/** Decode once (honouring EXIF rotation), then make the 2048px web copy and the 800px grid thumbnail. */
+async function makeCopies(file: File) {
+  let bitmap: ImageBitmap
+  try {
+    bitmap = await createImageBitmap(file)
+  } catch {
+    const heic = /\.hei[cf]$/i.test(file.name) || file.type.includes("heic") || file.type.includes("heif")
+    throw new Error(heic ? "This browser can't read HEIC. Upload from Safari, or export as JPEG." : "This file couldn't be read as a photo.")
+  }
+  try {
+    const web = await encodeCopy(bitmap, WEB_COPY_EDGE, WEB_COPY_QUALITY)
+    const thumb = await encodeCopy(bitmap, THUMB_EDGE, THUMB_QUALITY)
+    return { web, thumb, width: bitmap.width, height: bitmap.height }
+  } finally {
+    bitmap.close()
+  }
 }
 
 /** PUT with upload progress (fetch can't report it) and cancellation. */
@@ -48,6 +73,38 @@ function put(url: string, body: Blob, contentType: string, onProgress: (loaded: 
     signal.addEventListener("abort", () => xhr.abort(), { once: true })
     xhr.send(body)
   })
+}
+
+/** Every file in a dropped folder, including subfolders. readEntries returns at most ~100 entries per call, so read until empty. */
+async function readDirectory(dir: FileSystemDirectoryEntry): Promise<File[]> {
+  const reader = dir.createReader()
+  const entries: FileSystemEntry[] = []
+  for (;;) {
+    const batch = await new Promise<FileSystemEntry[]>((resolve, reject) => reader.readEntries(resolve, reject))
+    if (!batch.length) break
+    entries.push(...batch)
+  }
+  const nested = await Promise.all(entries.map(readEntry))
+  return nested.flat()
+}
+
+async function readEntry(entry: FileSystemEntry): Promise<File[]> {
+  if (entry.isFile) return [await new Promise<File>((resolve, reject) => (entry as FileSystemFileEntry).file(resolve, reject))]
+  if (entry.isDirectory) return readDirectory(entry as FileSystemDirectoryEntry)
+  return []
+}
+
+/** Files from a drop: plain files as they are, folders opened recursively. Falls back to the flat file list. */
+async function filesFromDrop(data: DataTransfer): Promise<File[]> {
+  // The drop's data is cleared once the event returns: take both views before the first await.
+  const flat = [...data.files]
+  const entries = [...data.items].map((i) => (i.kind === "file" ? i.webkitGetAsEntry?.() : null)).filter((e): e is FileSystemEntry => Boolean(e))
+  if (!entries.length) return flat
+  try {
+    return (await Promise.all(entries.map(readEntry))).flat()
+  } catch {
+    return flat
+  }
 }
 
 async function post<T>(url: string, body: unknown): Promise<T> {
@@ -107,11 +164,11 @@ export function PhotoUploader({ galleryId, unfinished = 0 }: { galleryId: string
       const batch = all.filter((i) => !cancelled.current.has(i.key))
       if (!batch.length) return
       batch.forEach((i) => patch(i.key, { status: "uploading", error: undefined }))
-      let presigned: { items: { photoId: string; originalUrl: string; webUrl: string }[] }
+      let presigned: { items: { photoId: string; originalUrl: string; webUrl: string; thumbUrl: string }[] }
       try {
         presigned = await post("/api/uploads/presign", {
           galleryId,
-          files: batch.map((i) => ({ name: i.file.name, size: i.file.size, type: i.file.type })),
+          files: batch.map((i) => ({ name: i.file.name, size: i.file.size, type: photoTypeOf(i.file) })),
           replaces: batch.map((i) => i.photoId).filter(Boolean),
         })
       } catch (e) {
@@ -134,16 +191,26 @@ export function PhotoUploader({ galleryId, unfinished = 0 }: { galleryId: string
           const controller = new AbortController()
           controllers.current.set(item.key, controller)
           try {
-            const web = await makeWebCopy(item.file)
-            const total = item.file.size + web.blob.size
+            // The original starts uploading at once; the copies are made while it travels.
             let originalLoaded = 0
             let webLoaded = 0
-            const report = () => pending.current.set(item.key, Math.round(((originalLoaded + webLoaded) / total) * 100))
-            await Promise.all([
-              put(target.originalUrl, item.file, item.file.type, (n) => ((originalLoaded = n), report()), controller.signal),
-              put(target.webUrl, web.blob, "image/jpeg", (n) => ((webLoaded = n), report()), controller.signal),
-            ])
-            outcomes.set(target.photoId, { id: target.photoId, ok: true, width: web.width, height: web.height })
+            let thumbLoaded = 0
+            let copiesSize = 0
+            const report = () =>
+              pending.current.set(item.key, Math.min(99, Math.round(((originalLoaded + webLoaded + thumbLoaded) / (item.file.size + copiesSize)) * 100)))
+            const original = put(target.originalUrl, item.file, photoTypeOf(item.file) ?? item.file.type, (n) => ((originalLoaded = n), report()), controller.signal)
+            const copies = makeCopies(item.file).then(async (c) => {
+              copiesSize = c.web.size + c.thumb.size
+              await Promise.all([
+                put(target.webUrl, c.web, "image/jpeg", (n) => ((webLoaded = n), report()), controller.signal),
+                put(target.thumbUrl, c.thumb, "image/jpeg", (n) => ((thumbLoaded = n), report()), controller.signal),
+              ])
+              return c
+            })
+            // An unreadable file fails its copies first: stop the original too instead of sending it for nothing.
+            copies.catch(() => controller.abort())
+            const [, made] = await Promise.all([original, copies])
+            outcomes.set(target.photoId, { id: target.photoId, ok: true, width: made.width, height: made.height })
           } catch (e) {
             if (cancelled.current.has(item.key)) outcomes.set(target.photoId, { id: target.photoId, ok: false, cancelled: true })
             else {
@@ -184,20 +251,24 @@ export function PhotoUploader({ galleryId, unfinished = 0 }: { galleryId: string
     async (queue: UploadItem[]) => {
       stopAll.current = false
       setRunning(true)
-      for (let i = 0; i < queue.length && !stopAll.current; i += MAX_FILES_PER_BATCH) await uploadBatch(queue.slice(i, i + MAX_FILES_PER_BATCH))
+      for (let i = 0; i < queue.length && !stopAll.current; i += MAX_FILES_PER_BATCH) {
+        await uploadBatch(queue.slice(i, i + MAX_FILES_PER_BATCH))
+        // Show each finished batch in the grid while the next one uploads.
+        router.refresh()
+      }
       setProgress(new Map(pending.current))
       setRunning(false)
-      router.refresh()
     },
     [uploadBatch, router]
   )
 
   const add = async (files: FileList | File[]) => {
     const picked = Array.from(files)
-    const ok = picked.filter((f) => f.type in ACCEPTED_IMAGE_TYPES && f.size <= MAX_ORIGINAL_BYTES)
+    // Folders often hold sidecar files (.xmp, .db, RAW); only photos we take are uploaded.
+    const ok = picked.filter((f) => photoTypeOf(f) !== null && f.size > 0 && f.size <= MAX_ORIGINAL_BYTES)
     const skipped = picked.length - ok.length
     if (!ok.length) {
-      setNotice(skipped ? `${skipped} file${skipped === 1 ? "" : "s"} skipped. Use JPEG, PNG or WebP under 200 MB.` : null)
+      setNotice(picked.length ? `${skipped} file${skipped === 1 ? "" : "s"} skipped. Use ${ACCEPTED_FORMATS_TEXT} under 200 MB.` : "That folder has no photos in it.")
       return
     }
 
@@ -217,7 +288,7 @@ export function PhotoUploader({ galleryId, unfinished = 0 }: { galleryId: string
 
     const fresh = ok.filter((_, i) => !have.has(i))
     const parts = [
-      skipped ? `${skipped} file${skipped === 1 ? "" : "s"} skipped (use JPEG, PNG or WebP under 200 MB).` : "",
+      skipped ? `${skipped} file${skipped === 1 ? "" : "s"} skipped (not ${ACCEPTED_FORMATS_TEXT}, or over 200 MB).` : "",
       have.size ? `${have.size} already in this gallery, skipped.` : "",
     ].filter(Boolean)
     setNotice(parts.length ? parts.join(" ") : null)
@@ -268,24 +339,37 @@ export function PhotoUploader({ galleryId, unfinished = 0 }: { galleryId: string
         e.preventDefault()
         dragDepth.current = 0
         setDragging(false)
-        void add(e.dataTransfer.files)
+        // Entries must be read synchronously in the drop event, so start now and add when ready.
+        void filesFromDrop(e.dataTransfer).then(add)
       }}
       className={cn(
-        "flex min-h-72 flex-col rounded-[var(--radius-cover)] border border-dashed p-6 transition-colors sm:p-8",
-        dragging ? "border-safelight bg-safelight-soft" : "border-line-strong"
+        "rounded-[var(--radius-cover)] border border-dashed p-4 transition-[background-color,border-color] duration-200 sm:p-5",
+        dragging ? "border-safelight bg-safelight-soft" : "border-line-strong bg-surface-raised/40"
       )}
     >
-      <div className="flex flex-col items-center text-center">
-        <Icon name="upload" className="size-10 text-ink-muted" strokeWidth={1.5} />
-        <h2 id="upload-title" className="mt-4 type-heading-2">Upload the wedding</h2>
-        <p className="mt-2 max-w-sm type-caption font-normal text-ink-muted">
-          Drag photos here, or choose them. JPEG, PNG or WebP, up to 200 MB each. We keep the original and make a web copy for your clients.
-        </p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+        <div className="flex min-w-0 flex-1 items-start gap-3">
+          <span
+            aria-hidden
+            className={cn(
+              "grid size-10 shrink-0 place-items-center rounded-[var(--radius-control)] border transition-colors",
+              dragging ? "border-safelight text-safelight" : "border-line text-ink-muted"
+            )}
+          >
+            <Icon name="upload" className="size-5" strokeWidth={1.6} />
+          </span>
+          <div className="min-w-0">
+            <h2 id="upload-title" className="type-heading-2 text-ink">{dragging ? "Drop to upload" : "Upload the wedding"}</h2>
+            <p className="mt-0.5 type-caption font-normal text-pretty text-ink-muted">
+              Drag photos or a folder here. {ACCEPTED_FORMATS_TEXT}, up to 200&nbsp;MB each.
+            </p>
+          </div>
+        </div>
         <input
           ref={inputRef}
           type="file"
           multiple
-          accept={Object.keys(ACCEPTED_IMAGE_TYPES).join(",")}
+          accept={[...Object.keys(ACCEPTED_IMAGE_TYPES), ".heic", ".heif", ".avif"].join(",")}
           className="sr-only"
           aria-label="Choose photos to upload"
           onChange={(e) => {
@@ -306,26 +390,26 @@ export function PhotoUploader({ galleryId, unfinished = 0 }: { galleryId: string
             e.target.value = ""
           }}
         />
-        <div className="mt-5 flex flex-wrap justify-center gap-2">
-          <Button variant="secondary" onClick={() => inputRef.current?.click()} disabled={checking}>
+        <div className="grid shrink-0 grid-cols-2 gap-2 sm:flex">
+          <Button size="sm" variant="primary" onClick={() => inputRef.current?.click()} disabled={checking}>
             Choose photos
           </Button>
-          <Button variant="quiet" onClick={() => folderRef.current?.click()} disabled={checking}>
+          <Button size="sm" variant="secondary" onClick={() => folderRef.current?.click()} disabled={checking}>
             Choose a folder
           </Button>
         </div>
-        {checking && <p role="status" className="mt-3 type-caption font-normal text-ink-muted">Checking what is already in this gallery…</p>}
-        {notice && <p className="mt-3 max-w-md type-caption text-ink-muted" role="status">{notice}</p>}
       </div>
+      {checking && <p role="status" className="mt-3 type-caption font-normal text-ink-muted">Checking what is already in this gallery…</p>}
+      {notice && <p className="mt-3 type-caption text-ink-muted" role="status">{notice}</p>}
 
       {unfinished > 0 && items.length === 0 && (
-        <p role="status" className="mt-6 rounded-[var(--radius-control)] border border-warning/40 bg-warning/10 px-4 py-3 type-caption font-normal text-ink">
+        <p role="status" className="mt-4 rounded-[var(--radius-control)] border border-warning/40 bg-warning/10 px-4 py-3 type-caption font-normal text-ink">
           {unfinished.toLocaleString("en")} {unfinished === 1 ? "photo" : "photos"} from an earlier upload didn&apos;t finish. Choose the same photos or folder again: the finished ones are skipped and only the rest upload.
         </p>
       )}
 
       {items.length > 0 && (
-        <div className="mt-6 border-t border-line pt-5">
+        <div className="mt-4 border-t border-line pt-4">
           <div className="flex flex-wrap items-center justify-between gap-3 type-caption">
             <span className="text-ink" role="status" aria-live="polite">
               {running ? `Uploading… ${done.toLocaleString("en")} of ${items.length.toLocaleString("en")}` : `${done.toLocaleString("en")} of ${items.length.toLocaleString("en")} uploaded`}

@@ -68,7 +68,7 @@ function NavLinks({ variant, pathname }: { variant: Variant; pathname: string | 
   return (
     <nav
       aria-label="App"
-      className="fixed inset-x-0 bottom-0 z-(--z-nav) flex border-t border-line bg-surface-raised pb-[env(safe-area-inset-bottom)] lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-(--z-nav) flex border-t border-line bg-surface-raised/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden"
     >
       {items.map((it) => {
         const on = isActive(it.href)
@@ -77,10 +77,13 @@ function NavLinks({ variant, pathname }: { variant: Variant; pathname: string | 
             key={it.href}
             href={it.href}
             aria-current={on ? "page" : undefined}
-            className={cn("relative flex h-16 flex-1 flex-col items-center justify-center gap-1 type-label", on ? "text-ink" : "text-ink-muted")}
+            className={cn(
+              "relative flex h-16 flex-1 touch-manipulation flex-col items-center justify-center gap-1 text-[11px] leading-none font-medium transition-colors",
+              on ? "text-ink" : "text-ink-muted active:text-ink"
+            )}
           >
-            {on && <motion.span layoutId="app-tab-active" className="absolute inset-x-6 top-0 h-0.5 bg-safelight" />}
-            <Icon name={it.icon} />
+            {on && <motion.span layoutId="app-tab-active" className="absolute inset-x-[30%] top-0 h-0.5 rounded-full bg-safelight" />}
+            <Icon name={it.icon} className={cn("size-[22px]", on && "text-safelight")} />
             {it.label}
           </Link>
         )

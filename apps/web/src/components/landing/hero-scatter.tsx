@@ -18,8 +18,12 @@ import { useEffect, useRef, useState, type RefObject, useMemo } from "react"
 import { ButtonArrow, ButtonLink, TextLink } from "@/components/ui/button"
 import { Chip, EdgeLabel } from "@/components/ui/card"
 import { Viewfinder } from "@/components/ui/viewfinder"
+import { RotatingHeadline } from "@/components/landing/rotating-headline"
 import { useSitePhotos } from "@/components/site/site-photos"
 import { type SitePhotos, type Photo } from "@/lib/photos"
+
+/** The hero headline cycles through these; the first is the canonical one (title, SEO, screen readers). */
+const HERO_HEADLINES = ["Cull a wedding before dinner.", "Your brand on every gallery.", "Upload once, deliver tonight.", "Couples pick. You deliver."]
 import { cn, frameNo } from "@/lib/utils"
 
 /* -------------------------------------------------------------------------- */
@@ -78,6 +82,8 @@ type Layout = {
   gridY: number
   /** Scale of a loose print relative to its grid size. */
   looseScale: number
+  /** Half the headline block's height; loose prints on phones stay outside it. */
+  headHalf: number
 }
 
 function computeLayout(vw: number, vh: number): Layout {
@@ -105,6 +111,7 @@ function computeLayout(vw: number, vh: number): Layout {
     rows,
     gridY: top + gridH / 2 - vh / 2,
     looseScale: looseW / gw,
+    headHalf: 0,
   }
 }
 
@@ -134,6 +141,7 @@ export function HeroScatter() {
   const [ready, setReady] = useState(false)
   const layoutRef = useRef(layout)
   const layoutTick = useMotionValue(0)
+  const headRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     let raf = 0
@@ -141,7 +149,8 @@ export function HeroScatter() {
       cancelAnimationFrame(raf)
       raf = requestAnimationFrame(() => {
         // Use the visual viewport height so phone URL bars don't cause jumps.
-        const next = computeLayout(window.innerWidth, document.documentElement.clientHeight)
+        // offsetHeight ignores transforms, so the scroll animation doesn't skew it.
+        const next = { ...computeLayout(window.innerWidth, document.documentElement.clientHeight), headHalf: (headRef.current?.offsetHeight ?? 0) / 2 }
         layoutRef.current = next
         setLayout(next)
         layoutTick.set(layoutTick.get() + 1)
@@ -249,7 +258,7 @@ export function HeroScatter() {
           style={{ opacity: headOpacity, y: headY, scale: headScale, visibility: headVisibility }}
           className="absolute inset-0 z-20 flex items-center justify-center px-4"
         >
-          <div className="relative mx-auto max-w-[760px] text-center">
+          <div ref={headRef} className="relative mx-auto max-w-[760px] text-center">
             <div
               aria-hidden
               className="absolute -inset-x-16 -inset-y-12 -z-10 rounded-full sm:-inset-x-24"
@@ -262,8 +271,9 @@ export function HeroScatter() {
               </span>
               <EdgeLabel>Paid beta · for wedding photographers</EdgeLabel>
             </div>
-            <h1 className="mt-5 type-display-l text-balance sm:text-[64px] sm:leading-[64px] lg:type-display-xl">
-              Cull a wedding before dinner.
+            <h1 className="mt-5 type-display-l max-[359px]:text-[40px] max-[359px]:leading-[44px] sm:text-[64px] sm:leading-[64px] lg:type-display-xl">
+              <span className="sr-only">Cull a wedding before dinner.</span>
+              <RotatingHeadline lines={HERO_HEADLINES} />
             </h1>
             <p className="mx-auto mt-5 max-w-[34rem] text-ink-muted sm:type-body-l">
               Upload the whole wedding once. Framesly picks the keepers, delivers a gallery in your
@@ -370,7 +380,13 @@ function PrintCard({
     // Keep loose prints clear of the fixed header: the top edge, allowing for
     // tilt, stays below 76px.
     const minY = -L.vh / 2 + 76 + halfH * 1.08
-    return { x: nx * (L.vw / 2 - halfW * 0.6), y: Math.max(minY, ny * (L.vh / 2 - halfH * 0.55)) }
+    let y = Math.max(minY, ny * (L.vh / 2 - halfH * 0.55))
+    // On phones the prints sit in bands above and below the headline; never over its text.
+    if (L.mobile && L.headHalf > 0) {
+      const clear = L.headHalf + 8 + halfH * 1.08
+      y = ny < 0 ? Math.min(y, -clear) : Math.max(y, clear)
+    }
+    return { x: nx * (L.vw / 2 - halfW * 0.6), y }
   }
   const cell = () => {
     const L = layoutRef.current

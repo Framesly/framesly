@@ -18,6 +18,7 @@ function toViewData(g: ClientGalleryView): GalleryViewData {
   const toPhoto = (p: ClientGalleryView["photos"][number], section: string): GalleryPhoto => ({
     id: p.id,
     src: p.src,
+    thumb: p.thumb,
     download: p.download,
     w: p.width ?? 3,
     h: p.height ?? 2,

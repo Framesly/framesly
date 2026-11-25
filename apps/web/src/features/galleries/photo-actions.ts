@@ -6,6 +6,7 @@ import { z } from "zod"
 import { requireStudio } from "@/lib/auth/dal"
 import { listGalleryPhotoIds, listGalleryPhotos, PHOTO_PAGE_SIZE } from "@/lib/data/galleries"
 import { toGridPhotos, type GridPhoto } from "@/lib/data/grid-photos"
+import { thumbKeyOf } from "@/lib/media"
 import { deleteKeys } from "@/lib/r2"
 import { createClient } from "@/lib/supabase/server"
 
@@ -33,7 +34,7 @@ export async function loadMorePhotosAction(galleryId: string, offset: number): P
   const own = await ownGallery(galleryId)
   if (!own) return { ok: false, message: "Gallery not found." }
   const rows = await listGalleryPhotos(galleryId, Math.max(0, Math.floor(offset)), PHOTO_PAGE_SIZE)
-  return { ok: true, photos: await toGridPhotos(rows), done: rows.length < PHOTO_PAGE_SIZE }
+  return { ok: true, photos: toGridPhotos(rows), done: rows.length < PHOTO_PAGE_SIZE }
 }
 
 export async function setCoverAction(galleryId: string, photoId: string): Promise<Result> {
@@ -71,7 +72,7 @@ export async function deletePhotosAction(galleryId: string, photoIds: string[]):
   const { data: rows } = await own.supabase.from("photos").select("id, r2_key, web_key").eq("gallery_id", galleryId).in("id", parsed.data)
   if (!rows?.length) return { ok: true }
   try {
-    await deleteKeys(rows.flatMap((r) => [r.r2_key, ...(r.web_key ? [r.web_key] : [])]))
+    await deleteKeys(rows.flatMap((r) => [r.r2_key, ...(r.web_key ? [r.web_key, thumbKeyOf(r.web_key)] : [])]))
   } catch {
     return { ok: false, message: "Couldn't remove the files from storage. Nothing was deleted; try again." }
   }

@@ -16,7 +16,7 @@
  * keys are needed here.
  */
 
-const PATH_RE = /^\/galleries\/[0-9a-f-]{36}\/(web|original)\/[0-9a-f-]{36}\.(jpg|jpeg|png|webp|heic)$/
+const PATH_RE = /^\/galleries\/[0-9a-f-]{36}\/(thumb|web|original)\/[0-9a-f-]{36}\.(jpg|jpeg|png|webp|heic|avif)$/
 const MAX_TTL = 7 * 24 * 60 * 60 // never accept links valid for more than a week
 
 export default {
@@ -37,10 +37,12 @@ export default {
     const kind = path.split("/")[3]
     const download = url.searchParams.get("download") === "1"
 
-    // Edge cache for web copies, keyed by path only (the signature was checked above).
+    // Edge cache for thumbnails and web copies, keyed by path only (the signature was checked above).
+    // Originals are large, downloaded rarely and never cached.
+    const cacheable = (kind === "web" || kind === "thumb") && !download && request.method === "GET"
     const cacheKey = new Request(`${url.origin}${path}`)
     const cache = caches.default
-    if (kind === "web" && !download && request.method === "GET") {
+    if (cacheable) {
       const hit = await cache.match(cacheKey)
       if (hit) return withClientHeaders(hit, exp, now)
     }
@@ -58,7 +60,7 @@ export default {
       headers.set("Content-Disposition", `attachment; filename="${name}"`)
     }
 
-    if (kind === "web" && !download && request.method === "GET") {
+    if (cacheable) {
       const [forCache, forClient] = object.body.tee()
       const cached = new Response(forCache, { headers: new Headers(headers) })
       cached.headers.set("Cache-Control", "public, max-age=86400")

@@ -2,7 +2,7 @@ import { z } from "zod"
 
 import { getMembership } from "@/lib/auth/dal"
 import { ACCEPTED_IMAGE_TYPES, MAX_FILES_PER_BATCH, MAX_ORIGINAL_BYTES } from "@/lib/uploads"
-import { originalKey, presignPut, webKey } from "@/lib/r2"
+import { originalKey, presignPut, thumbKey, webKey } from "@/lib/r2"
 import { createClient } from "@/lib/supabase/server"
 
 const bodySchema = z.object({
@@ -24,15 +24,15 @@ const bodySchema = z.object({
 /**
  * Step 3 of an upload: the photographer's browser lists the files it is about
  * to send. We check they own the gallery, record one `photos` row per file
- * (status "uploading") and hand back two presigned URLs each: the original and
- * the 2048px web copy. The files then go straight from the browser to R2.
+ * (status "uploading") and hand back three presigned URLs each: the original,
+ * the 2048px web copy and the 800px grid thumbnail. The files then go straight from the browser to R2.
  */
 export async function POST(request: Request) {
   const membership = await getMembership()
   if (!membership) return Response.json({ error: "Sign in to upload." }, { status: 401 })
 
   const parsed = bodySchema.safeParse(await request.json().catch(() => null))
-  if (!parsed.success) return Response.json({ error: "Those files can't be uploaded. Use JPEG, PNG or WebP under 200 MB." }, { status: 400 })
+  if (!parsed.success) return Response.json({ error: "Those files can't be uploaded. Use JPEG, PNG, WebP, AVIF or HEIC under 200 MB." }, { status: 400 })
   const { galleryId, files, replaces } = parsed.data
 
   const supabase = await createClient()
@@ -76,6 +76,7 @@ export async function POST(request: Request) {
         photoId: row.id,
         originalUrl: await presignPut(row.r2_key, row.mime),
         webUrl: await presignPut(row.web_key, "image/jpeg"),
+        thumbUrl: await presignPut(thumbKey(galleryId, row.id), "image/jpeg"),
       }))
     )
     return Response.json({ items })

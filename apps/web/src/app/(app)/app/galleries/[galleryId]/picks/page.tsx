@@ -1,12 +1,12 @@
 import type { Metadata } from "next"
-import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
 import { AutoRefresh, FilenameList } from "@/components/app/picks-tools"
+import { FallbackImage } from "@/components/ui/fallback-image"
 import { requireStudio } from "@/lib/auth/dal"
 import { getGalleryWithSections } from "@/lib/data/galleries"
-import { presignGet } from "@/lib/r2"
+import { photoImageUrls } from "@/lib/media"
 import { createClient } from "@/lib/supabase/server"
 import { Icon } from "@/components/ui/icon"
 
@@ -34,12 +34,10 @@ export default async function PicksPage({ params }: PageProps<"/app/galleries/[g
   const { data: photos } = ids.length
     ? await supabase.from("photos").select("id, original_name, web_key").in("id", ids)
     : { data: [] as { id: string; original_name: string; web_key: string | null }[] }
-  const rows = await Promise.all(
-    (photos ?? [])
-      .map((p) => ({ ...p, ...byPhoto.get(p.id)! }))
-      .sort((a, b) => b.hearts - a.hearts || a.original_name.localeCompare(b.original_name))
-      .map(async (p) => ({ ...p, src: p.web_key ? await presignGet(p.web_key) : null }))
-  )
+  const rows = (photos ?? [])
+    .map((p) => ({ ...p, ...byPhoto.get(p.id)! }))
+    .sort((a, b) => b.hearts - a.hearts || a.original_name.localeCompare(b.original_name))
+    .map((p) => ({ ...p, urls: p.web_key ? photoImageUrls(p.web_key) : null }))
 
   return (
     <div className="mx-auto max-w-[var(--container-content)]">
@@ -61,7 +59,7 @@ export default async function PicksPage({ params }: PageProps<"/app/galleries/[g
             {rows.map((p) => (
               <li key={p.id} className="overflow-hidden rounded-[var(--radius-chip)] border border-line bg-surface-raised">
                 <div className="relative aspect-[4/5] bg-surface-sunken">
-                  {p.src && <Image src={p.src} alt={p.original_name} fill unoptimized sizes="(min-width: 1024px) 20vw, 45vw" className="object-cover" />}
+                  {p.urls && <FallbackImage src={p.urls.thumb} fallback={p.urls.full} alt={p.original_name} fill unoptimized sizes="(min-width: 1024px) 20vw, 45vw" className="object-cover" />}
                 </div>
                 <p className="flex items-center justify-between gap-2 px-2.5 py-2 type-caption text-ink">
                   <span className="truncate">{p.original_name}</span>

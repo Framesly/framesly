@@ -1,15 +1,15 @@
 "use client"
 
 import { AnimatePresence, motion } from "motion/react"
-import { useRouter } from "next/navigation"
-import { useState, useTransition } from "react"
+import { useOptimistic, useState, useTransition } from "react"
 
 import { Aperture } from "@/components/auth/primitives"
 import { Button } from "@/components/ui/button"
+import { DatePicker } from "@/components/ui/date-picker"
 import { Dialog } from "@/components/ui/dialog"
 import { Field } from "@/components/ui/field"
 import { Icon, type IconName } from "@/components/ui/icon"
-import { Select } from "@/components/ui/select"
+import { MenuSelect, type MenuOption } from "@/components/ui/menu-select"
 import { useToast } from "@/components/ui/toast"
 import {
   addSectionAction,
@@ -24,138 +24,213 @@ import { cn } from "@/lib/utils"
 
 type Section = { id: string; name: string; sort_order: number }
 
-const statuses: { value: GalleryStatus; label: string }[] = [
-  { value: "draft", label: "Draft" },
-  { value: "culling", label: "Culling" },
-  { value: "delivered", label: "Delivered" },
-  { value: "archived", label: "Archived" },
+const statuses: MenuOption<GalleryStatus>[] = [
+  { value: "draft", label: "Draft", hint: "Only you can see it", dot: "var(--ink-muted)" },
+  { value: "culling", label: "Culling", hint: "Picking the keepers", dot: "var(--info)" },
+  { value: "delivered", label: "Delivered", hint: "Sent to the couple", dot: "var(--success)" },
+  { value: "archived", label: "Archived", hint: "Done and put away", dot: "var(--line-strong)" },
 ]
 
 /**
- * Editable title, date and status. Saves on blur / change.
- * The title is an inline-edit heading (it looks like text until you hover or focus it),
- * so it is the one text input here that is not a Field.
+ * The top of a gallery: its name (edited in place), date and status, plus the
+ * gallery-wide actions (sections, delete). Changes show at once and save in
+ * the background; the server action refreshes the page data, and a failed
+ * save puts the old value back.
  */
-export function GalleryDetails({ id, title, eventDate, status }: { id: string; title: string; eventDate: string | null; status: GalleryStatus }) {
-  const router = useRouter()
-  const [pending, start] = useTransition()
-  const [error, setError] = useState<string | null>(null)
+export function GalleryHeader({
+  id,
+  title,
+  eventDate,
+  status,
+  sections,
+}: {
+  id: string
+  title: string
+  eventDate: string | null
+  status: GalleryStatus
+  sections: Section[]
+}) {
   const toast = useToast()
+  const [pending, start] = useTransition()
+  const [date, setDate] = useState(eventDate)
+  const [state, setState] = useState(status)
+  const [sectionsOpen, setSectionsOpen] = useState(false)
 
-  const save = (input: Parameters<typeof updateGalleryAction>[1]) =>
+  const save = (input: Parameters<typeof updateGalleryAction>[1], undo: () => void) =>
     start(async () => {
       const r = await updateGalleryAction(id, input)
-      if (!r.ok) setError(r.message ?? "Couldn't save.")
-      else {
-        setError(null)
-        toast({ title: "Saved", tone: "success" })
-        router.refresh()
+      if (!r.ok) {
+        undo()
+        toast({ title: r.message ?? "Couldn't save that change", body: "Check your connection and try again." })
       }
     })
 
   return (
     <div>
-      <label className="sr-only" htmlFor="gallery-title">Gallery name</label>
-      <input
-        id="gallery-title"
-        defaultValue={title}
-        maxLength={120}
-        onBlur={(e) => e.target.value.trim() !== title && save({ title: e.target.value })}
-        onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
-        className="w-full rounded-[var(--radius-chip)] bg-transparent type-heading-1 text-ink hover:bg-surface-raised focus:bg-surface-raised md:type-display-l"
-      />
-      <div className="mt-4 flex flex-wrap items-center gap-3">
-        <Field label="Event date" hideLabel prefix="Date" type="date" defaultValue={eventDate ?? ""} onChange={(e) => save({ eventDate: e.target.value || null })} className="w-52 [color-scheme:inherit]" />
-        <Select label="Gallery status" hideLabel prefix="Status" defaultValue={status} onChange={(e) => save({ status: e.target.value as GalleryStatus })} className="w-52">
-          {statuses.map((s) => (
-            <option key={s.value} value={s.value}>
-              {s.label}
-            </option>
-          ))}
-        </Select>
-        <span className="type-caption font-normal text-ink-muted" aria-live="polite">
-          {pending ? "Saving…" : ""}
+      <div className="flex flex-wrap items-start gap-x-4 gap-y-3">
+        <div className="min-w-0 flex-1 basis-72">
+          <label className="sr-only" htmlFor="gallery-title">Gallery name</label>
+          <input
+            id="gallery-title"
+            defaultValue={title}
+            maxLength={120}
+            onBlur={(e) => {
+              const next = e.target.value.trim()
+              if (!next) e.target.value = title
+              else if (next !== title) save({ title: next }, () => (e.target.value = title))
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") (e.target as HTMLInputElement).blur()
+              if (e.key === "Escape") {
+                ;(e.target as HTMLInputElement).value = title
+                ;(e.target as HTMLInputElement).blur()
+              }
+            }}
+            className="-mx-1.5 w-[calc(100%+12px)] truncate rounded-[var(--radius-chip)] bg-transparent px-1.5 type-heading-1 text-ink transition-colors hover:bg-surface-raised focus:bg-surface-raised md:type-display-l"
+          />
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          <Button size="sm" variant="secondary" onClick={() => setSectionsOpen(true)}>
+            <Icon name="images" className="size-4" />
+            Sections
+            <span className="type-metric text-caption text-ink-muted">{sections.length}</span>
+          </Button>
+          <DeleteGallery id={id} title={title} />
+        </div>
+      </div>
+
+      <div className="mt-3 flex items-center gap-2">
+        <DatePicker
+          label="Wedding date"
+          value={date}
+          placeholder="Add wedding date"
+          className="min-w-0 flex-1 sm:w-48 sm:flex-none"
+          onChange={(next) => {
+            const prev = date
+            setDate(next)
+            save({ eventDate: next }, () => setDate(prev))
+          }}
+        />
+        <MenuSelect
+          label="Gallery status"
+          value={state}
+          options={statuses}
+          className="min-w-0 flex-1 sm:w-40 sm:flex-none"
+          onChange={(next) => {
+            const prev = state
+            setState(next)
+            save({ status: next }, () => setState(prev))
+          }}
+        />
+        <span className="flex items-center gap-1.5 type-caption font-normal text-ink-muted" aria-live="polite">
+          {pending && (
+            <>
+              <Aperture className="size-3.5" /> Saving…
+            </>
+          )}
         </span>
       </div>
-      {error && <p className="mt-2 type-caption text-danger" role="alert">{error}</p>}
+
+      <Dialog open={sectionsOpen} onClose={() => setSectionsOpen(false)} title="Sections">
+        <SectionsManager galleryId={id} sections={sections} />
+      </Dialog>
     </div>
   )
 }
 
-/** Sections (one per event): add, rename, reorder, delete. */
+type SectionChange = { type: "add"; name: string } | { type: "rename"; id: string; name: string } | { type: "delete"; id: string } | { type: "move"; id: string; direction: -1 | 1 }
+
+function applyChange(list: Section[], c: SectionChange): Section[] {
+  switch (c.type) {
+    case "add":
+      return [...list, { id: `pending-${list.length}`, name: c.name.trim(), sort_order: list.length }]
+    case "rename":
+      return list.map((s) => (s.id === c.id ? { ...s, name: c.name.trim() } : s))
+    case "delete":
+      return list.filter((s) => s.id !== c.id)
+    case "move": {
+      const i = list.findIndex((s) => s.id === c.id)
+      const j = i + c.direction
+      if (i < 0 || j < 0 || j >= list.length) return list
+      const next = [...list]
+      ;[next[i], next[j]] = [next[j], next[i]]
+      return next
+    }
+  }
+}
+
+/** Sections (one per event): add, rename, reorder, delete. Each change shows at once. */
 export function SectionsManager({ galleryId, sections }: { galleryId: string; sections: Section[] }) {
-  const router = useRouter()
-  const [pending, start] = useTransition()
+  const [, start] = useTransition()
+  const [optimistic, apply] = useOptimistic(sections, applyChange)
   const [error, setError] = useState<string | null>(null)
   const [newName, setNewName] = useState("")
   const [editing, setEditing] = useState<string | null>(null)
 
-  const run = (fn: () => Promise<{ ok: boolean; message?: string }>) =>
+  const run = (change: SectionChange, fn: () => Promise<{ ok: boolean; message?: string }>) =>
     start(async () => {
+      apply(change)
       const r = await fn()
-      if (!r.ok) setError(r.message ?? "Something went wrong.")
-      else {
-        setError(null)
-        router.refresh()
-      }
+      setError(r.ok ? null : (r.message ?? "Something went wrong. Try again."))
     })
 
   return (
-    <section aria-labelledby="sections-title" className="rounded-[var(--radius-cover)] border border-line bg-surface-raised p-5 sm:p-6">
-      <div className="flex items-center justify-between gap-3">
-        <h2 id="sections-title" className="type-heading-2">Sections</h2>
-        {pending && <Aperture className="size-4 text-ink-muted" />}
-      </div>
-      <p className="mt-1 type-caption font-normal text-ink-muted">Clients see one section per event, in this order.</p>
+    <div>
+      <p className="type-caption font-normal text-ink-muted">Clients see one section per event, in this order.</p>
 
-      <ol className="mt-5 divide-y divide-line border-y border-line">
+      <ol className="mt-4 divide-y divide-line border-y border-line">
         <AnimatePresence initial={false}>
-          {sections.map((s, i) => (
-            <motion.li
-              key={s.id}
-              layout
-              initial={{ opacity: 0, y: -6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, height: 0 }}
-              className="flex min-h-14 items-center gap-2 py-2"
-            >
-              <span className="w-6 shrink-0 type-metric text-caption text-ink-muted">{i + 1}</span>
-              {editing === s.id ? (
-                <form
-                  className="flex flex-1 gap-2"
-                  onSubmit={(e) => {
-                    e.preventDefault()
-                    const name = String(new FormData(e.currentTarget).get("name") ?? "")
-                    setEditing(null)
-                    run(() => renameSectionAction(galleryId, s.id, name))
-                  }}
-                >
-                  <Field label="Section name" hideLabel name="name" defaultValue={s.name} autoFocus maxLength={60} className="min-w-0 flex-1" />
-                  <Button type="submit" size="sm">Save</Button>
-                  <Button type="button" size="sm" variant="quiet" onClick={() => setEditing(null)}>Cancel</Button>
-                </form>
-              ) : (
-                <>
-                  <span className="min-w-0 flex-1 truncate text-ink">{s.name}</span>
-                  <IconBtn label={`Move ${s.name} up`} disabled={i === 0 || pending} onClick={() => run(() => moveSectionAction(galleryId, s.id, -1))} icon="arrow-up" />
-                  <IconBtn label={`Move ${s.name} down`} disabled={i === sections.length - 1 || pending} onClick={() => run(() => moveSectionAction(galleryId, s.id, 1))} icon="arrow-down" />
-                  <IconBtn label={`Rename ${s.name}`} disabled={pending} onClick={() => setEditing(s.id)} icon="pencil" />
-                  <IconBtn label={`Delete ${s.name}`} danger disabled={pending} onClick={() => run(() => deleteSectionAction(galleryId, s.id))} icon="trash" />
-                </>
-              )}
-            </motion.li>
-          ))}
+          {optimistic.map((s, i) => {
+            const saving = s.id.startsWith("pending-")
+            return (
+              <motion.li
+                key={s.id}
+                layout="position"
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: saving ? 0.6 : 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.18 }}
+                className="flex min-h-14 items-center gap-1 py-1.5"
+              >
+                <span className="w-6 shrink-0 type-metric text-caption text-ink-muted">{i + 1}</span>
+                {editing === s.id ? (
+                  <form
+                    className="flex flex-1 gap-2"
+                    onSubmit={(e) => {
+                      e.preventDefault()
+                      const name = String(new FormData(e.currentTarget).get("name") ?? "").trim()
+                      setEditing(null)
+                      if (name && name !== s.name) run({ type: "rename", id: s.id, name }, () => renameSectionAction(galleryId, s.id, name))
+                    }}
+                  >
+                    <Field label="Section name" hideLabel name="name" defaultValue={s.name} autoFocus maxLength={60} autoComplete="off" className="min-w-0 flex-1" />
+                    <Button type="submit" size="sm">Save</Button>
+                    <Button type="button" size="sm" variant="quiet" onClick={() => setEditing(null)}>Cancel</Button>
+                  </form>
+                ) : (
+                  <>
+                    <span className="min-w-0 flex-1 truncate text-ink">{s.name}</span>
+                    <IconBtn label={`Move ${s.name} up`} disabled={i === 0 || saving} onClick={() => run({ type: "move", id: s.id, direction: -1 }, () => moveSectionAction(galleryId, s.id, -1))} icon="arrow-up" />
+                    <IconBtn label={`Move ${s.name} down`} disabled={i === optimistic.length - 1 || saving} onClick={() => run({ type: "move", id: s.id, direction: 1 }, () => moveSectionAction(galleryId, s.id, 1))} icon="arrow-down" />
+                    <IconBtn label={`Rename ${s.name}`} disabled={saving} onClick={() => setEditing(s.id)} icon="pencil" />
+                    <IconBtn label={`Delete ${s.name}`} danger disabled={saving} onClick={() => run({ type: "delete", id: s.id }, () => deleteSectionAction(galleryId, s.id))} icon="trash" />
+                  </>
+                )}
+              </motion.li>
+            )
+          })}
         </AnimatePresence>
-        {sections.length === 0 && <li className="py-4 type-caption font-normal text-ink-muted">No sections yet. Photos will show in one list until you add some.</li>}
+        {optimistic.length === 0 && <li className="py-4 type-caption font-normal text-ink-muted">No sections yet. Photos show in one list until you add some.</li>}
       </ol>
 
       <form
         className="mt-4 flex gap-2"
         onSubmit={(e) => {
           e.preventDefault()
-          const name = newName
+          const name = newName.trim()
+          if (!name) return
           setNewName("")
-          run(() => addSectionAction(galleryId, name))
+          run({ type: "add", name }, () => addSectionAction(galleryId, name))
         }}
       >
         <Field
@@ -168,10 +243,13 @@ export function SectionsManager({ galleryId, sections }: { galleryId: string; se
           autoComplete="off"
           className="min-w-0 flex-1"
         />
-        <Button type="submit" variant="secondary" disabled={!newName.trim() || pending}>Add</Button>
+        <Button type="submit" variant="secondary" disabled={!newName.trim()}>
+          <Icon name="plus" className="size-4" />
+          Add
+        </Button>
       </form>
       {error && <p className="mt-3 type-caption text-danger" role="alert">{error}</p>}
-    </section>
+    </div>
   )
 }
 
@@ -183,7 +261,7 @@ function IconBtn({ label, icon, onClick, disabled, danger }: { label: string; ic
       title={label}
       onClick={onClick}
       disabled={disabled}
-      className={cn("grid size-11 shrink-0 place-items-center rounded-full text-ink-muted transition-colors hover:bg-surface-sunken disabled:opacity-30", danger ? "hover:text-danger" : "hover:text-ink")}
+      className={cn("grid size-10 shrink-0 place-items-center rounded-full text-ink-muted transition-colors hover:bg-surface-sunken disabled:opacity-30", danger ? "hover:text-danger" : "hover:text-ink")}
     >
       <Icon name={icon} className="size-[18px]" />
     </button>
@@ -197,13 +275,15 @@ export function DeleteGallery({ id, title }: { id: string; title: string }) {
   const [pending, start] = useTransition()
   const [error, setError] = useState<string | null>(null)
   return (
-    <section aria-labelledby="danger-title" className="rounded-[var(--radius-cover)] border border-danger/40 p-5 sm:p-6">
-      <h2 id="danger-title" className="type-heading-2">Delete gallery</h2>
-      <p className="mt-1 type-caption font-normal text-ink-muted">Removes the gallery, its sections and its photos for good.</p>
-      <Button variant="danger" className="mt-4" onClick={() => setOpen(true)}>Delete gallery</Button>
+    <>
+      <Button size="sm" variant="quiet" aria-label="Delete gallery" title="Delete gallery" className="text-ink-muted hover:text-danger" onClick={() => setOpen(true)}>
+        <Icon name="trash" className="size-4" />
+        <span className="hidden sm:inline">Delete</span>
+      </Button>
       <Dialog open={open} onClose={() => setOpen(false)} title="Delete this gallery?">
         <p className="text-ink-muted">
-          This can’t be undone. Type <span className="font-semibold text-ink">{title}</span> to confirm.
+          This removes the gallery, its sections and every photo, and the client link stops working. It can’t be undone. Type{" "}
+          <span className="font-semibold text-ink">{title}</span> to confirm.
         </p>
         <Field label="Gallery name" hideLabel value={typed} onChange={(e) => setTyped(e.target.value)} autoComplete="off" className="mt-4" />
         {error && <p className="mt-2 type-caption text-danger" role="alert">{error}</p>}
@@ -215,14 +295,15 @@ export function DeleteGallery({ id, title }: { id: string; title: string }) {
             onClick={() =>
               start(async () => {
                 const r = await deleteGalleryAction(id)
-                if (r && !r.ok) setError(r.message ?? "Couldn't delete.")
+                if (r && !r.ok) setError(r.message ?? "Couldn't delete. Try again.")
               })
             }
           >
+            {pending ? <Aperture className="size-4" /> : null}
             {pending ? "Deleting…" : "Delete gallery"}
           </Button>
         </div>
       </Dialog>
-    </section>
+    </>
   )
 }

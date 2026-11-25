@@ -96,6 +96,8 @@ export const publishGallerySchema = z.object({
   password: z.string().max(72, "Use 72 characters or fewer.").optional().transform((v) => (v ? v : undefined))
     .refine((v) => v === undefined || v.length >= 4, "Use at least 4 characters."),
   removePassword: z.boolean().optional().default(false),
+  /** Replace the key with a new generated one (ignored when a password is given). */
+  resetKey: z.boolean().optional().default(false),
   /** ISO timestamp from the browser (end of the chosen day, local time), or null for no expiry. */
   expiresAt: z.iso.datetime({ offset: true }).nullable().optional().default(null),
 })

@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 
 import { GalleryList } from "@/components/app/gallery-list"
+import { MetricStrip } from "@/components/app/metric-strip"
 import { NewGalleryDialog } from "@/components/app/new-gallery-dialog"
 import { Viewfinder } from "@/components/ui/viewfinder"
 import { requireStudio } from "@/lib/auth/dal"
@@ -37,18 +38,15 @@ export default async function GalleriesPage({ searchParams }: PageProps<"/app">)
         {galleries.length > 0 && <NewGalleryDialog />}
       </div>
 
-      <dl className="mt-8 grid grid-cols-1 gap-3 min-[420px]:grid-cols-3">
-        {[
-          { label: "Galleries", value: galleries.length },
-          { label: "Photos", value: totals.photos },
-          { label: "Delivered", value: totals.delivered },
-        ].map((m) => (
-          <div key={m.label} className="rounded-[var(--radius-control)] border border-line bg-surface-raised p-4">
-            <dt className="type-caption font-normal text-ink-muted">{m.label}</dt>
-            <dd className="mt-1 type-metric text-stat leading-8 text-ink">{m.value.toLocaleString("en")}</dd>
-          </div>
-        ))}
-      </dl>
+      <div className="mt-6">
+        <MetricStrip
+          metrics={[
+            { label: "Galleries", value: galleries.length },
+            { label: "Photos", value: totals.photos },
+            { label: "Delivered", value: totals.delivered },
+          ]}
+        />
+      </div>
 
       {galleries.length === 0 ? (
         <section className="grain relative mt-8 flex flex-col items-center rounded-[var(--radius-cover)] border border-line bg-surface-raised px-6 py-16 text-center" aria-labelledby="empty-title">
@@ -65,7 +63,7 @@ export default async function GalleriesPage({ searchParams }: PageProps<"/app">)
           </div>
         </section>
       ) : (
-        <GalleryList items={galleries.map((g) => ({ gallery: g, coverSrc: covers.get(g.id) ?? null }))} brandColor={studio.brand_color} />
+        <GalleryList items={galleries.map((g) => ({ gallery: g, cover: covers.get(g.id) ?? null }))} brandColor={studio.brand_color} />
       )}
     </div>
   )

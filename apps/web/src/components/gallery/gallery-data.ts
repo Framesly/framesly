@@ -1,6 +1,13 @@
 import { showcaseUrl, type Photo, type SitePhotoKey, type SitePhotos } from "@/lib/photos"
 
-export type GalleryPhoto = Photo & { frame: number; section: string; /** Signed link to the original (live galleries) */ download?: string }
+export type GalleryPhoto = Photo & {
+  frame: number
+  section: string
+  /** Signed link to the original (live galleries) */
+  download?: string
+  /** Small grid copy (live galleries); `src` is the full web copy for the viewer */
+  thumb?: string
+}
 export type GallerySection = { id: string; name: string; day: string; photos: GalleryPhoto[] }
 
 /** What the client gallery view renders: the sample gallery or a real published one. */

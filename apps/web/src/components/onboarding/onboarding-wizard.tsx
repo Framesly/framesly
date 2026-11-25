@@ -18,19 +18,22 @@ const develop = [0.22, 1, 0.36, 1] as const
 const steps = [
   { title: "Name your studio", short: "Studio" },
   { title: "Make it yours", short: "Brand" },
-  { title: "Choose where photos live", short: "Storage" },
 ] as const
-
-const regions = [
-  { value: "in", label: "India", note: "Mumbai. Best for weddings shot in India and fastest for Indian clients." },
-  { value: "us", label: "United States", note: "Best for the Americas." },
-  { value: "eu", label: "Europe", note: "Frankfurt. Keeps client data in the EU for GDPR." },
-] as const
-
-type Region = (typeof regions)[number]["value"]
 
 /**
- * First-run setup: studio name and address, brand, and data region.
+ * The studio's region label, from the photographer's time zone, so setup
+ * doesn't need to ask. It is informational: every studio's photos live in the
+ * same storage, served worldwide through the media CDN.
+ */
+function detectRegion(): "in" | "eu" | "us" {
+  const zone = Intl.DateTimeFormat().resolvedOptions().timeZone ?? ""
+  if (/^Asia\/(Kolkata|Calcutta)$/.test(zone)) return "in"
+  if (zone.startsWith("Europe/")) return "eu"
+  return "us"
+}
+
+/**
+ * First-run setup: studio name and address, then brand. Enter submits a step.
  * The gallery cover preview on the right updates as they type, so they see
  * what their couples will see.
  */
@@ -43,7 +46,6 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
   const [slugEdited, setSlugEdited] = useState(false)
   const [brandColor, setBrandColor] = useState("#F2A93B")
   const [logoFile, setLogoFile] = useState<File | null>(null)
-  const [region, setRegion] = useState<Region>("in")
   const [phase, setPhase] = useState<"form" | "saving" | "done">("form")
   const [error, setError] = useState<string | null>(null)
   const [fieldError, setFieldError] = useState<Record<string, string>>({})
@@ -69,7 +71,7 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
   const finish = async () => {
     setPhase("saving")
     setError(null)
-    const res = await createStudioAction({ name, slug: effectiveSlug, brandColor, region })
+    const res = await createStudioAction({ name, slug: effectiveSlug, brandColor, region: detectRegion() })
     if (!res.ok) {
       setPhase("form")
       if (res.fieldErrors) {
@@ -107,10 +109,10 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
   return (
     <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-16">
       <div className="min-w-0">
-        <p className="text-ink-muted">{firstName ? `Welcome, ${firstName}.` : "Welcome."} Three quick steps, then you’re in.</p>
+        <p className="text-ink-muted">{firstName ? `Welcome, ${firstName}.` : "Welcome."} Two quick steps, then you’re in.</p>
 
         {/* Progress: a real sequence, so it's numbered */}
-        <ol className="mt-6 grid grid-cols-3 gap-2" aria-label="Setup progress">
+        <ol className="mt-6 grid grid-cols-2 gap-2" aria-label="Setup progress">
           {steps.map((s, i) => (
             <li key={s.short}>
               <button
@@ -131,7 +133,17 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
           ))}
         </ol>
 
-        <div className="relative mt-10 min-h-[380px]">
+        <form
+          noValidate
+          onSubmit={(e) => {
+            e.preventDefault()
+            if (phase === "saving") return
+            if (step < steps.length - 1) {
+              if (canContinue) go(step + 1)
+            } else void finish()
+          }}
+        >
+          <div className="relative mt-10 min-h-[320px]">
           <AnimatePresence mode="wait" custom={dir} initial={false}>
             <motion.section
               key={step}
@@ -202,37 +214,6 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
                 </div>
               )}
 
-              {step === 2 && (
-                <div className="mt-8">
-                  <p className="text-ink-muted">Pick the region closest to your clients. It can’t be changed later.</p>
-                  <div role="radiogroup" aria-label="Data region" className="mt-6 grid gap-3">
-                    {regions.map((r) => {
-                      const on = region === r.value
-                      return (
-                        <button
-                          key={r.value}
-                          type="button"
-                          role="radio"
-                          aria-checked={on}
-                          onClick={() => setRegion(r.value)}
-                          className={cn(
-                            "flex items-start gap-4 rounded-[var(--radius-control)] border p-4 text-left transition-colors",
-                            on ? "border-safelight bg-safelight-soft" : "border-line hover:border-line-strong"
-                          )}
-                        >
-                          <span aria-hidden className={cn("mt-0.5 grid size-5 shrink-0 place-items-center rounded-full border-2", on ? "border-safelight" : "border-line-strong")}>
-                            {on && <motion.span layoutId="region-dot" className="size-2.5 rounded-full bg-safelight" />}
-                          </span>
-                          <span>
-                            <span className="block type-heading-2">{r.label}</span>
-                            <span className="mt-1 block type-caption font-normal text-ink-muted">{r.note}</span>
-                          </span>
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
-              )}
             </motion.section>
           </AnimatePresence>
         </div>
@@ -252,12 +233,12 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
             <span />
           )}
           {step < steps.length - 1 ? (
-            <Button size="lg" onClick={() => go(step + 1)} disabled={!canContinue}>
+            <Button type="submit" size="lg" disabled={!canContinue}>
               Continue
               <ButtonArrow />
             </Button>
           ) : (
-            <Button size="lg" onClick={finish} disabled={phase === "saving"} aria-busy={phase === "saving"}>
+            <Button type="submit" size="lg" disabled={phase === "saving"} aria-busy={phase === "saving"}>
               {phase === "saving" ? (
                 <>
                   <Aperture /> Creating your studio…
@@ -271,6 +252,7 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
             </Button>
           )}
         </div>
+        </form>
       </div>
 
       {/* Live preview of what couples will see */}

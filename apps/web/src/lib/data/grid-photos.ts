@@ -1,23 +1,18 @@
 import "server-only"
 
-import { presignGet } from "@/lib/r2"
+import { photoImageUrls } from "@/lib/media"
 
-/** A photo as the editor's grid shows it. */
-export type GridPhoto = { id: string; name: string; src: string | null; status: string; sectionId: string | null }
+/** A photo as the editor's grid shows it: the thumbnail, and the web copy to fall back to. */
+export type GridPhoto = { id: string; name: string; src: string | null; full: string | null; status: string; sectionId: string | null }
 
 /**
- * Turn photo rows into what the grid shows, with short-lived photo links for
+ * Turn photo rows into what the grid shows, with signed media links for
  * finished uploads. Server-only and not an action: it must never be callable
  * from the browser, because it signs whatever keys it is given.
  */
-export async function toGridPhotos(rows: { id: string; original_name: string; web_key: string | null; status: string; section_id: string | null }[]): Promise<GridPhoto[]> {
-  return Promise.all(
-    rows.map(async (p) => ({
-      id: p.id,
-      name: p.original_name,
-      src: p.status === "ready" && p.web_key ? await presignGet(p.web_key) : null,
-      status: p.status,
-      sectionId: p.section_id,
-    }))
-  )
+export function toGridPhotos(rows: { id: string; original_name: string; web_key: string | null; status: string; section_id: string | null }[]): GridPhoto[] {
+  return rows.map((p) => {
+    const urls = p.status === "ready" && p.web_key ? photoImageUrls(p.web_key) : null
+    return { id: p.id, name: p.original_name, src: urls?.thumb ?? null, full: urls?.full ?? null, status: p.status, sectionId: p.section_id }
+  })
 }

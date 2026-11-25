@@ -1,7 +1,8 @@
 "use client"
 
 import Image from "next/image"
-import { useRouter } from "next/navigation"
+
+import { FallbackImage } from "@/components/ui/fallback-image"
 import { useState, useTransition } from "react"
 
 import { Badge } from "@/components/ui/badge"
@@ -35,7 +36,6 @@ export function PhotoGrid({
   sections: Section[]
   coverId: string | null
 }) {
-  const router = useRouter()
   const toast = useToast()
   const [photos, setPhotos] = useState(initial)
   const [done, setDone] = useState(initial.length >= total)
@@ -66,7 +66,6 @@ export function PhotoGrid({
       if (!r.ok) return fail(r.message)
       setCoverId(id)
       toast({ title: "Cover set", body: "Clients see this photo first.", tone: "success" })
-      router.refresh()
     })
 
   const assign = (ids: string[], sectionId: string | null) =>
@@ -75,7 +74,6 @@ export function PhotoGrid({
       if (!r.ok) return fail(r.message)
       setPhotos((all) => all.map((p) => (ids.includes(p.id) ? { ...p, sectionId } : p)))
       toast({ title: sectionId ? `Moved to ${sectionName(sectionId)}` : "Taken out of its section", tone: "success" })
-      router.refresh()
     })
 
   const remove = (ids: string[]) =>
@@ -87,7 +85,6 @@ export function PhotoGrid({
       setConfirmDelete(null)
       setOpenId(null)
       toast({ title: ids.length === 1 ? "Photo deleted" : `${ids.length} photos deleted`, tone: "success" })
-      router.refresh()
     })
 
   const move = (id: string, to: "start" | "earlier" | "later") => {
@@ -106,7 +103,6 @@ export function PhotoGrid({
         setPhotos(before)
         return fail(r.message)
       }
-      router.refresh()
     })
   }
 
@@ -188,7 +184,7 @@ export function PhotoGrid({
                 className={cn("relative block aspect-[4/5] w-full overflow-hidden rounded-[var(--radius-chip)] bg-surface-sunken text-left", isSelected && "selected-frame")}
               >
                 {p.src ? (
-                  <Image src={p.src} alt="" fill unoptimized sizes="(min-width: 1024px) 16vw, 25vw" className="object-cover" />
+                  <FallbackImage src={p.src} fallback={p.full} alt="" fill unoptimized loading="lazy" sizes="(min-width: 1024px) 16vw, 25vw" className="object-cover" />
                 ) : (
                   <span className="absolute inset-0 grid place-items-center px-2 text-center type-caption font-normal text-ink-muted">{p.status === "failed" ? "Failed" : "Uploading…"}</span>
                 )}
@@ -218,7 +214,7 @@ export function PhotoGrid({
         {open && (
           <div>
             <div className="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-control)] bg-surface-sunken">
-              {open.src ? <Image src={open.src} alt={open.name} fill unoptimized sizes="(min-width: 640px) 512px, 100vw" className="object-contain" /> : <span className="absolute inset-0 grid place-items-center type-caption font-normal text-ink-muted">{open.status === "failed" ? "This upload failed. Delete it and upload the photo again." : "Still uploading…"}</span>}
+              {open.full ? <Image src={open.full} alt={open.name} fill unoptimized sizes="(min-width: 640px) 512px, 100vw" className="object-contain" /> : <span className="absolute inset-0 grid place-items-center type-caption font-normal text-ink-muted">{open.status === "failed" ? "This upload failed. Delete it and upload the photo again." : "Still uploading…"}</span>}
             </div>
             <div className="mt-3 flex items-center justify-between gap-2">
               <span className="type-metric text-ink-muted">

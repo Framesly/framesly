@@ -4,6 +4,7 @@ import { useActionState, useState } from "react"
 
 import { FormAlert, SubmitButton } from "@/components/auth/primitives"
 import { Button } from "@/components/ui/button"
+import { DatePicker } from "@/components/ui/date-picker"
 import { Dialog } from "@/components/ui/dialog"
 import { Field } from "@/components/ui/field"
 import { Icon } from "@/components/ui/icon"
@@ -37,11 +38,19 @@ export function NewGalleryDialog({ label = "New gallery", variant = "primary" }:
 function NewGalleryForm({ onCancel }: { onCancel: () => void }) {
   const [state, action] = useActionState(createGalleryAction, idle)
   const [preset, setPreset] = useState<(typeof presets)[number]["value"]>((state.values?.preset as never) ?? "multi-day")
+  const [date, setDate] = useState<string | null>(state.values?.eventDate || null)
   return (
     <form action={action} className="space-y-6" noValidate>
       {state.message && <FormAlert>{state.message}</FormAlert>}
       <Field label="Gallery name" name="title" placeholder="Aarohi & Kabir…" required autoComplete="off" defaultValue={state.values?.title} error={state.fieldErrors?.title} autoFocus />
-      <Field label="Wedding date" name="eventDate" type="date" defaultValue={state.values?.eventDate} error={state.fieldErrors?.eventDate} hint="Optional. Helps you find galleries later." />
+      <div>
+        <p className="mb-2 type-caption text-ink">Wedding date</p>
+        <input type="hidden" name="eventDate" value={date ?? ""} />
+        <DatePicker label="Wedding date" value={date} onChange={setDate} placeholder="Add a date (optional)" />
+        <p className={cn("mt-1.5 type-caption font-normal", state.fieldErrors?.eventDate ? "text-danger" : "text-ink-muted")}>
+          {state.fieldErrors?.eventDate ?? "Optional. Helps you find galleries later."}
+        </p>
+      </div>
       <fieldset>
         <legend className="type-caption text-ink">Sections</legend>
         <p className="mt-1 type-caption font-normal text-ink-muted">One section per event. You can rename or reorder them later.</p>

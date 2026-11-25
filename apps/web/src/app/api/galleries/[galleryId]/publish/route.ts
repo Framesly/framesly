@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs"
 
 import { getMembership } from "@/lib/auth/dal"
+import { encryptGalleryKey, generateGalleryKey } from "@/lib/gallery-key"
 import { siteOrigin } from "@/lib/auth/redirects"
 import { createClient } from "@/lib/supabase/server"
 import { fieldErrors, publicSlugSchema, publishGallerySchema } from "@/lib/validation"
@@ -9,7 +10,8 @@ import { fieldErrors, publicSlugSchema, publishGallerySchema } from "@/lib/valid
  * Publishing a gallery. The photographer must belong to
  * the gallery's studio; the database functions check that again (security
  * definer + is_member), so a forged request can't publish someone else's work.
- * Passwords are bcrypt-hashed here and only the hash reaches the database.
+ * Keys are bcrypt-hashed here for checking, and also stored encrypted
+ * (lib/gallery-key) so the photographer can see them again.
  */
 
 const BCRYPT_COST = 10
@@ -35,16 +37,18 @@ export async function POST(request: Request, ctx: Ctx) {
 
   const parsed = publishGallerySchema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) return Response.json({ error: "Check the highlighted fields.", fieldErrors: fieldErrors(parsed.error) }, { status: 400 })
-  const { slug, password, removePassword, expiresAt } = parsed.data
+  const { slug, password, removePassword, resetKey, expiresAt } = parsed.data
 
-  const passwordHash = password ? await bcrypt.hash(password, BCRYPT_COST) : null
+  const key = password ?? (resetKey && !removePassword ? generateGalleryKey() : undefined)
+  const passwordHash = key ? await bcrypt.hash(key, BCRYPT_COST) : null
   const supabase = await createClient()
   const { data, error } = await supabase.rpc("publish_gallery", {
     p_gallery_id: galleryId,
     p_slug: slug,
     p_password_hash: passwordHash,
-    p_remove_password: removePassword && !password,
+    p_remove_password: removePassword && !key,
     p_expires_at: expiresAt,
+    p_password_cipher: key ? encryptGalleryKey(key) : null,
   })
 
   if (error) {
@@ -67,6 +71,8 @@ export async function POST(request: Request, ctx: Ctx) {
     publishedAt: row.published_at,
     expiresAt: row.expires_at,
     hasPassword: row.has_password,
+    /** Present only when the key changed in this request. */
+    key: key ?? null,
   })
 }
 

@@ -1,16 +1,16 @@
 import { Skeleton } from "@/components/ui/skeleton"
 
-/** Placeholder for any app page while it loads: a title, three stat tiles and a large block. */
+/** Placeholder for any app page while it loads: a title, the metric strip and a content block. */
 export function PageSkeleton() {
   return (
     <div className="mx-auto max-w-[var(--container-content)]" role="status" aria-busy aria-label="Loading">
       <Skeleton className="h-10 w-56" />
-      <div className="mt-8 grid grid-cols-1 gap-3 min-[420px]:grid-cols-3">
-        <Skeleton className="h-20 rounded-[var(--radius-control)]" />
-        <Skeleton className="h-20 rounded-[var(--radius-control)]" />
-        <Skeleton className="h-20 rounded-[var(--radius-control)]" />
+      <Skeleton className="mt-6 h-[74px] rounded-[var(--radius-control)]" />
+      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        {Array.from({ length: 4 }, (_, i) => (
+          <Skeleton key={i} className="aspect-[4/5] rounded-[var(--radius-control)]" style={{ animationDelay: `${i * 90}ms` }} />
+        ))}
       </div>
-      <Skeleton className="mt-8 h-64 rounded-[var(--radius-cover)]" />
     </div>
   )
 }
