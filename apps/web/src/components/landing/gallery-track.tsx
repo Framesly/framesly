@@ -98,7 +98,7 @@ export function GalleryTrack() {
     <section
       ref={sectionRef}
       aria-labelledby="gallery-track-title"
-      className={cn("theme-espresso relative", reduce ? "" : "h-[340vh]")}
+      className={cn("relative bg-surface-sunken", reduce ? "" : "h-[340vh]")}
     >
       {/* Seen only while the lights are still off */}
       {!reduce && (
@@ -110,7 +110,7 @@ export function GalleryTrack() {
           </div>
         </div>
       )}
-      <motion.div style={{ clipPath }} className="theme-ivory relative h-full">
+      <motion.div style={{ clipPath }} className="relative h-full bg-surface">
         <div ref={viewportRef} className={cn("flex flex-col overflow-hidden", reduce ? "py-24" : "sticky top-0 h-dvh justify-center")}>
           <div className={cn(reduce && "overflow-x-auto")}>
             <motion.div
@@ -136,7 +136,7 @@ export function GalleryTrack() {
               {/* Cover */}
               <article className="relative w-[82vw] shrink-0 overflow-hidden rounded-[var(--radius-cover)] sm:w-[620px]">
                 <ParallaxPhoto photo={photos.gardenArch} progress={pin} sizes="620px" className="absolute inset-0" position="50% 35%" strength={10} />
-                <div className="absolute inset-0 bg-gradient-to-t from-[rgb(28_23_20/0.78)] via-[rgb(28_23_20/0.1)] to-[rgb(28_23_20/0.35)]" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[rgb(var(--scrim)/0.78)] via-[rgb(var(--scrim)/0.1)] to-[rgb(var(--scrim)/0.35)]" />
                 <p className="absolute top-5 left-5 font-heading text-caption font-bold tracking-[0.28em] text-white uppercase">Saffron Lane</p>
                 <span className="absolute top-5 right-5 rounded-full bg-white/85 px-2.5 py-0.5 type-label text-fixed-dark">Sample</span>
                 <div className="absolute right-5 bottom-6 left-5 text-white sm:left-7">
@@ -166,13 +166,13 @@ export function GalleryTrack() {
               {/* Favourites */}
               <Panel label="Favourites" title="Heart, then download" body="Two buttons per photo. Nothing else gets between a client and the picture.">
                 <ParallaxPhoto photo={photos.seaBreeze} progress={pin} sizes="420px" className="absolute inset-0" position="50% 30%" />
-                <div className="absolute right-4 bottom-4 flex items-center gap-1 rounded-full bg-[rgb(28_23_20/0.6)] p-1 text-white">
+                <div className="absolute right-4 bottom-4 flex items-center gap-1 rounded-full bg-[rgb(var(--scrim)/0.6)] p-1 text-white">
                   <HeartButton on={fav} onToggle={() => setFav((v) => !v)} label={fav ? "Remove from favourites" : "Add to favourites"} className="hover:bg-white/15" />
                   <span className="grid size-11 place-items-center" aria-hidden>
                     <svg viewBox="0 0 24 24" className="size-5"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19.5h14" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" /></svg>
                   </span>
                 </div>
-                <p className="absolute top-4 left-4 rounded-full bg-[rgb(28_23_20/0.6)] px-3 py-1 type-label text-white">Tap the heart</p>
+                <p className="absolute top-4 left-4 rounded-full bg-[rgb(var(--scrim)/0.6)] px-3 py-1 type-label text-white">Tap the heart</p>
               </Panel>
 
               {/* Share preview */}

@@ -212,7 +212,7 @@ export function HeroScatter() {
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              "radial-gradient(900px 520px at 50% 46%, var(--hero-glow) 0%, transparent 70%), radial-gradient(600px 400px at 12% 0%, rgb(209 130 0 / 0.10), transparent 70%)",
+              "radial-gradient(900px 520px at 50% 46%, var(--hero-glow) 0%, transparent 70%), radial-gradient(600px 400px at 12% 0%, rgb(242 169 59 / 0.08), transparent 70%)",
           }}
         />
 

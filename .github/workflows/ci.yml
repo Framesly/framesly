@@ -33,4 +33,6 @@ jobs:
       - run: pnpm lint
       # Fails on hard-coded colours, z-index numbers and tiny font sizes (see scripts/check-design-tokens.mjs).
       - run: pnpm lint:design
+      # Fails when a Darkroom colour pair drops below WCAG contrast targets (see scripts/check-contrast.mjs).
+      - run: pnpm lint:contrast
       - run: pnpm typecheck

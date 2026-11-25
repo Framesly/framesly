@@ -37,7 +37,7 @@ export function GalleryCard({ gallery, brandColor, coverSrc }: { gallery: Galler
       href={`/app/galleries/${gallery.id}`}
       className="group block overflow-hidden rounded-[var(--radius-control)] border border-line bg-surface-raised transition-colors hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2"
     >
-      <div className="relative aspect-[4/3] overflow-hidden" style={{ background: `color-mix(in oklab, ${brandColor} 22%, var(--surface-sunken))` }}>
+      <div className="relative aspect-[4/3] overflow-hidden bg-surface-sunken" style={coverSrc ? undefined : { background: `color-mix(in oklab, ${brandColor} 22%, var(--surface-sunken))` }}>
         {coverSrc ? (
           // The card's title names the gallery, so the photo itself is decorative. Signed URLs vary, so skip the optimiser.
           <Image

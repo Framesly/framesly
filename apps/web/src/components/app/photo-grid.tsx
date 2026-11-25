@@ -185,7 +185,7 @@ export function PhotoGrid({
                 onClick={() => (selecting ? toggle(p.id) : setOpenId(p.id))}
                 aria-label={selecting ? `${isSelected ? "Deselect" : "Select"} ${p.name}` : `Open ${p.name}`}
                 aria-pressed={selecting ? isSelected : undefined}
-                className={cn("relative block aspect-[4/5] w-full overflow-hidden rounded-[var(--radius-chip)] bg-surface-sunken text-left", isSelected && "outline-2 outline-offset-2 outline-safelight")}
+                className={cn("relative block aspect-[4/5] w-full overflow-hidden rounded-[var(--radius-chip)] bg-surface-sunken text-left", isSelected && "selected-frame")}
               >
                 {p.src ? (
                   <Image src={p.src} alt="" fill unoptimized sizes="(min-width: 1024px) 16vw, 25vw" className="object-cover" />

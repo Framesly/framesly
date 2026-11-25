@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
 
 import { Wordmark } from "@/components/site/wordmark"
-import { ThemeSwitch } from "@/components/theme/theme"
 import { TransitionLink as Link } from "@/components/transition/page-transition"
 import { ButtonLink, buttonVariants } from "@/components/ui/button"
 import { marketingNav } from "@/lib/site"
@@ -43,7 +42,7 @@ export function SiteHeader() {
       <header
         className={cn(
           "fixed inset-x-0 top-0 z-(--z-header) border-b transition-[background-color,border-color] duration-300",
-          scrolled || open ? "border-line bg-surface-raised" : "border-transparent bg-transparent"
+          open ? "border-line bg-surface-overlay" : scrolled ? "border-line bg-surface-raised" : "border-transparent bg-transparent"
         )}
       >
         <div className="gutter mx-auto flex h-16 max-w-[var(--container-content)] items-center gap-8">
@@ -77,7 +76,6 @@ export function SiteHeader() {
           </nav>
 
           <div className="ml-auto flex items-center gap-2">
-            <ThemeSwitch id="header" className="hidden md:inline-flex" />
             <Link
               href="/login"
               className="hidden h-11 items-center rounded-[var(--radius-chip)] px-3 type-caption text-ink-muted transition-colors hover:text-ink sm:flex"
@@ -124,7 +122,7 @@ export function SiteHeader() {
         {open && (
           <motion.div
             id="mobile-menu"
-            className="fixed inset-x-0 top-16 bottom-0 z-(--z-nav) flex flex-col bg-surface-raised md:hidden"
+            className="fixed inset-x-0 top-16 bottom-0 z-(--z-nav) flex flex-col bg-surface-overlay md:hidden"
             initial={{ clipPath: "inset(0 0 100% 0)" }}
             animate={{ clipPath: "inset(0 0 0% 0)" }}
             exit={{ clipPath: "inset(0 0 100% 0)" }}
@@ -147,7 +145,6 @@ export function SiteHeader() {
               ))}
             </nav>
             <div className="gutter space-y-3 pt-4 pb-[max(24px,env(safe-area-inset-bottom))]">
-              <ThemeSwitch id="mobile" labels className="flex w-full" />
               <ButtonLink href="/signup" size="lg" className="w-full" onClick={() => setOpen(false)}>
                 Start free
               </ButtonLink>

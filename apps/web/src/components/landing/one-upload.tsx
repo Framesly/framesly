@@ -95,7 +95,7 @@ function Diagram({ progress }: { progress: MotionValue<number> }) {
       {/* The single file they collapse into */}
       <motion.div
         style={{ opacity: mergedOpacity, scale: mergedScale }}
-        className="theme-maroon absolute inset-[20%] flex flex-col overflow-hidden rounded-[var(--radius-cover)] border-2 border-safelight shadow-[var(--shadow-print)]"
+        className="absolute inset-[20%] flex bg-surface-raised flex-col overflow-hidden rounded-[var(--radius-cover)] border-2 border-safelight shadow-[var(--shadow-print)]"
       >
         {/* The single original that every step reads from */}
         <div className="relative min-h-0 flex-1">

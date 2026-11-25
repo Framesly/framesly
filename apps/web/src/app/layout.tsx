@@ -3,7 +3,6 @@ import { Bricolage_Grotesque, Figtree, JetBrains_Mono } from "next/font/google"
 
 import { MotionProvider } from "@/components/motion/motion-provider"
 import { SitePhotosProvider } from "@/components/site/site-photos"
-import { ThemeProvider, themeScript } from "@/components/theme/theme"
 import { PageTransitionProvider } from "@/components/transition/page-transition"
 import { getSitePhotos } from "@/lib/data/site-photos"
 import { siteConfig } from "@/lib/site"
@@ -40,9 +39,13 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: "#f4efe6",
-  colorScheme: "light dark",
+  // Darkroom --surface: the browser bar matches the page.
+  themeColor: "#121315",
+  colorScheme: "dark",
 }
+
+/** One-time clean-up of the old light/dark preference, which no longer exists. */
+const clearOldThemeChoice = `try{localStorage.removeItem("framesly-theme")}catch(e){}`
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   // Cached public catalogue (site_photos), so pages still prerender as static.
@@ -50,22 +53,16 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      // The theme script sets data-theme before React hydrates, so the server
-      // and client markup differ on <html> only, by design.
-      suppressHydrationWarning
       className={`${bricolage.variable} ${figtree.variable} ${jetbrainsMono.variable}`}
     >
       <head>
-        {/* Sets light/Darkroom before first paint: no flash of the wrong theme. */}
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <script dangerouslySetInnerHTML={{ __html: clearOldThemeChoice }} />
       </head>
       <body className="flex min-h-dvh flex-col">
         <MotionProvider>
-          <ThemeProvider>
-            <SitePhotosProvider photos={photos}>
-              <PageTransitionProvider>{children}</PageTransitionProvider>
-            </SitePhotosProvider>
-          </ThemeProvider>
+          <SitePhotosProvider photos={photos}>
+            <PageTransitionProvider>{children}</PageTransitionProvider>
+          </SitePhotosProvider>
         </MotionProvider>
       </body>
     </html>

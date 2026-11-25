@@ -57,8 +57,8 @@ export function VideoTeaser({ showLink = true }: { showLink?: boolean }) {
             <li key={r.t} className="relative w-[260px] shrink-0 sm:w-[340px]">
               <div className="relative aspect-video overflow-hidden">
                 <Image src={r.p.src} alt={`Film chapter at ${r.t}: ${r.label}. ${r.p.alt}`} fill sizes="340px" className="object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[rgb(11_13_16/0.7)] to-transparent" />
-                <span className="absolute bottom-2 left-2 rounded-[var(--radius-chip)] bg-[rgb(11_13_16/0.7)] px-2 py-0.5 type-metric text-micro text-fixed-light">
+                <div className="absolute inset-0 bg-gradient-to-t from-[rgb(var(--scrim)/0.7)] to-transparent" />
+                <span className="absolute bottom-2 left-2 rounded-[var(--radius-chip)] bg-[rgb(var(--scrim)/0.7)] px-2 py-0.5 type-metric text-micro text-fixed-light">
                   {r.t}
                 </span>
               </div>

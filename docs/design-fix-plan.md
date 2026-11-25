@@ -26,7 +26,7 @@ Size: S = under half a day, M = about a day, L = several days.
 | A6 | Tap targets under 44px | Theme switch (36px), sample notice (36px), gallery bar buttons (40px), `Button size="sm"` on mobile | Nothing interactive under 44px on touch; keep `sm` for desktop toolbars only | S |
 | A7 | Text below the scale (9 to 10px) | 13 spots, e.g. "Sample" pill, tab-bar labels | Nothing under the `type-label` 11px floor | S |
 | A8 | Page-transition curtain slows the app (about 1.3s) | `components/transition/page-transition.tsx`, `ui/button.tsx` (`ButtonLink`), `app/(app)/app/upload/page.tsx` | Curtain on marketing and auth only; in `/app/*` navigation is instant | S |
-| A9 | OS dark mode ignored | `components/theme/theme.tsx` (`themeScript`) | First visit follows `prefers-color-scheme`; saved choice still wins; client gallery keeps its Print theme by design | S |
+| A9 | OS dark mode ignored | `components/theme/theme.tsx` (`themeScript`) | **Superseded: full Darkroom.** The whole product is dark by default, so there is nothing to follow; the switch and `theme.tsx` are removed | S |
 
 ## B. Design system (make it hard to be inconsistent)
 

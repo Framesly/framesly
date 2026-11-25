@@ -3,142 +3,73 @@
 /* ===========================================================================
    Framesly · design tokens
 
-   Brand decision (Nov 21): the public site is light by default; the app
-   after login (/app) is Darkroom by default. Visitors can switch either way
-   with the theme switch, and the choice is remembered.
+   Darkroom everywhere. The website, auth, onboarding, the app and client
+   galleries are all dark. .theme-print is an opt-in light gallery theme, not
+   used by default.
 
-   - :root                     Ivory: warm print paper, marigold safelight.
-   - html[data-theme="dark"]   Darkroom across the page (brief values).
-     (set before first paint by the script in app/layout.tsx)
-   - .theme-ivory              Ivory on one section (the "lights on" band). Follows dark mode.
-   - .theme-espresso  Warm dark for one or two contrast bands.
-   - .theme-maroon    Bridal maroon for accent cards and the footer.
-   - .theme-darkroom  The brief's Darkroom values (dashboard, lightbox).
-   - .theme-print     The brief's Print values (client galleries). Follows dark mode.
+   - :root / .theme-darkroom   Darkroom: the only default theme.
+   - .theme-print              Light "print" theme. Opt-in per gallery, unused for now.
 
    Every theme defines the same token names, so components work in any of
    them. Apply a theme class to a section to switch it.
    =========================================================================== */
 
-:root,
-.theme-ivory {
-  --surface: #f4efe6;
-  --surface-raised: #fffcf7;
-  --surface-sunken: #eae3d7;
-  --line: #dcd3c4;
-  --line-strong: #8f8473;
-  --ink: #1c1714;
-  --ink-muted: #645a50;
-  --safelight: #d18200;
-  --safelight-text: #8f5200;
-  --safelight-soft: #f8e3bf;
-  --on-safelight: #1c1714;
-  --success: #1d6a80;
-  --danger: #b3261e;
-  --warning: #9c4a00;
-  --info: #215ca0;
-  --scrim: 28 23 20;
-  --print-border: #fffcf7;
-  --shadow-print: 0 22px 44px -22px rgb(60 40 20 / 0.45), 0 2px 6px rgb(60 40 20 / 0.08);
-  --hero-glow: #fffaf1;
-  color-scheme: light;
-}
-
 /*
- * Darkroom for the whole page: the brief's dark-first palette. Client-facing
- * surfaces (.theme-print, and the .theme-ivory "lights on" band) are light in
- * light mode and take the same Darkroom values in dark mode, so the whole
- * product follows the visitor's choice.
+ * Darkroom values. Why they are what they are:
+ * - Neutral greys, not blue-tinted: the colour around a photo changes how its colours
+ *   look, so the photo bed is a true neutral (R = G = B) and the chrome has only a
+ *   1 to 3 point cool lean.
+ * - Never pure black or pure white: pure black hides elevation and smears on OLED, and
+ *   pure white "vibrates" on dark. Ink on the page is about 15.8:1, the level Material's
+ *   dark theme recommends.
+ * - Elevation is a lighter surface: sunken (photos) < page < raised (cards) < overlay
+ *   (menus, dialogs, toasts).
+ * - One accent. Safelight amber is for one primary action per screen, favourites,
+ *   selections and AI picks. Accent text uses a lighter, softer amber so it doesn't glare.
+ * Contrast is checked by `pnpm lint:contrast`, which reads this block.
  */
-html[data-theme="dark"],
-html[data-theme="dark"] .theme-print,
-html[data-theme="dark"] .theme-ivory,
+:root,
 .theme-darkroom {
-  --surface: #121417;
-  --surface-raised: #1c2026;
-  --surface-sunken: #0b0d10;
-  --line: #2c333e;
-  --line-strong: #6b7482;
-  --ink: #e9ecf1;
-  --ink-muted: #98a0ad;
-  --safelight: #f2a93b;
-  --safelight-text: #f5bb62;
-  --safelight-soft: #3a2a10;
-  --on-safelight: #16191f;
-  --success: #6cc4d9;
-  --danger: #ff8a7a;
+  --surface-sunken: #0b0b0c; /* photo bed: behind every photo and video */
+  --surface: #121315; /* page background */
+  --surface-raised: #1a1b1e; /* cards, panels, sidebar, header */
+  --surface-overlay: #222428; /* menus, popovers, dialogs, toasts */
+  --line: #2b2d31; /* decorative dividers only */
+  --line-strong: #6e727a; /* input, button and control borders */
+  --ink: #ececee;
+  --ink-muted: #9ea1a8; /* metadata, captions, EXIF */
+  --safelight: #f2a93b; /* primary fill, favourite heart, selection, AI pick */
+  --safelight-hover: #f5b95e;
+  --safelight-pressed: #d99530;
+  --safelight-text: #f4c27a; /* links and accent text on dark */
+  --safelight-soft: #2b2113; /* badge, selected-row and AI-pick fills */
+  --on-safelight: #15120d; /* text and icons on safelight fills */
+  --success: #66c2d6; /* teal, colour-blind safe; always with a word or icon */
+  --danger: #ff8577;
   --warning: #ff9a5c;
   --info: #8cbcff;
-  --scrim: 11 13 16;
-  --print-border: #e9ecf1;
-  --shadow-print: 0 24px 50px -24px rgb(0 0 0 / 0.75);
-  --hero-glow: rgb(242 169 59 / 0.07);
-  --grain-opacity: 0.05;
+  --scrim: 11 11 12; /* rgb triplet: rgb(var(--scrim) / 0.7) */
+  --print-border: #ececee; /* paper border on loose "prints" */
+  --shadow-print: 0 24px 50px -24px rgb(0 0 0 / 0.75); /* photo contact shadow */
+  --hero-glow: rgb(242 169 59 / 0.06);
+  --grain-opacity: 0.05; /* film grain on page backgrounds, never on photos */
+  --canvas-grey: #4a4a4a; /* neutral mid-grey for colour checking (cull and lightbox option, later) */
   color-scheme: dark;
 }
 
-.theme-espresso,
-.theme-maroon {
-  --grain-opacity: 0.05;
-}
-.theme-ivory {
-  --grain-opacity: 0.035;
-  --hero-glow: #fffaf1;
-}
-
-.theme-espresso {
-  --surface: #1b1714;
-  --surface-raised: #26201c;
-  --surface-sunken: #120f0d;
-  --line: #3a322c;
-  --line-strong: #7a6d62;
-  --ink: #f3ece3;
-  --ink-muted: #b3a699;
-  --safelight: #f2a93b;
-  --safelight-text: #f5bb62;
-  --safelight-soft: #3d2a12;
-  --on-safelight: #1c1714;
-  --success: #8fc9d6;
-  --danger: #ff8a7a;
-  --warning: #ff9a5c;
-  --info: #8cbcff;
-  --scrim: 18 15 13;
-  --print-border: #f3ece3;
-  --shadow-print: 0 24px 50px -24px rgb(0 0 0 / 0.7);
-  color-scheme: dark;
-}
-
-.theme-maroon {
-  --surface: #4a1620;
-  --surface-raised: #581d28;
-  --surface-sunken: #3b1019;
-  --line: #6e3440;
-  --line-strong: #a06a75;
-  --ink: #f7eadf;
-  --ink-muted: #dcc2b8;
-  --safelight: #f2a93b;
-  --safelight-text: #f7c47a;
-  --safelight-soft: #6b3a1d;
-  --on-safelight: #1c1714;
-  --success: #a9dbe6;
-  --danger: #ffb3a7;
-  --warning: #ffc38a;
-  --info: #b5d3ff;
-  --scrim: 40 10 16;
-  --print-border: #f7eadf;
-  --shadow-print: 0 24px 50px -24px rgb(20 0 5 / 0.7);
-  color-scheme: dark;
-}
-
+/* Opt-in light gallery theme (a future per-gallery option). Not applied anywhere by default. */
 .theme-print {
   --surface: #f5f3ef;
   --surface-raised: #ffffff;
   --surface-sunken: #e9e6e0;
+  --surface-overlay: #ffffff;
   --line: #d6d1c8;
   --line-strong: #8f877b;
   --ink: #16191f;
   --ink-muted: #5a606b;
   --safelight: #d18200;
+  --safelight-hover: #b87200;
+  --safelight-pressed: #9c6000;
   --safelight-text: #8f5200;
   --safelight-soft: #fbe7c6;
   --on-safelight: #16191f;
@@ -147,15 +78,17 @@ html[data-theme="dark"] .theme-ivory,
   --warning: #9c4a00;
   --info: #215ca0;
   --scrim: 22 25 31;
+  --print-border: #ffffff;
+  --shadow-print: 0 22px 44px -22px rgb(60 40 20 / 0.45), 0 2px 6px rgb(60 40 20 / 0.08);
+  --hero-glow: rgb(209 130 0 / 0.08);
+  --grain-opacity: 0.035;
+  --canvas-grey: #8a8a8a;
   color-scheme: light;
 }
 
 /* Sections that switch theme must repaint their own background and text. */
-.theme-ivory,
 .theme-print,
-.theme-darkroom,
-.theme-espresso,
-.theme-maroon {
+.theme-darkroom {
   background-color: var(--surface);
   color: var(--ink);
 }
@@ -185,11 +118,14 @@ html[data-theme="dark"] .theme-ivory,
   --color-surface: var(--surface);
   --color-surface-raised: var(--surface-raised);
   --color-surface-sunken: var(--surface-sunken);
+  --color-surface-overlay: var(--surface-overlay);
   --color-line: var(--line);
   --color-line-strong: var(--line-strong);
   --color-ink: var(--ink);
   --color-ink-muted: var(--ink-muted);
   --color-safelight: var(--safelight);
+  --color-safelight-hover: var(--safelight-hover);
+  --color-safelight-pressed: var(--safelight-pressed);
   --color-safelight-text: var(--safelight-text);
   --color-safelight-soft: var(--safelight-soft);
   --color-on-safelight: var(--on-safelight);
@@ -197,10 +133,11 @@ html[data-theme="dark"] .theme-ivory,
   --color-danger: var(--danger);
   --color-warning: var(--warning);
   --color-info: var(--info);
+  --color-canvas-grey: var(--canvas-grey);
 
   /* Colours that do not change with the theme: dark ink for light chips and pills, light ink for text on photo scrims. */
-  --color-fixed-dark: #16191f;
-  --color-fixed-light: #f3ece3;
+  --color-fixed-dark: #15120d;
+  --color-fixed-light: #eeeef0;
 
   --font-sans: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
   --font-heading: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
@@ -219,8 +156,8 @@ html[data-theme="dark"] .theme-ivory,
   --text-lead: 16px;
   --text-stat: 22px;
 
-  /* Elevation: flat cards use a border; only floating layers get a shadow. */
-  --shadow-float: 0 20px 50px -20px rgb(0 0 0 / 0.6);
+  /* Elevation: flat cards use a border; only floating layers get a shadow. The 1px ring keeps the edge visible on --surface-overlay. */
+  --shadow-float: 0 0 0 1px rgb(255 255 255 / 0.05), 0 24px 60px -20px rgb(0 0 0 / 0.85);
 
   --container-content: 1200px;
 
@@ -408,6 +345,16 @@ html[data-theme="dark"] .theme-ivory,
 }
 
 /*
+ * A selected or picked photo: a 2px safelight outline, offset 2px, with a soft
+ * safelight-soft glow. One utility so every grid selects the same way.
+ */
+@utility selected-frame {
+  outline: 2px solid var(--safelight);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 6px var(--safelight-soft), 0 0 28px 6px var(--safelight-soft);
+}
+
+/*
  * Page transition: while the shutter lifts (see components/transition), the
  * new page rises into place. Duration matches the curtain; no forwards fill,
  * so nothing keeps a transform (which would break position: fixed children).
@@ -424,27 +371,6 @@ html[data-theme="dark"] .theme-ivory,
 }
 body[data-revealing="true"] > :not([data-pt-overlay]) {
   animation: page-rise 0.75s var(--ease-develop) backwards;
-}
-
-/*
- * Theme switch: the new theme spreads out from the switch as a circle
- * (View Transitions API; browsers without it switch instantly).
- */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
-  mix-blend-mode: normal;
-}
-html[data-theme-switching]::view-transition-new(root) {
-  animation: theme-reveal 0.65s var(--ease-shutter) both;
-}
-@keyframes theme-reveal {
-  from {
-    clip-path: circle(0px at var(--tx, 50%) var(--ty, 0px));
-  }
-  to {
-    clip-path: circle(150vmax at var(--tx, 50%) var(--ty, 0px));
-  }
 }
 
 /* Pause CSS animations in sections that are off screen (set by JS). */
@@ -473,12 +399,8 @@ html[data-theme-switching]::view-transition-new(root) {
  */
 @media (prefers-contrast: more) {
   :root,
-  html[data-theme],
-  html[data-theme] .theme-print,
-  html[data-theme] .theme-ivory,
   .theme-darkroom.theme-darkroom,
-  .theme-espresso.theme-espresso,
-  .theme-maroon.theme-maroon {
+  .theme-print.theme-print {
     --line: var(--line-strong);
     --ink-muted: var(--ink);
   }

@@ -39,7 +39,7 @@ export function Select({
           id={id}
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
-          className="h-full min-w-0 flex-1 cursor-pointer appearance-none bg-transparent pr-9 pl-3 text-body text-ink outline-none [&>option]:bg-surface-raised"
+          className="h-full min-w-0 flex-1 cursor-pointer appearance-none bg-transparent pr-9 pl-3 text-body text-ink outline-none [&>option]:bg-surface-overlay"
           {...props}
         >
           {children}

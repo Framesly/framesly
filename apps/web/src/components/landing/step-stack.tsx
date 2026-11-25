@@ -15,7 +15,7 @@ const steps = [
     body: "Drag in every card from every shooter. Files go straight to storage in parts, so a dropped connection picks up where it stopped instead of starting over.",
     detail: ["2,000+ files per upload", "Resumes after a drop", "EXIF read for every frame"],
     Visual: UploadVisual,
-    theme: "",
+    tone: "bg-surface-raised",
   },
   {
     n: "02",
@@ -23,7 +23,7 @@ const steps = [
     body: "Say how many photos to deliver. Framesly removes blur, closed eyes and near-duplicates, keeps the best of each burst, and tells you why. You overrule anything.",
     detail: ["Blur and closed-eye checks", "Burst and duplicate grouping", "A reason on every decision"],
     Visual: CullVisual,
-    theme: "theme-espresso",
+    tone: "bg-surface-sunken",
   },
   {
     n: "03",
@@ -31,7 +31,7 @@ const steps = [
     body: "Publish a private gallery with your logo and colours, one section per event. Clients favourite and download from the same files you uploaded.",
     detail: ["PIN and expiry", "ZIP downloads by email", "Previews when shared"],
     Visual: DeliverVisual,
-    theme: "theme-maroon",
+    tone: "bg-surface-raised",
   },
 ]
 
@@ -105,8 +105,8 @@ function StackCard({
       <motion.article
         style={{ scale, marginTop: animate ? index * 28 : 0 }}
         className={cn(
-          "relative w-full origin-top overflow-hidden rounded-[var(--radius-cover)] border border-line bg-surface-raised will-change-transform",
-          step.theme,
+          "relative w-full origin-top overflow-hidden rounded-[var(--radius-cover)] border border-line will-change-transform",
+          step.tone,
           "lg:h-[min(640px,calc(100dvh-140px))]"
         )}
       >
@@ -133,7 +133,7 @@ function StackCard({
           </div>
         </div>
         {/* Cards underneath darken slightly as the stack grows */}
-        <motion.div aria-hidden style={{ opacity: shade }} className="pointer-events-none absolute inset-0 bg-[rgb(28_23_20)]" />
+        <motion.div aria-hidden style={{ opacity: shade }} className="pointer-events-none absolute inset-0 bg-surface-sunken" />
       </motion.article>
     </div>
   )

@@ -38,7 +38,7 @@ export const buttonVariants = cva(
       variant: {
         primary: [
           "bg-safelight text-on-safelight before:bg-[rgb(0_0_0/0.22)]",
-          "hover:bg-[color-mix(in_oklab,var(--safelight)_88%,black)]",
+          "hover:bg-safelight-hover active:bg-safelight-pressed",
         ],
         ink: [
           "bg-ink text-surface before:bg-surface/20",
