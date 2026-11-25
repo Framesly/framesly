@@ -39,7 +39,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 10, scale: 0.98 }}
               transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              className="pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-[var(--radius-control)] border border-line-strong px-4 py-3 shadow-float"
+              className="pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-[var(--radius-control)] border border-line bg-surface-overlay px-4 py-3 text-ink shadow-float"
             >
               <span aria-hidden className={`mt-2 size-1.5 shrink-0 rounded-full ${t.tone === "success" ? "bg-success" : t.tone === "error" ? "bg-danger" : "bg-safelight"}`} />
               <div>

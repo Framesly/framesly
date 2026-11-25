@@ -3,7 +3,7 @@
  * and so can be any colour. Everything here follows WCAG 2.2 contrast maths.
  */
 
-const DARK_INK = "#16191f"
+const DARK_INK = "#15120d"
 const WHITE = "#ffffff"
 
 type Rgb = [number, number, number]
@@ -82,9 +82,11 @@ export function brandAccentStyle(brand: string | null | undefined, surface: stri
  */
 export const ACCENT_SURFACES = {
   /** `--surface-sunken`: the photo bed and the lightbox stage. */
-  darkroom: "#0b0d10",
-  /** `--surface-raised`: the lightest Darkroom surface. If an accent reads on it, it reads on them all. */
-  darkroomRaised: "#1c2026",
+  darkroom: "#0b0b0c",
+  /** `--surface-raised`: cards, panels, header. */
+  darkroomRaised: "#1a1b1e",
+  /** `--surface-overlay`: menus, dialogs, toasts. The lightest Darkroom surface: if an accent reads on it, it reads on them all. */
+  darkroomOverlay: "#222428",
   /** `.theme-print --surface`: only for the opt-in light gallery theme. */
   print: "#f5f3ef",
 } as const

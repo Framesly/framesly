@@ -15,7 +15,7 @@ function Shell({ studio, children }: { studio: Studio; children: React.ReactNode
     <main
       className="grid min-h-dvh place-items-center bg-surface px-4 py-16"
       // The studio's colour for the button and focus ring, nudged to stay readable.
-      style={brandAccentStyle(studio.brandColor, ACCENT_SURFACES.darkroomRaised)}
+      style={brandAccentStyle(studio.brandColor, ACCENT_SURFACES.darkroomOverlay)}
     >
       <div className="w-full max-w-sm text-center">
         <StudioLogo

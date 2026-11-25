@@ -10,14 +10,14 @@ export const size = { width: 1200, height: 630 }
 export const contentType = "image/png"
 
 // Darkroom values (see app/globals.css). Fixed here: ImageResponse is rendered outside the CSS tokens.
-const ground = "#121417"
-const raised = "#1C2026"
-const line = "#2C333E"
-const ink = "#E9ECF1"
-const muted = "#98A0AD"
+const ground = "#121315"
+const raised = "#1A1B1E"
+const line = "#2B2D31"
+const ink = "#ECECEE"
+const muted = "#9EA1A8"
 const marigold = "#F2A93B"
-const marigoldSoft = "#3A2A10"
-const marigoldText = "#F5BB62"
+const marigoldSoft = "#2B2113"
+const marigoldText = "#F4C27A"
 
 function Bracket({ corner }: { corner: "tl" | "tr" | "bl" | "br" }) {
   const s = 26
@@ -80,7 +80,7 @@ export default function OpengraphImage() {
                 opacity: t.pick ? 1 : 0.45,
               }}
             >
-              <div style={{ flex: 1, display: "flex", background: t.pick ? t.bg : "#4A5059" }} />
+              <div style={{ flex: 1, display: "flex", background: t.pick ? t.bg : "#4A4A4A" }} />
               {t.pick && <Bracket corner="tl" />}
               {t.pick && <Bracket corner="tr" />}
               {t.pick && <Bracket corner="bl" />}

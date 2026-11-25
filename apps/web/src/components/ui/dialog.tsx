@@ -45,7 +45,7 @@ export function Dialog({ open, onClose, title, children }: { open: boolean; onCl
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
-            className="relative max-h-[92dvh] w-full overflow-y-auto rounded-t-[var(--radius-cover)] border border-line bg-surface-raised p-6 [overscroll-behavior:contain] sm:max-w-lg sm:rounded-[var(--radius-cover)] sm:p-8"
+            className="relative max-h-[92dvh] w-full overflow-y-auto rounded-t-[var(--radius-cover)] border border-line bg-surface-overlay p-6 [overscroll-behavior:contain] sm:max-w-lg sm:rounded-[var(--radius-cover)] sm:p-8"
             initial={{ y: 40, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 30, opacity: 0 }}

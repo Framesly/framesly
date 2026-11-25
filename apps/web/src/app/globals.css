@@ -14,28 +14,46 @@
    them. Apply a theme class to a section to switch it.
    =========================================================================== */
 
+/*
+ * Darkroom values. Why they are what they are:
+ * - Neutral greys, not blue-tinted: the colour around a photo changes how its colours
+ *   look, so the photo bed is a true neutral (R = G = B) and the chrome has only a
+ *   1 to 3 point cool lean.
+ * - Never pure black or pure white: pure black hides elevation and smears on OLED, and
+ *   pure white "vibrates" on dark. Ink on the page is about 15.8:1, the level Material's
+ *   dark theme recommends.
+ * - Elevation is a lighter surface: sunken (photos) < page < raised (cards) < overlay
+ *   (menus, dialogs, toasts).
+ * - One accent. Safelight amber is for one primary action per screen, favourites,
+ *   selections and AI picks. Accent text uses a lighter, softer amber so it doesn't glare.
+ * Contrast is checked by `pnpm lint:contrast`, which reads this block.
+ */
 :root,
 .theme-darkroom {
-  --surface: #121417;
-  --surface-raised: #1c2026;
-  --surface-sunken: #0b0d10;
-  --line: #2c333e;
-  --line-strong: #6b7482;
-  --ink: #e9ecf1;
-  --ink-muted: #98a0ad;
-  --safelight: #f2a93b;
-  --safelight-text: #f5bb62;
-  --safelight-soft: #3a2a10;
-  --on-safelight: #16191f;
-  --success: #6cc4d9;
-  --danger: #ff8a7a;
+  --surface-sunken: #0b0b0c; /* photo bed: behind every photo and video */
+  --surface: #121315; /* page background */
+  --surface-raised: #1a1b1e; /* cards, panels, sidebar, header */
+  --surface-overlay: #222428; /* menus, popovers, dialogs, toasts */
+  --line: #2b2d31; /* decorative dividers only */
+  --line-strong: #6e727a; /* input, button and control borders */
+  --ink: #ececee;
+  --ink-muted: #9ea1a8; /* metadata, captions, EXIF */
+  --safelight: #f2a93b; /* primary fill, favourite heart, selection, AI pick */
+  --safelight-hover: #f5b95e;
+  --safelight-pressed: #d99530;
+  --safelight-text: #f4c27a; /* links and accent text on dark */
+  --safelight-soft: #2b2113; /* badge, selected-row and AI-pick fills */
+  --on-safelight: #15120d; /* text and icons on safelight fills */
+  --success: #66c2d6; /* teal, colour-blind safe; always with a word or icon */
+  --danger: #ff8577;
   --warning: #ff9a5c;
   --info: #8cbcff;
-  --scrim: 11 13 16;
-  --print-border: #e9ecf1;
-  --shadow-print: 0 24px 50px -24px rgb(0 0 0 / 0.75);
-  --hero-glow: rgb(242 169 59 / 0.07);
-  --grain-opacity: 0.05;
+  --scrim: 11 11 12; /* rgb triplet: rgb(var(--scrim) / 0.7) */
+  --print-border: #ececee; /* paper border on loose "prints" */
+  --shadow-print: 0 24px 50px -24px rgb(0 0 0 / 0.75); /* photo contact shadow */
+  --hero-glow: rgb(242 169 59 / 0.06);
+  --grain-opacity: 0.05; /* film grain on page backgrounds, never on photos */
+  --canvas-grey: #4a4a4a; /* neutral mid-grey for colour checking (cull and lightbox option, later) */
   color-scheme: dark;
 }
 
@@ -44,11 +62,14 @@
   --surface: #f5f3ef;
   --surface-raised: #ffffff;
   --surface-sunken: #e9e6e0;
+  --surface-overlay: #ffffff;
   --line: #d6d1c8;
   --line-strong: #8f877b;
   --ink: #16191f;
   --ink-muted: #5a606b;
   --safelight: #d18200;
+  --safelight-hover: #b87200;
+  --safelight-pressed: #9c6000;
   --safelight-text: #8f5200;
   --safelight-soft: #fbe7c6;
   --on-safelight: #16191f;
@@ -61,6 +82,7 @@
   --shadow-print: 0 22px 44px -22px rgb(60 40 20 / 0.45), 0 2px 6px rgb(60 40 20 / 0.08);
   --hero-glow: rgb(209 130 0 / 0.08);
   --grain-opacity: 0.035;
+  --canvas-grey: #8a8a8a;
   color-scheme: light;
 }
 
@@ -96,11 +118,14 @@
   --color-surface: var(--surface);
   --color-surface-raised: var(--surface-raised);
   --color-surface-sunken: var(--surface-sunken);
+  --color-surface-overlay: var(--surface-overlay);
   --color-line: var(--line);
   --color-line-strong: var(--line-strong);
   --color-ink: var(--ink);
   --color-ink-muted: var(--ink-muted);
   --color-safelight: var(--safelight);
+  --color-safelight-hover: var(--safelight-hover);
+  --color-safelight-pressed: var(--safelight-pressed);
   --color-safelight-text: var(--safelight-text);
   --color-safelight-soft: var(--safelight-soft);
   --color-on-safelight: var(--on-safelight);
@@ -108,10 +133,11 @@
   --color-danger: var(--danger);
   --color-warning: var(--warning);
   --color-info: var(--info);
+  --color-canvas-grey: var(--canvas-grey);
 
   /* Colours that do not change with the theme: dark ink for light chips and pills, light ink for text on photo scrims. */
-  --color-fixed-dark: #16191f;
-  --color-fixed-light: #f3ece3;
+  --color-fixed-dark: #15120d;
+  --color-fixed-light: #eeeef0;
 
   --font-sans: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
   --font-heading: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
@@ -130,8 +156,8 @@
   --text-lead: 16px;
   --text-stat: 22px;
 
-  /* Elevation: flat cards use a border; only floating layers get a shadow. */
-  --shadow-float: 0 20px 50px -20px rgb(0 0 0 / 0.6);
+  /* Elevation: flat cards use a border; only floating layers get a shadow. The 1px ring keeps the edge visible on --surface-overlay. */
+  --shadow-float: 0 0 0 1px rgb(255 255 255 / 0.05), 0 24px 60px -20px rgb(0 0 0 / 0.85);
 
   --container-content: 1200px;
 
@@ -316,6 +342,16 @@
   background: var(--print-border);
   padding: 5px;
   box-shadow: var(--shadow-print);
+}
+
+/*
+ * A selected or picked photo: a 2px safelight outline, offset 2px, with a soft
+ * safelight-soft glow. One utility so every grid selects the same way.
+ */
+@utility selected-frame {
+  outline: 2px solid var(--safelight);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 6px var(--safelight-soft), 0 0 28px 6px var(--safelight-soft);
 }
 
 /*

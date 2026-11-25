@@ -4,8 +4,8 @@
  * here because these images are rendered outside the CSS tokens.
  */
 export function brandIcon(size: number, { maskable = false }: { maskable?: boolean } = {}) {
-  const ground = "#121417"
-  const light = "#E9ECF1"
+  const ground = "#121315"
+  const light = "#ECECEE"
   const safelight = "#F2A93B"
   // Maskable icons keep the mark inside the central 80% so any crop shape still shows it.
   const mark = Math.round(size * (maskable ? 0.5 : 0.62))

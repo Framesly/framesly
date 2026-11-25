@@ -40,7 +40,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   // Darkroom --surface: the browser bar matches the page.
-  themeColor: "#121417",
+  themeColor: "#121315",
   colorScheme: "dark",
 }
 

@@ -90,13 +90,13 @@ export function AuthShowcase() {
             />
           </motion.div>
         </AnimatePresence>
-        <div className="absolute inset-0 bg-gradient-to-t from-[rgb(28_23_20/0.75)] via-transparent to-[rgb(28_23_20/0.2)]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[rgb(var(--scrim)/0.75)] via-transparent to-[rgb(var(--scrim)/0.2)]" />
       </div>
 
       <FocusBrackets k={index} reduce={reduce} />
 
       {/* Live readout */}
-      <div className="absolute top-10 left-10 flex items-center gap-2 rounded-full bg-[rgb(28_23_20/0.6)] px-3 py-1.5">
+      <div className="absolute top-10 left-10 flex items-center gap-2 rounded-full bg-[rgb(var(--scrim)/0.6)] px-3 py-1.5">
         <span className="relative flex size-1.5">
           <span className="absolute inset-0 animate-ping rounded-full bg-safelight" />
           <span className="relative size-1.5 rounded-full bg-safelight" />
@@ -170,7 +170,7 @@ export function AuthBanner() {
           <Image src={slide.photo.src} alt="" fill sizes="100vw" className="object-cover" style={{ objectPosition: slide.position }} />
         </motion.div>
       </AnimatePresence>
-      <div className="absolute inset-0 bg-gradient-to-t from-[rgb(28_23_20/0.6)] to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[rgb(var(--scrim)/0.6)] to-transparent" />
       <span className="absolute bottom-3 left-3 rounded-[var(--radius-chip)] bg-safelight px-2 py-0.5 type-label text-on-safelight">
         Pick · {frameNo(slide.frame)}
       </span>

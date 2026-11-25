@@ -27,7 +27,7 @@ function IconButton({ label, onClick, disabled, pressed, children }: { label: st
       disabled={disabled}
       whileTap={{ scale: 0.88 }}
       onClick={onClick}
-      className="grid size-11 place-items-center rounded-full text-ink transition-colors hover:bg-surface-raised disabled:pointer-events-none disabled:opacity-40"
+      className="grid size-11 place-items-center rounded-full text-ink transition-colors hover:bg-surface-overlay disabled:pointer-events-none disabled:opacity-40"
     >
       {children}
     </motion.button>
@@ -213,7 +213,7 @@ export function Lightbox({
           role="dialog"
           aria-modal="true"
           aria-label={`Photo ${index! + 1} of ${items.length}`}
-          className="fixed inset-0 z-(--z-viewer) flex flex-col bg-surface-sunken"
+          className="fixed inset-0 z-(--z-viewer) flex flex-col bg-surface-sunken text-ink"
           style={accentStyle}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -240,7 +240,7 @@ export function Lightbox({
                 on={isFav(photo.id)}
                 onToggle={() => toggleFav(photo.id)}
                 label={isFav(photo.id) ? "Remove from favourites" : "Add to favourites"}
-                className="text-ink hover:bg-surface-raised"
+                className="text-ink hover:bg-surface-overlay"
               />
               <IconButton label="Download photo" onClick={() => onDownload(photo)}>
                 <Icon name="download" className="size-5" />
@@ -251,7 +251,7 @@ export function Lightbox({
                 aria-label="Close"
                 whileTap={{ scale: 0.88 }}
                 onClick={onClose}
-                className="grid size-11 place-items-center rounded-full text-ink transition-colors hover:bg-surface-raised"
+                className="grid size-11 place-items-center rounded-full text-ink transition-colors hover:bg-surface-overlay"
               >
                 <Icon name="close" className="size-5" />
               </motion.button>

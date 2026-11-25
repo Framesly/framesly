@@ -124,8 +124,8 @@ export function GalleryView({
   // The studio's colour drives the accent (hearts, active section, buttons). It is nudged
   // per surface so it stays readable: the page follows light/dark, the lightbox is always dark.
   const brand = g.studio.brandColor
-  // Checked against the lightest Darkroom surface, so it reads on the page, the cards and the lightbox.
-  const accent = useMemo(() => brandAccentStyle(brand, ACCENT_SURFACES.darkroomRaised), [brand])
+  // Checked against the lightest Darkroom surface (overlay), so it reads on the page, cards, menus and lightbox.
+  const accent = useMemo(() => brandAccentStyle(brand, ACCENT_SURFACES.darkroomOverlay), [brand])
 
   const visible = useMemo(
     () => (view === "all" ? g.all : g.all.filter((p) => favs.has(p.id))),
@@ -308,12 +308,12 @@ function Cover({ data: g, sample, onShare, favCount, onShowFavs }: { data: Galle
   const fade = useTransform(scrollYProgress, [0, 0.7], [1, 0])
 
   return (
-    <header ref={ref} className="relative h-[88svh] min-h-[520px] overflow-hidden bg-fixed-dark">
+    <header ref={ref} className="relative h-[88svh] min-h-[520px] overflow-hidden bg-surface-sunken">
       <motion.div style={{ y }} className="absolute inset-0" initial={{ scale: 1.12 }} animate={{ scale: 1 }} transition={{ duration: 2.4, ease: develop }}>
         {g.cover && <Image src={g.cover.src} alt={g.cover.alt} fill priority sizes="100vw" quality={85} className="object-cover object-[50%_35%]" />}
       </motion.div>
       {/* Scrim so the names stay readable on any photo */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[rgb(22_25_31/0.82)] via-[rgb(22_25_31/0.18)] to-[rgb(22_25_31/0.45)]" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[rgb(var(--scrim)/0.82)] via-[rgb(var(--scrim)/0.18)] to-[rgb(var(--scrim)/0.45)]" />
 
       {/* Photographer's logo top-left, never Framesly's */}
       <div className="absolute inset-x-0 top-0 flex items-center justify-between px-4 py-4 text-white sm:px-8 sm:py-6">
@@ -390,7 +390,7 @@ function Tile({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "0px 0px -8% 0px" }}
       transition={{ duration: 0.7, ease: develop }}
-      className="group relative mb-2 break-inside-avoid overflow-hidden bg-surface-sunken"
+      className={cn("group relative mb-2 break-inside-avoid overflow-hidden bg-surface-sunken", fav && "selected-frame")}
     >
       <button type="button" onClick={onOpen} aria-label={`Open ${photo.alt}`} className="block w-full cursor-zoom-in">
         <motion.div layoutId={`photo-${photo.id}`} className="relative" style={{ aspectRatio: `${photo.w} / ${photo.h}` }}>
@@ -409,7 +409,7 @@ function Tile({
         className={cn(
           // Click-through bar: only the buttons take taps, so short tiles still open on tap.
           // On touch screens the heart is the only control here; download lives in the viewer.
-          "pointer-events-none absolute inset-x-0 bottom-0 flex justify-end gap-1 bg-gradient-to-t from-[rgb(22_25_31/0.55)] to-transparent p-1.5 pt-6 text-white transition-opacity duration-300 [&>*]:pointer-events-auto",
+          "pointer-events-none absolute inset-x-0 bottom-0 flex justify-end gap-1 bg-gradient-to-t from-[rgb(var(--scrim)/0.55)] to-transparent p-1.5 pt-6 text-white transition-opacity duration-300 [&>*]:pointer-events-auto",
           "opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100",
           fav && "opacity-100"
         )}
@@ -439,7 +439,7 @@ function SampleNotice() {
           initial={{ y: 80, opacity: 0 }}
           animate={{ y: 0, opacity: 1, transition: { delay: 1.6, duration: 0.5, ease: develop } }}
           exit={{ y: 80, opacity: 0 }}
-          className="fixed bottom-4 left-1/2 z-(--z-nav) flex w-[calc(100%-32px)] max-w-md -translate-x-1/2 items-center gap-3 rounded-full border border-line-strong py-1.5 pr-1.5 pl-4 shadow-float"
+          className="fixed bottom-4 left-1/2 z-(--z-nav) flex w-[calc(100%-32px)] max-w-md -translate-x-1/2 items-center gap-3 rounded-full border border-line bg-surface-overlay py-1.5 pr-1.5 pl-4 text-ink shadow-float"
         >
           <p className="flex-1 truncate type-caption text-ink-muted">
             <span className="text-ink">Sample gallery.</span> Yours looks like this.

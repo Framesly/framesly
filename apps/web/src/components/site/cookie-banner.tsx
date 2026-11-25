@@ -46,7 +46,7 @@ export function CookieBanner() {
           animate={{ opacity: 1, y: 0, transition: { duration: 0.5 } }}
           exit={{ opacity: 0, y: 24, transition: { duration: 0.25 } }}
         >
-          <div className="rounded-[var(--radius-control)] border border-line-strong bg-surface-raised p-5 shadow-float">
+          <div className="rounded-[var(--radius-control)] border border-line bg-surface-overlay p-5 shadow-float">
             <p className="type-label text-ink-muted">Cookies</p>
             <p className="mt-2 text-ink">
               We use essential cookies to run Framesly. With your permission we also measure how the

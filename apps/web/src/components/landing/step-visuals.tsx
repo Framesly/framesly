@@ -214,7 +214,7 @@ export function DeliverVisual() {
           <div className="relative h-[220px]">
             <Image src={photos.skyEmbrace.src} alt="" fill sizes="240px" className="object-cover" />
             <span className="absolute top-3 right-3 rounded-full bg-white/85 px-2 py-0.5 type-label text-fixed-dark">Sample</span>
-            <div className="absolute inset-0 bg-gradient-to-t from-[rgb(22_25_31/0.75)] via-transparent to-[rgb(22_25_31/0.35)]" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[rgb(var(--scrim)/0.75)] via-transparent to-[rgb(var(--scrim)/0.35)]" />
             <p className="absolute top-3 left-3 font-heading text-micro font-bold tracking-[0.2em] text-white uppercase">Saffron Lane</p>
             <div className="absolute inset-x-3 bottom-3 text-white">
               <p className="font-heading text-stat leading-6 font-bold">Aarohi & Kabir</p>
