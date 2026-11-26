@@ -9,7 +9,7 @@ import { ButtonArrow, ButtonLink } from "@/components/ui/button"
 import { EdgeLabel } from "@/components/ui/card"
 import { Viewfinder } from "@/components/ui/viewfinder"
 import { useSitePhotos } from "@/components/site/site-photos"
-import { ContactEmail, SocialLinks } from "@/components/site/social-links"
+import { ContactEmail } from "@/components/site/social-links"
 import { type SitePhotos, type Photo } from "@/lib/photos"
 import { cn } from "@/lib/utils"
 
@@ -78,7 +78,6 @@ export function FinalCta() {
         <p className="mt-8 type-caption font-normal text-ink-muted">
           Questions first? <ContactEmail className="font-semibold text-ink" />
         </p>
-        <SocialLinks className="mt-1 justify-center" />
       </div>
     </section>
   )

@@ -27,7 +27,7 @@ export const plans: Plan[] = [
     id: "solo",
     name: "Solo",
     forWho: "One photographer, a few weddings a month.",
-    monthly: { USD: 25, INR: 1500 },
+    monthly: { USD: 20, INR: 1500 },
     specs: [
       ["Storage", "500 GB"],
       ["Client galleries", "Unlimited"],
