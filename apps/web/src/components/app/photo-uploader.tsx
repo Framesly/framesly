@@ -21,6 +21,11 @@ import {
 import { cn } from "@/lib/utils"
 
 const CONCURRENCY = 4
+/** Finished photos are confirmed in groups of this many, or after this wait, whichever comes first. */
+const CONFIRM_GROUP = 6
+const CONFIRM_WAIT_MS = 400
+/** Bytes sent per photo relative to its original: the web copy and thumbnail add roughly this much. */
+const COPY_OVERHEAD = 1.12
 const CHECK_CHUNK = 500
 
 type Outcome = { id: string; ok: boolean; width?: number; height?: number; error?: string; cancelled?: boolean }
@@ -107,6 +112,12 @@ async function filesFromDrop(data: DataTransfer): Promise<File[]> {
   }
 }
 
+const rateFmt = new Intl.NumberFormat("en", { maximumFractionDigits: 1 })
+const formatRate = (bytesPerSec: number) =>
+  bytesPerSec >= 1e6 ? `${rateFmt.format(bytesPerSec / 1e6)} MB/s` : `${rateFmt.format(Math.max(1, bytesPerSec / 1e3))} KB/s`
+const formatLeft = (seconds: number) =>
+  seconds < 10 ? "almost done" : seconds < 90 ? `about ${Math.round(seconds / 10) * 10} s left` : `about ${Math.round(seconds / 60)} min left`
+
 async function post<T>(url: string, body: unknown): Promise<T> {
   const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
   const json = await res.json().catch(() => ({}))
@@ -134,17 +145,42 @@ export function PhotoUploader({ galleryId, unfinished = 0 }: { galleryId: string
   const dragDepth = useRef(0)
   // Mutable upload bookkeeping: handlers write it, the screen reads a copy of progress on a timer.
   const pending = useRef(new Map<string, number>())
+  // Bytes sent per file (original + copies), for the speed and time-left estimate.
+  const sent = useRef(new Map<string, number>())
+  const samples = useRef<{ t: number; bytes: number }[]>([])
+  const [rate, setRate] = useState<{ bytesPerSec: number; secondsLeft: number } | null>(null)
   const controllers = useRef(new Map<string, AbortController>())
   const cancelled = useRef(new Set<string>())
   const stopAll = useRef(false)
 
   const patch = useCallback((key: string, next: Partial<UploadItem>) => setItems((all) => all.map((i) => (i.key === key ? { ...i, ...next } : i))), [])
+  const itemsRef = useRef(items)
+  useEffect(() => {
+    itemsRef.current = items
+  }, [items])
 
-  // Progress changes many times a second; show it a few times a second.
+  // Progress changes many times a second; show it a few times a second, with speed over the last few seconds.
   useEffect(() => {
     if (!running) return
-    const t = setInterval(() => setProgress(new Map(pending.current)), 250)
-    return () => clearInterval(t)
+    samples.current = []
+    const t = setInterval(() => {
+      setProgress(new Map(pending.current))
+      const now = performance.now()
+      const bytes = [...sent.current.values()].reduce((a, b) => a + b, 0)
+      const window = samples.current.filter((x) => now - x.t < 6000)
+      window.push({ t: now, bytes })
+      samples.current = window
+      const first = window[0]
+      const seconds = (now - first.t) / 1000
+      if (seconds < 1.5) return
+      const bytesPerSec = (bytes - first.bytes) / seconds
+      const total = itemsRef.current.reduce((sum, i) => sum + (i.status === "failed" ? 0 : i.file.size * COPY_OVERHEAD), 0)
+      setRate(bytesPerSec > 0 ? { bytesPerSec, secondsLeft: Math.max(0, (total - bytes) / bytesPerSec) } : null)
+    }, 250)
+    return () => {
+      clearInterval(t)
+      setRate(null)
+    }
   }, [running])
 
   // Leaving the page would abandon the upload: ask first.
@@ -158,7 +194,12 @@ export function PhotoUploader({ galleryId, unfinished = 0 }: { galleryId: string
     return () => window.removeEventListener("beforeunload", warn)
   }, [running])
 
-  /** Upload one batch: presign, send files with limited parallelism, then confirm. */
+  /**
+   * Upload one batch: presign, send files with limited parallelism, and
+   * confirm each photo with the server as soon as it has finished (grouped
+   * into small requests), so the count climbs photo by photo and a dropped
+   * connection loses only the photos still in flight.
+   */
   const uploadBatch = useCallback(
     async (all: UploadItem[]) => {
       const batch = all.filter((i) => !cancelled.current.has(i.key))
@@ -176,8 +217,42 @@ export function PhotoUploader({ galleryId, unfinished = 0 }: { galleryId: string
         return
       }
       batch.forEach((i, idx) => patch(i.key, { photoId: presigned.items[idx].photoId }))
-
+      const keyOf = new Map(batch.map((item, idx) => [presigned.items[idx].photoId, item.key]))
       const outcomes = new Map<string, Outcome>()
+
+      // Confirmation queue: flushed when a few photos are waiting, or shortly after the first one.
+      const confirms: Promise<void>[] = []
+      let waiting: Outcome[] = []
+      let timer: ReturnType<typeof setTimeout> | undefined
+      const flush = () => {
+        clearTimeout(timer)
+        timer = undefined
+        const group = waiting
+        waiting = []
+        if (!group.length) return
+        confirms.push(
+          post<{ results: { id: string; status: "ready" | "failed" | "cancelled" }[] }>("/api/photos", { galleryId, photos: group })
+            .then(({ results }) => {
+              for (const r of results) {
+                const key = keyOf.get(r.id)
+                if (!key || cancelled.current.has(key) || r.status === "cancelled") continue
+                if (r.status === "failed") patch(key, { status: "failed", error: group.find((o) => o.id === r.id)?.error ?? "Didn't reach storage." })
+                else {
+                  patch(key, { status: "done" })
+                  pending.current.set(key, 100)
+                }
+              }
+            })
+            .catch((e: Error) => group.forEach((o) => !o.cancelled && keyOf.get(o.id) && patch(keyOf.get(o.id)!, { status: "failed", error: e.message })))
+        )
+      }
+      const confirm = (o: Outcome) => {
+        outcomes.set(o.id, o)
+        waiting.push(o)
+        if (waiting.length >= CONFIRM_GROUP) flush()
+        else timer ??= setTimeout(flush, CONFIRM_WAIT_MS)
+      }
+
       let next = 0
       const worker = async () => {
         while (next < batch.length && !stopAll.current) {
@@ -185,7 +260,7 @@ export function PhotoUploader({ galleryId, unfinished = 0 }: { galleryId: string
           const item = batch[idx]
           const target = presigned.items[idx]
           if (cancelled.current.has(item.key)) {
-            outcomes.set(target.photoId, { id: target.photoId, ok: false, cancelled: true })
+            confirm({ id: target.photoId, ok: false, cancelled: true })
             continue
           }
           const controller = new AbortController()
@@ -196,8 +271,11 @@ export function PhotoUploader({ galleryId, unfinished = 0 }: { galleryId: string
             let webLoaded = 0
             let thumbLoaded = 0
             let copiesSize = 0
-            const report = () =>
-              pending.current.set(item.key, Math.min(99, Math.round(((originalLoaded + webLoaded + thumbLoaded) / (item.file.size + copiesSize)) * 100)))
+            const report = () => {
+              const loaded = originalLoaded + webLoaded + thumbLoaded
+              sent.current.set(item.key, loaded)
+              pending.current.set(item.key, Math.min(99, Math.round((loaded / (item.file.size + copiesSize)) * 100)))
+            }
             const original = put(target.originalUrl, item.file, photoTypeOf(item.file) ?? item.file.type, (n) => ((originalLoaded = n), report()), controller.signal)
             const copies = makeCopies(item.file).then(async (c) => {
               copiesSize = c.web.size + c.thumb.size
@@ -210,11 +288,11 @@ export function PhotoUploader({ galleryId, unfinished = 0 }: { galleryId: string
             // An unreadable file fails its copies first: stop the original too instead of sending it for nothing.
             copies.catch(() => controller.abort())
             const [, made] = await Promise.all([original, copies])
-            outcomes.set(target.photoId, { id: target.photoId, ok: true, width: made.width, height: made.height })
+            confirm({ id: target.photoId, ok: true, width: made.width, height: made.height })
           } catch (e) {
-            if (cancelled.current.has(item.key)) outcomes.set(target.photoId, { id: target.photoId, ok: false, cancelled: true })
+            if (cancelled.current.has(item.key)) confirm({ id: target.photoId, ok: false, cancelled: true })
             else {
-              outcomes.set(target.photoId, { id: target.photoId, ok: false, error: (e as Error).message })
+              confirm({ id: target.photoId, ok: false, error: (e as Error).message })
               patch(item.key, { status: "failed", error: (e as Error).message })
             }
           } finally {
@@ -224,25 +302,13 @@ export function PhotoUploader({ galleryId, unfinished = 0 }: { galleryId: string
       }
       await Promise.all(Array.from({ length: Math.min(CONCURRENCY, batch.length) }, worker))
 
-      // Anything never reached (Cancel all) or cancelled meanwhile: tell the server to drop its row.
-      batch.forEach((item, idx) => {
+      // Anything never reached (Cancel all): tell the server to drop its row.
+      batch.forEach((_, idx) => {
         const id = presigned.items[idx].photoId
-        if (!outcomes.has(id) || cancelled.current.has(item.key)) outcomes.set(id, { id, ok: false, cancelled: true })
+        if (!outcomes.has(id)) confirm({ id, ok: false, cancelled: true })
       })
-
-      try {
-        const { results } = await post<{ results: { id: string; status: "ready" | "failed" | "cancelled" }[] }>("/api/photos", { galleryId, photos: [...outcomes.values()] })
-        const failedIds = new Set(results.filter((r) => r.status === "failed").map((r) => r.id))
-        batch.forEach((item, idx) => {
-          const id = presigned.items[idx].photoId
-          if (cancelled.current.has(item.key)) return
-          if (failedIds.has(id)) patch(item.key, { status: "failed", error: outcomes.get(id)?.error ?? "Didn't reach storage." })
-          else patch(item.key, { status: "done" })
-          pending.current.set(item.key, 100)
-        })
-      } catch (e) {
-        batch.forEach((i) => !cancelled.current.has(i.key) && patch(i.key, { status: "failed", error: (e as Error).message }))
-      }
+      flush()
+      await Promise.all(confirms)
     },
     [galleryId, patch]
   )
@@ -413,6 +479,7 @@ export function PhotoUploader({ galleryId, unfinished = 0 }: { galleryId: string
           <div className="flex flex-wrap items-center justify-between gap-3 type-caption">
             <span className="text-ink" role="status" aria-live="polite">
               {running ? `Uploading… ${done.toLocaleString("en")} of ${items.length.toLocaleString("en")}` : `${done.toLocaleString("en")} of ${items.length.toLocaleString("en")} uploaded`}
+              {running && rate && <span className="font-normal text-ink-muted tabular-nums"> · {formatRate(rate.bytesPerSec)} · {formatLeft(rate.secondsLeft)}</span>}
             </span>
             <span className="flex gap-2">
               {running && (
