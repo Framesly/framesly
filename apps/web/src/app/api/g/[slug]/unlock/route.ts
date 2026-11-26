@@ -11,7 +11,7 @@ const body = z.object({ password: z.string().min(1).max(72) })
 export async function POST(request: Request, ctx: RouteContext<"/api/g/[slug]/unlock">) {
   const { slug } = await ctx.params
   const parsed = body.safeParse(await request.json().catch(() => null))
-  if (!parsed.success) return Response.json({ error: "Enter the password." }, { status: 400 })
+  if (!parsed.success) return Response.json({ error: "Enter the gallery key." }, { status: 400 })
 
   const result = await unlockGallery(slug, parsed.data.password)
   switch (result) {
@@ -21,9 +21,11 @@ export async function POST(request: Request, ctx: RouteContext<"/api/g/[slug]/un
     case "wrong":
       // Small fixed delay slows down guessing.
       await new Promise((r) => setTimeout(r, 600))
-      return Response.json({ error: "That password isn't right. Check with your photographer." }, { status: 401 })
+      return Response.json({ error: "That key isn't right. Check the message from your photographer." }, { status: 401 })
     case "expired":
       return Response.json({ error: "This gallery has expired." }, { status: 410 })
+    case "unpublished":
+      return Response.json({ error: "This gallery isn't available right now. Ask your photographer." }, { status: 404 })
     case "not_found":
       return Response.json({ error: "This gallery isn't available." }, { status: 404 })
   }

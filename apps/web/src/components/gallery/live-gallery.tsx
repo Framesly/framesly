@@ -1,14 +1,15 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { GalleryView, type Favourites } from "@/components/gallery/client-gallery"
 import type { GalleryPhoto, GallerySection, GalleryViewData } from "@/components/gallery/gallery-data"
 import { ToastProvider, useToast } from "@/components/ui/toast"
 import type { ClientGalleryView } from "@/lib/data/client-gallery"
 
-const REFRESH_BEFORE_EXPIRY = 10 * 60 // seconds: refetch links ~50 min into their 1-hour life
+const REFRESH_BEFORE_EXPIRY = 10 * 60 // seconds: refetch links well before they expire
+const RECHECK_AFTER_MS = 30_000 // returning to the tab re-checks the gallery at most this often
 
 const dateFmt = new Intl.DateTimeFormat("en", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" })
 
@@ -56,11 +57,15 @@ function downloadPhoto(p: GalleryPhoto) {
   a.remove()
 }
 
+/** The gallery stopped being viewable here: unpublished or unknown (404), expired (410), or its key changed (401). */
+const GONE = new Set([401, 404, 410])
+
 /**
  * Hearts saved on the server, keyed to this browser's visitor
- * cookie. The heart flips at once and flips back if saving fails.
+ * cookie. The heart flips at once and flips back if saving fails;
+ * if the gallery is no longer viewable, `onGone` switches the screen.
  */
-function useServerFavourites(slug: string, initial: string[]): Favourites {
+function useServerFavourites(slug: string, initial: string[], onGone: () => void): Favourites {
   const toast = useToast()
   const [favs, setFavs] = useState(() => new Set(initial))
   const toggle = useCallback(
@@ -76,25 +81,28 @@ function useServerFavourites(slug: string, initial: string[]): Favourites {
         .then((res) => {
           if (!res.ok) throw new Error(String(res.status))
         })
-        .catch(() => {
+        .catch((e: Error) => {
           setFavs((prev) => {
             const next = new Set(prev)
             if (on) next.delete(id)
             else next.add(id)
             return next
           })
-          toast({ title: "Couldn't save that heart", body: "Check your connection and try again." })
+          if (GONE.has(Number(e.message))) onGone()
+          else toast({ title: "Couldn't save that heart", body: "Check your connection and try again." })
         })
     },
-    [favs, slug, toast]
+    [favs, slug, toast, onGone]
   )
   return { favs, toggle, has: (id: string) => favs.has(id) }
 }
 
 /**
- * A real client gallery at /g/[slug]. Photo links last 1 hour, so this
- * refetches fresh ones shortly before they expire; if the gallery was
- * unpublished, expired or locked meanwhile, the page re-renders that state.
+ * A real client gallery at /g/[slug]. It re-checks the gallery shortly
+ * before the photo links expire, and whenever the couple comes back to the
+ * tab (at most every 30 seconds). New photos appear; if the gallery was
+ * unpublished, expired or its key changed meanwhile, the page switches to
+ * that screen instead of leaving dead photos on show.
  */
 export function LiveGallery({ slug, initial }: { slug: string; initial: ClientGalleryView }) {
   return (
@@ -108,17 +116,37 @@ function LiveGalleryInner({ slug, initial }: { slug: string; initial: ClientGall
   const router = useRouter()
   const [gallery, setGallery] = useState(initial)
   const data = useMemo(() => toViewData(gallery), [gallery])
-  const favourites = useServerFavourites(slug, initial.favourites)
+  const gone = useCallback(() => router.refresh(), [router])
+  const favourites = useServerFavourites(slug, initial.favourites, gone)
+  const lastCheck = useRef(0)
 
+  const recheck = useCallback(async () => {
+    lastCheck.current = Date.now()
+    const res = await fetch(`/api/g/${slug}`, { cache: "no-store" }).catch(() => null)
+    if (res?.ok) setGallery(await res.json())
+    else if (res && GONE.has(res.status)) gone()
+  }, [slug, gone])
+
+  // Fresh links before the current ones run out.
   useEffect(() => {
     const wait = Math.max(30, gallery.linksExpireAt - Math.floor(Date.now() / 1000) - REFRESH_BEFORE_EXPIRY) * 1000
-    const t = setTimeout(async () => {
-      const res = await fetch(`/api/g/${slug}`, { cache: "no-store" }).catch(() => null)
-      if (res?.ok) setGallery(await res.json())
-      else if (res) router.refresh()
-    }, wait)
+    const t = setTimeout(recheck, wait)
     return () => clearTimeout(t)
-  }, [gallery.linksExpireAt, slug, router])
+  }, [gallery.linksExpireAt, recheck])
+
+  // Coming back to the tab: the photographer may have unpublished, changed the key or added photos.
+  useEffect(() => {
+    lastCheck.current = Date.now()
+    const onVisible = () => {
+      if (document.visibilityState === "visible" && Date.now() - lastCheck.current > RECHECK_AFTER_MS) void recheck()
+    }
+    document.addEventListener("visibilitychange", onVisible)
+    window.addEventListener("focus", onVisible)
+    return () => {
+      document.removeEventListener("visibilitychange", onVisible)
+      window.removeEventListener("focus", onVisible)
+    }
+  }, [recheck])
 
   return <GalleryView data={data} favourites={favourites} onDownload={downloadPhoto} />
 }

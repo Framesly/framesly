@@ -1,8 +1,7 @@
 import type { Metadata } from "next"
-import { notFound } from "next/navigation"
 import { Suspense } from "react"
 
-import { ExpiredScreen, PasswordScreen } from "@/components/gallery/gallery-gate"
+import { ExpiredScreen, MissingScreen, PasswordScreen, UnpublishedScreen } from "@/components/gallery/gallery-gate"
 import { LiveGallery } from "@/components/gallery/live-gallery"
 import { loadClientGallery } from "@/lib/data/client-gallery"
 
@@ -27,7 +26,9 @@ async function Gate({ params }: { params: PageProps<"/g/[slug]">["params"] }) {
   const result = await loadClientGallery(slug)
   switch (result.status) {
     case "not_found":
-      notFound()
+      return <MissingScreen />
+    case "unpublished":
+      return <UnpublishedScreen studio={result.studio} />
     case "expired":
       return <ExpiredScreen studio={result.studio} />
     case "locked":

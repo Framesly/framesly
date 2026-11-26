@@ -12,7 +12,8 @@ import { studioAssetUrl } from "@/lib/supabase/env"
  * Client galleries: what a couple can see at
  * framesly.app/g/<slug>. Clients have no account, so this reads with the
  * service role and does every check itself, in this order:
- *   not published → "not_found"   (404)
+ *   unknown link → "not_found"    (404)
+ *   unpublished → "unpublished"   (404, with the studio's branding)
  *   past expires_at → "expired"   (410)
  *   password set, no valid unlock cookie → "locked" (401)
  * Only then are photo links signed. Nothing here is exposed to the browser
@@ -63,6 +64,7 @@ export type ClientGalleryView = {
 
 export type ClientGalleryResult =
   | { status: "not_found" }
+  | { status: "unpublished"; studio: { name: string; logoUrl: string | null; brandColor: string } }
   | { status: "expired"; studio: { name: string; logoUrl: string | null; brandColor: string } }
   | { status: "locked"; title: string; studio: { name: string; logoUrl: string | null; brandColor: string } }
   | { status: "ok"; gallery: ClientGalleryView }
@@ -75,14 +77,13 @@ type Published = GalleryRow & { studio: { name: string; logoUrl: string | null; 
  * hash, in one query. The secret's updated_at is part of the unlock token, so
  * changing the key locks everyone out again.
  */
-async function findPublished(slug: string): Promise<Published | null> {
+async function findBySlug(slug: string): Promise<Published | null> {
   if (!/^[a-z0-9](?:[a-z0-9-]{1,58}[a-z0-9])$/.test(slug)) return null
   const db = createAdminClient()
   const { data } = await db
     .from("galleries")
     .select("id, studio_id, title, event_date, public_slug, published_at, expires_at, cover_photo_id, studios(name, logo_path, brand_color), gallery_secrets(password_hash, updated_at)")
     .eq("public_slug", slug)
-    .not("published_at", "is", null)
     .maybeSingle()
   if (!data) return null
   const row = data as unknown as GalleryRow & {
@@ -132,6 +133,7 @@ async function visitorId(create: boolean) {
 
 type Access =
   | { status: "not_found" }
+  | { status: "unpublished"; studio: { name: string; logoUrl: string | null; brandColor: string } }
   | { status: "expired"; studio: { name: string; logoUrl: string | null; brandColor: string } }
   | { status: "locked"; title: string; studio: { name: string; logoUrl: string | null; brandColor: string } }
   | { status: "ok"; gallery: GalleryRow; studio: { name: string; logoUrl: string | null; brandColor: string } }
@@ -142,9 +144,11 @@ type Access =
  * favourites both go through it.
  */
 async function checkAccess(slug: string): Promise<Access> {
-  const found = await findPublished(slug)
+  const found = await findBySlug(slug)
   if (!found) return { status: "not_found" }
   const { studio, secret, ...gallery } = found
+  // The link name stays reserved after unpublishing, so the couple can be told who to ask.
+  if (!gallery.published_at) return { status: "unpublished", studio }
 
   if (gallery.expires_at && new Date(gallery.expires_at).getTime() <= Date.now()) {
     return { status: "expired", studio }
@@ -236,7 +240,7 @@ async function readPhotos(galleryId: string) {
 }
 
 /** Heart or un-heart a photo for this browser. Same access rules as viewing. */
-export async function setFavourite(slug: string, photoId: string, on: boolean): Promise<"ok" | "not_found" | "expired" | "locked" | "no_photo"> {
+export async function setFavourite(slug: string, photoId: string, on: boolean): Promise<"ok" | "not_found" | "unpublished" | "expired" | "locked" | "no_photo"> {
   if (!UUID_RE.test(photoId)) return "no_photo"
   const access = await checkAccess(slug)
   if (access.status !== "ok") return access.status
@@ -256,9 +260,10 @@ export async function setFavourite(slug: string, photoId: string, on: boolean): 
 }
 
 /** Check a password and, if right, set the gallery's unlock cookie (24h). */
-export async function unlockGallery(slug: string, password: string): Promise<"ok" | "wrong" | "not_found" | "expired" | "open"> {
-  const gallery = await findPublished(slug)
+export async function unlockGallery(slug: string, password: string): Promise<"ok" | "wrong" | "not_found" | "unpublished" | "expired" | "open"> {
+  const gallery = await findBySlug(slug)
   if (!gallery) return "not_found"
+  if (!gallery.published_at) return "unpublished"
   if (gallery.expires_at && new Date(gallery.expires_at).getTime() <= Date.now()) return "expired"
   const { secret } = gallery
   if (!secret) return "open"

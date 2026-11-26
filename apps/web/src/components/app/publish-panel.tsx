@@ -54,13 +54,17 @@ function useCopy() {
 
 /**
  * Sharing at the top of a gallery: the client link and its key, always in
- * view, with copy, a one-click key reset and the sharing settings in a dialog.
+ * view, with copy, a key reset, unpublish, and the sharing settings in a
+ * dialog. Reset and unpublish ask for a second click. An unpublished gallery
+ * keeps its link name and key, so "Publish again" brings the same link back.
  */
 export function ShareBar({ galleryId, title, origin, initial }: { galleryId: string; title: string; origin: string; initial: ShareState }) {
   const [state, setState] = useState(initial)
   const [open, setOpen] = useState(false)
   const [confirmReset, setConfirmReset] = useState(false)
+  const [confirmUnpublish, setConfirmUnpublish] = useState(false)
   const [resetting, startReset] = useTransition()
+  const [switching, startSwitch] = useTransition()
   const copy = useCopy()
   const toast = useToast()
 
@@ -68,12 +72,37 @@ export function ShareBar({ galleryId, title, origin, initial }: { galleryId: str
   const link = state.publicSlug ? `${origin}/g/${state.publicSlug}` : ""
   const expired = Boolean(state.expiresAt && new Date(state.expiresAt) <= new Date())
 
-  // A second click within a few seconds confirms the reset; otherwise it disarms.
+  // A second click within a few seconds confirms; otherwise the button disarms.
   useEffect(() => {
-    if (!confirmReset) return
-    const t = setTimeout(() => setConfirmReset(false), 4000)
+    if (!confirmReset && !confirmUnpublish) return
+    const t = setTimeout(() => {
+      setConfirmReset(false)
+      setConfirmUnpublish(false)
+    }, 4000)
     return () => clearTimeout(t)
-  }, [confirmReset])
+  }, [confirmReset, confirmUnpublish])
+
+  const unpublish = () => {
+    if (!confirmUnpublish) return setConfirmUnpublish(true)
+    setConfirmUnpublish(false)
+    startSwitch(async () => {
+      const res = await fetch(`/api/galleries/${galleryId}/publish`, { method: "DELETE" }).catch(() => null)
+      if (!res?.ok) return toast({ title: "Couldn't unpublish", body: "Check your connection and try again." })
+      setState((s) => ({ ...s, publishedAt: null }))
+      toast({ title: "Unpublished", body: "The link is off. Couples now see that the gallery isn't available." })
+    })
+  }
+
+  // Same link name, key and expiry as before; an expiry that has passed needs a new date, so that opens the settings.
+  const publishAgain = () => {
+    if (expired) return setOpen(true)
+    startSwitch(async () => {
+      const { ok, data } = await publishRequest(galleryId, { slug: state.publicSlug, expiresAt: state.expiresAt })
+      if (!ok || !data) return toast({ title: data?.error ?? "Couldn't publish", body: "Check your connection and try again." })
+      setState((s) => ({ ...s, publicSlug: data.slug, publishedAt: data.publishedAt, expiresAt: data.expiresAt, hasPassword: data.hasPassword }))
+      toast({ title: "Published again", body: "The same link and key work again.", tone: "success" })
+    })
+  }
 
   const resetKey = () => {
     if (!confirmReset) return setConfirmReset(true)
@@ -124,10 +153,34 @@ export function ShareBar({ galleryId, title, origin, initial }: { galleryId: str
             </Button>
           </div>
 
-          <div className="flex items-center bg-surface-raised px-4 py-3">
-            <Button size="sm" variant="secondary" className="w-full" onClick={() => setOpen(true)}>
+          <div className="flex items-center gap-2 bg-surface-raised px-4 py-3">
+            <Button size="sm" variant="secondary" className="flex-1 lg:flex-none" onClick={() => setOpen(true)}>
               <Icon name="settings" className="size-4" />
               Settings
+            </Button>
+            <Button size="sm" variant={confirmUnpublish ? "danger" : "quiet"} className="flex-1 lg:flex-none" onClick={unpublish} disabled={switching}>
+              {switching ? <Aperture className="size-4" /> : null}
+              {confirmUnpublish ? "Confirm unpublish" : "Unpublish"}
+            </Button>
+          </div>
+        </div>
+      ) : state.publicSlug ? (
+        <div className="flex flex-wrap items-center gap-3 px-4 py-3">
+          <span aria-hidden className="size-2 shrink-0 rounded-full bg-warning" />
+          <div className="min-w-0 flex-1 basis-60">
+            <p className="type-caption text-ink">Unpublished</p>
+            <p className="truncate type-caption font-normal text-ink-muted" translate="no">
+              {link.replace(/^https?:\/\//, "")} is off. Couples see that it isn&apos;t available.
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button size="sm" variant="secondary" onClick={() => setOpen(true)}>
+              <Icon name="settings" className="size-4" />
+              Settings
+            </Button>
+            <Button size="sm" onClick={publishAgain} disabled={switching}>
+              {switching ? <Aperture className="size-4" /> : <Icon name="share" className="size-4" />}
+              Publish again
             </Button>
           </div>
         </div>

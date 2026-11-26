@@ -21,6 +21,8 @@ export async function POST(request: Request, ctx: RouteContext<"/api/g/[slug]/fa
       return Response.json({ error: "This gallery needs a password." }, { status: 401 })
     case "expired":
       return Response.json({ error: "This gallery has expired." }, { status: 410 })
+    case "unpublished":
+      return Response.json({ error: "This gallery isn't available right now." }, { status: 404 })
     case "no_photo":
     case "not_found":
       return Response.json({ error: "That photo isn't in this gallery." }, { status: 404 })
