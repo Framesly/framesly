@@ -42,7 +42,7 @@ function Cover({ gallery, brandColor, cover, sizes, small }: { gallery: GalleryO
   ) : (
     <span
       aria-hidden
-      className={cn("absolute inset-0 grid place-items-center font-heading font-bold tracking-[-0.03em] text-ink/25", small ? "text-[15px]" : "text-[32px]")}
+      className={cn("absolute inset-0 grid place-items-center font-heading font-bold tracking-[-0.03em] text-ink/25", small ? "text-body" : "text-[32px]")}
       style={{ background: `color-mix(in oklab, ${brandColor} 22%, var(--surface-sunken))` }}
     >
       {initialsOf(gallery.title) || "—"}

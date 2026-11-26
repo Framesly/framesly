@@ -112,7 +112,7 @@ export function MenuSelect<V extends string>({
                   {o.dot && <span aria-hidden className="size-2 shrink-0 rounded-full" style={{ background: o.dot }} />}
                   <span className="flex-1">
                     <span className="block type-caption text-ink">{o.label}</span>
-                    {o.hint && <span className="block text-[12px] leading-4 text-ink-muted">{o.hint}</span>}
+                    {o.hint && <span className="block text-micro leading-4 text-ink-muted">{o.hint}</span>}
                   </span>
                   {selected && <Icon name="check" className="size-4 text-safelight" />}
                 </li>

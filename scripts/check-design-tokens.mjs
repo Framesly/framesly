@@ -11,7 +11,7 @@
  * Files below legitimately need raw values; each has a reason.
  */
 import { readdirSync, readFileSync, statSync } from "node:fs"
-import { join, relative } from "node:path"
+import { join, relative, sep } from "node:path"
 
 const SRC = "apps/web/src"
 
@@ -42,7 +42,8 @@ walk(SRC)
 
 const problems = []
 for (const file of files) {
-  const rel = relative(SRC, file)
+  // Forward slashes on every OS, so the allowlist matches on Windows too.
+  const rel = relative(SRC, file).split(sep).join("/")
   readFileSync(file, "utf8")
     .split("\n")
     .forEach((line, i) => {

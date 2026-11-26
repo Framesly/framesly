@@ -127,7 +127,7 @@ export function DatePicker({
               </button>
             </div>
 
-            <div className="mt-2 grid grid-cols-7 text-center text-[11px] leading-6 text-ink-muted" aria-hidden>
+            <div className="mt-2 grid grid-cols-7 text-center text-micro leading-6 text-ink-muted" aria-hidden>
               {WEEKDAYS.map((d) => (
                 <span key={d}>{d}</span>
               ))}
@@ -166,7 +166,7 @@ export function DatePicker({
                     aria-current={iso === today ? "date" : undefined}
                     onClick={() => pick(iso)}
                     className={cn(
-                      "relative grid h-9 place-items-center rounded-full text-[13px] tabular-nums transition-colors",
+                      "relative grid h-9 place-items-center rounded-full text-caption tabular-nums transition-colors",
                       selected ? "bg-safelight font-semibold text-on-safelight" : inMonth ? "text-ink hover:bg-surface-raised" : "text-ink-muted/50 hover:bg-surface-raised",
                       disabled && "pointer-events-none opacity-30"
                     )}

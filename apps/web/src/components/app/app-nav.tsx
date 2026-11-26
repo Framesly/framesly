@@ -78,7 +78,7 @@ function NavLinks({ variant, pathname }: { variant: Variant; pathname: string | 
             href={it.href}
             aria-current={on ? "page" : undefined}
             className={cn(
-              "relative flex h-16 flex-1 touch-manipulation flex-col items-center justify-center gap-1 text-[11px] leading-none font-medium transition-colors",
+              "relative flex h-16 flex-1 touch-manipulation flex-col items-center justify-center gap-1 text-micro leading-none font-medium transition-colors",
               on ? "text-ink" : "text-ink-muted active:text-ink"
             )}
           >

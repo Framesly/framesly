@@ -108,7 +108,7 @@ export function ShareBar({ galleryId, title, origin, initial }: { galleryId: str
             <div className="min-w-0 flex-1">
               <p className="type-caption font-normal text-ink-muted">Gallery key</p>
               {state.key ? (
-                <p className="truncate font-mono text-[15px] leading-6 tracking-wide text-ink" translate="no">{state.key}</p>
+                <p className="truncate font-mono text-body leading-6 tracking-wide text-ink" translate="no">{state.key}</p>
               ) : (
                 <p className="truncate type-caption text-ink-muted">{state.hasPassword ? "Set before keys were visible" : "None: anyone with the link"}</p>
               )}
