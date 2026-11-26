@@ -3,6 +3,7 @@ import Link from "next/link"
 
 import { ProsePage } from "@/components/site/prose-page"
 import { ContactEmail } from "@/components/site/social-links"
+import { LEGAL_VERSIONS, lastUpdated } from "@/lib/legal"
 import { pageMeta } from "@/lib/site"
 
 export const metadata: Metadata = {
@@ -12,7 +13,7 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <ProsePage eyebrow="Legal" title="Privacy policy" updated="Last updated 25 November 2026">
+    <ProsePage eyebrow="Legal" title="Privacy policy" updated={lastUpdated(LEGAL_VERSIONS.privacy)}>
       <p>
         Framesly is operated by Parvathy Studios (&ldquo;we&rdquo;, &ldquo;us&rdquo;). This policy explains what
         personal data we collect, why, who sees it and what choices you have. It covers photographers who use
@@ -37,13 +38,15 @@ export default function PrivacyPage() {
       <p>
         <strong>Account and studio.</strong> Your name, email address and password (stored only as a salted hash by
         our sign-in provider), or your Google account name and email if you sign in with Google. Your studio name,
-        address, brand colour, logo, profile picture, the plan you are interested in and the data region you
-        chose.
+        address, brand colour, logo, profile picture, the plan you are interested in and your data region (set
+        from your time zone during setup). When you accept our Terms and this policy, we record which versions you
+        accepted and when.
       </p>
       <p>
         <strong>Your content.</strong> Photos and the web copies we generate from them, gallery titles, sections,
-        covers, publish settings (link name, expiry date) and gallery passwords. Gallery passwords are stored only
-        as bcrypt hashes and cannot be read back, even by us.
+        covers, publish settings (link name, expiry date) and gallery keys. Each gallery key is stored as a bcrypt
+        hash, used to check what a client types, and also encrypted so that you, and members of your studio, can
+        see and share it from your dashboard. The encryption key is held only by our servers.
       </p>
       <p>
         <strong>Clients and guests.</strong> If you open a client gallery we set a cookie so the gallery stays
@@ -99,8 +102,8 @@ export default function PrivacyPage() {
         <li><strong>A payment provider</strong>, once paid plans open.</li>
       </ul>
       <p>
-        During setup you choose a preferred data region (India, United States or Europe). We record your choice and
-        will honour it as regional storage rolls out. Until then, your data may be stored and processed in other
+        During setup we record a preferred data region (India, United States or Europe), based on your time zone.
+        We will honour it as regional storage rolls out. Until then, your data may be stored and processed in other
         countries. When we move data across borders we rely on appropriate safeguards, such as standard contractual
         clauses where the GDPR requires them. We do not sell personal data.
       </p>

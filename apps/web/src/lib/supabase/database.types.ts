@@ -185,6 +185,13 @@ export type Database = {
         Relationships: []
       }
       /** Client favourites. Written only by the server (service role); members of the studio can read. */
+      /** Each photographer's acceptance of the Terms and Privacy policy (append-only). */
+      legal_acceptances: {
+        Row: { id: string; user_id: string; terms_version: string; privacy_version: string; accepted_at: Timestamp; user_agent: string | null }
+        Insert: { id?: string; user_id: string; terms_version: string; privacy_version: string; accepted_at?: Timestamp; user_agent?: string | null }
+        Update: Record<string, never>
+        Relationships: []
+      }
       selections: {
         Row: { id: string; gallery_id: string; photo_id: string; visitor_id: string; client_name: string | null; created_at: Timestamp }
         Insert: { id?: string; gallery_id: string; photo_id: string; visitor_id: string; client_name?: string | null }

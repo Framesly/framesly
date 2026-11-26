@@ -33,7 +33,49 @@ function detectRegion(): "in" | "eu" | "us" {
 }
 
 /**
- * First-run setup: studio name and address, then brand. Enter submits a step.
+ * The agreement photographers give before their studio is created. Ticking it
+ * is required; the server records which versions were accepted and when.
+ */
+function Agreement({ accepted, onChange, error }: { accepted: boolean; onChange: (v: boolean) => void; error?: string }) {
+  return (
+    <div className={cn("rounded-[var(--radius-control)] border p-4", error ? "border-danger" : accepted ? "border-safelight/50 bg-safelight-soft" : "border-line")}>
+      <p className="type-caption text-ink">Your photos stay yours</p>
+      <p className="mt-1 type-caption font-normal text-pretty text-ink-muted">
+        We use your photos and your clients&apos; details only to run Framesly for you. We never sell them, show them to advertisers or train AI
+        on them unless you separately opt in.
+      </p>
+      <label className="mt-3 flex cursor-pointer items-start gap-3 type-caption text-ink">
+        <input
+          type="checkbox"
+          name="acceptedTerms"
+          checked={accepted}
+          onChange={(e) => onChange(e.target.checked)}
+          aria-describedby={error ? "terms-error" : undefined}
+          className="mt-0.5 size-5 shrink-0 accent-[var(--safelight)]"
+        />
+        <span>
+          I have read and agree to the{" "}
+          <a href="/legal/terms" target="_blank" rel="noopener" className="underline underline-offset-4 hover:text-safelight-text">
+            Terms of service
+          </a>{" "}
+          and{" "}
+          <a href="/legal/privacy" target="_blank" rel="noopener" className="underline underline-offset-4 hover:text-safelight-text">
+            Privacy policy
+          </a>
+          .
+        </span>
+      </label>
+      {error && (
+        <p id="terms-error" role="alert" className="mt-2 type-caption text-danger">
+          {error}
+        </p>
+      )}
+    </div>
+  )
+}
+
+/**
+ * First-run setup: studio name and address, then brand and the agreement. Enter submits a step.
  * The gallery cover preview on the right updates as they type, so they see
  * what their couples will see.
  */
@@ -46,6 +88,7 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
   const [slugEdited, setSlugEdited] = useState(false)
   const [brandColor, setBrandColor] = useState("#F2A93B")
   const [logoFile, setLogoFile] = useState<File | null>(null)
+  const [accepted, setAccepted] = useState(false)
   const [phase, setPhase] = useState<"form" | "saving" | "done">("form")
   const [error, setError] = useState<string | null>(null)
   const [fieldError, setFieldError] = useState<Record<string, string>>({})
@@ -71,7 +114,7 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
   const finish = async () => {
     setPhase("saving")
     setError(null)
-    const res = await createStudioAction({ name, slug: effectiveSlug, brandColor, region: detectRegion() })
+    const res = await createStudioAction({ name, slug: effectiveSlug, brandColor, region: detectRegion(), acceptedTerms: accepted })
     if (!res.ok) {
       setPhase("form")
       if (res.fieldErrors) {
@@ -211,6 +254,7 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
                       <LogoPicker previewUrl={logoUrl} onFile={setLogoFile} onRemove={() => setLogoFile(null)} />
                     </div>
                   </div>
+                  <Agreement accepted={accepted} onChange={setAccepted} error={fieldError.terms} />
                 </div>
               )}
 
@@ -238,7 +282,7 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
               <ButtonArrow />
             </Button>
           ) : (
-            <Button type="submit" size="lg" disabled={phase === "saving"} aria-busy={phase === "saving"}>
+            <Button type="submit" size="lg" disabled={phase === "saving" || !accepted} aria-busy={phase === "saving"}>
               {phase === "saving" ? (
                 <>
                   <Aperture /> Creating your studio…

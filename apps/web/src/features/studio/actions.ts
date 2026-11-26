@@ -1,10 +1,12 @@
 "use server"
 
+import { headers } from "next/headers"
 import { revalidatePath } from "next/cache"
 
 import { formValues, type ActionState } from "@/lib/action-state"
 import { getMembership, requireStudio, requireUser } from "@/lib/auth/dal"
 import { STUDIO_ASSETS_BUCKET } from "@/lib/supabase/env"
+import { LEGAL_VERSIONS } from "@/lib/legal"
 import { createClient } from "@/lib/supabase/server"
 import { createStudioSchema, fieldErrors, studioSlugSchema, updateStudioSchema } from "@/lib/validation"
 
@@ -32,19 +34,36 @@ export type CreateStudioResult =
   | { ok: true; studioId: string }
   | { ok: false; message?: string; fieldErrors?: Record<string, string> }
 
-/** Onboarding: create the studio and owner membership in one transaction. */
+/**
+ * Onboarding: record the photographer's agreement to the current Terms and
+ * Privacy policy, then create the studio and owner membership in one
+ * transaction. No studio is created without the agreement on record.
+ */
 export async function createStudioAction(input: {
   name: string
   slug: string
   brandColor: string
   region: string
+  acceptedTerms: boolean
 }): Promise<CreateStudioResult> {
-  await requireUser("/app/onboarding")
+  const user = await requireUser("/app/onboarding")
+  if (input.acceptedTerms !== true) {
+    return { ok: false, fieldErrors: { terms: "Please read and accept the Terms of service and Privacy policy to continue." } }
+  }
   const parsed = createStudioSchema.safeParse(input)
   if (!parsed.success) return { ok: false, fieldErrors: fieldErrors(parsed.error) }
 
   const { name, slug, brandColor, region } = parsed.data
   const supabase = await createClient()
+
+  const { error: acceptError } = await supabase.from("legal_acceptances").insert({
+    user_id: user.id,
+    terms_version: LEGAL_VERSIONS.terms,
+    privacy_version: LEGAL_VERSIONS.privacy,
+    user_agent: (await headers()).get("user-agent")?.slice(0, 500) ?? null,
+  })
+  if (acceptError) return { ok: false, message: "Couldn't save your agreement. Try again." }
+
   const { data, error } = await supabase.rpc("create_studio", {
     p_name: name,
     p_slug: slug,

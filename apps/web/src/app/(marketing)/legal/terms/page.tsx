@@ -3,6 +3,7 @@ import Link from "next/link"
 
 import { ProsePage } from "@/components/site/prose-page"
 import { ContactEmail } from "@/components/site/social-links"
+import { LEGAL_VERSIONS, lastUpdated } from "@/lib/legal"
 import { pageMeta } from "@/lib/site"
 
 export const metadata: Metadata = {
@@ -12,7 +13,7 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <ProsePage eyebrow="Legal" title="Terms of service" updated="Last updated 25 November 2026">
+    <ProsePage eyebrow="Legal" title="Terms of service" updated={lastUpdated(LEGAL_VERSIONS.terms)}>
       <p>
         These terms are the agreement between you and Parvathy Studios (&ldquo;we&rdquo;, &ldquo;us&rdquo;), which
         operates Framesly. By creating an account or using Framesly you accept them. If you use Framesly for a

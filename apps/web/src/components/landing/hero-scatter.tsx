@@ -23,7 +23,14 @@ import { useSitePhotos } from "@/components/site/site-photos"
 import { type SitePhotos, type Photo } from "@/lib/photos"
 
 /** The hero headline cycles through these; the first is the canonical one (title, SEO, screen readers). */
-const HERO_HEADLINES = ["Cull a wedding before dinner.", "Your brand on every gallery.", "Upload once, deliver tonight.", "Couples pick. You deliver."]
+const HERO_HEADLINES = [
+  "Cull a wedding before dinner.",
+  "Galleries with the lights on.",
+  "Your brand on every gallery.",
+  "For those who shoot all day.",
+  "Upload once, deliver tonight.",
+  "Couples pick. You deliver.",
+]
 import { cn, frameNo } from "@/lib/utils"
 
 /* -------------------------------------------------------------------------- */
@@ -269,7 +276,7 @@ export function HeroScatter() {
                 <span className="absolute inset-0 animate-ping rounded-full bg-safelight opacity-60" />
                 <span className="relative size-2 rounded-full bg-safelight" />
               </span>
-              <EdgeLabel>Paid beta · for wedding photographers</EdgeLabel>
+              <EdgeLabel>A darkroom with the lights on</EdgeLabel>
             </div>
             <h1 className="mt-5 type-display-l max-[359px]:text-[40px] max-[359px]:leading-[44px] sm:text-[64px] sm:leading-[64px] lg:type-display-xl">
               <span className="sr-only">Cull a wedding before dinner.</span>
