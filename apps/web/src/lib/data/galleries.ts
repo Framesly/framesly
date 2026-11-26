@@ -120,7 +120,7 @@ export async function listGalleryPhotoIds(galleryId: string) {
 export const getPublishState = cache(async (galleryId: string) => {
   const supabase = await createClient()
   const [{ data }, cipher] = await Promise.all([
-    supabase.from("galleries").select("public_slug, published_at, expires_at, has_password").eq("id", galleryId).maybeSingle(),
+    supabase.from("galleries").select("public_slug, published_at, expires_at, has_password, cover_mode").eq("id", galleryId).maybeSingle(),
     supabase.rpc("gallery_key_cipher", { p_gallery_id: galleryId }),
   ])
   if (!data) return null

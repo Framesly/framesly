@@ -11,6 +11,7 @@ type Timestamp = string
 
 export type Region = "us" | "eu" | "in"
 export type MemberRole = "owner" | "shooter" | "editor"
+export type CoverMode = "single" | "slideshow"
 export type GalleryStatus = "draft" | "culling" | "delivered" | "archived"
 export type PhotoStatus = "uploading" | "uploaded" | "processing" | "ready" | "failed"
 export type PlanInterest = "solo" | "studio" | "collective"
@@ -99,6 +100,8 @@ export type Database = {
           expires_at: Timestamp | null
           /** Display hint only; the password hash itself is in gallery_secrets (server-only) */
           has_password: boolean
+          /** How the client cover shows: the chosen photo, or a slideshow of the gallery */
+          cover_mode: CoverMode
         }
         Insert: {
           id?: string
@@ -112,6 +115,7 @@ export type Database = {
         Update: {
           title?: string
           slug?: string
+          cover_mode?: CoverMode
           event_date?: string | null
           status?: GalleryStatus
           cover_photo_id?: string | null

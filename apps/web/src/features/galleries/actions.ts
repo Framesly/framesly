@@ -40,7 +40,10 @@ export async function createGalleryAction(_: ActionState, formData: FormData): P
   redirect(`/app/galleries/${id}?created=1`)
 }
 
-export async function updateGalleryAction(galleryId: string, input: { title?: string; eventDate?: string | null; status?: "draft" | "culling" | "delivered" | "archived" }) {
+export async function updateGalleryAction(
+  galleryId: string,
+  input: { title?: string; eventDate?: string | null; status?: "draft" | "culling" | "delivered" | "archived"; coverMode?: "single" | "slideshow" }
+) {
   await requireStudio()
   const title = input.title?.trim()
   if (title !== undefined && (title.length < 1 || title.length > 120)) return { ok: false, message: "Use 1 to 120 characters." }
@@ -51,6 +54,7 @@ export async function updateGalleryAction(galleryId: string, input: { title?: st
       ...(title !== undefined ? { title } : {}),
       ...(input.eventDate !== undefined ? { event_date: input.eventDate || null } : {}),
       ...(input.status ? { status: input.status } : {}),
+      ...(input.coverMode === "single" || input.coverMode === "slideshow" ? { cover_mode: input.coverMode } : {}),
     })
     .eq("id", galleryId)
   if (error) return { ok: false, message: error.message }

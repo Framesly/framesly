@@ -32,6 +32,7 @@ type GalleryRow = {
   published_at: string | null
   expires_at: string | null
   cover_photo_id: string | null
+  cover_mode: "single" | "slideshow" | null
 }
 
 export type ClientPhoto = {
@@ -54,6 +55,8 @@ export type ClientGalleryView = {
   eventDate: string | null
   studio: { name: string; logoUrl: string | null; brandColor: string }
   coverId: string | null
+  /** One photo, or a slideshow of the gallery's photos */
+  coverMode: "single" | "slideshow"
   sections: { id: string; name: string }[]
   photos: ClientPhoto[]
   /** Unix seconds when the photo links stop working; the page refreshes before then. */
@@ -82,7 +85,7 @@ async function findBySlug(slug: string): Promise<Published | null> {
   const db = createAdminClient()
   const { data } = await db
     .from("galleries")
-    .select("id, studio_id, title, event_date, public_slug, published_at, expires_at, cover_photo_id, studios(name, logo_path, brand_color), gallery_secrets(password_hash, updated_at)")
+    .select("id, studio_id, title, event_date, public_slug, published_at, expires_at, cover_photo_id, cover_mode, studios(name, logo_path, brand_color), gallery_secrets(password_hash, updated_at)")
     .eq("public_slug", slug)
     .maybeSingle()
   if (!data) return null
@@ -190,6 +193,7 @@ export async function loadClientGallery(slug: string): Promise<ClientGalleryResu
       eventDate: gallery.event_date,
       studio,
       coverId: gallery.cover_photo_id,
+      coverMode: gallery.cover_mode ?? "single",
       sections: (sections ?? []).map((s) => ({ id: s.id, name: s.name })),
       photos: (photos ?? []).map((p) => ({
         id: p.id,

@@ -19,7 +19,7 @@ import {
   renameSectionAction,
   updateGalleryAction,
 } from "@/features/galleries/actions"
-import type { GalleryStatus } from "@/lib/supabase/database.types"
+import type { CoverMode, GalleryStatus } from "@/lib/supabase/database.types"
 import { cn } from "@/lib/utils"
 
 type Section = { id: string; name: string; sort_order: number }
@@ -29,6 +29,11 @@ const statuses: MenuOption<GalleryStatus>[] = [
   { value: "culling", label: "Culling", hint: "Picking the keepers", dot: "var(--info)" },
   { value: "delivered", label: "Delivered", hint: "Sent to the couple", dot: "var(--success)" },
   { value: "archived", label: "Archived", hint: "Done and put away", dot: "var(--line-strong)" },
+]
+
+const coverModes: MenuOption<CoverMode>[] = [
+  { value: "single", label: "Cover: one photo", hint: "The cover you chose" },
+  { value: "slideshow", label: "Cover: slideshow", hint: "Fades through the photos" },
 ]
 
 /**
@@ -42,18 +47,21 @@ export function GalleryHeader({
   title,
   eventDate,
   status,
+  coverMode,
   sections,
 }: {
   id: string
   title: string
   eventDate: string | null
   status: GalleryStatus
+  coverMode: CoverMode
   sections: Section[]
 }) {
   const toast = useToast()
   const [pending, start] = useTransition()
   const [date, setDate] = useState(eventDate)
   const [state, setState] = useState(status)
+  const [cover, setCover] = useState(coverMode)
   const [sectionsOpen, setSectionsOpen] = useState(false)
 
   const save = (input: Parameters<typeof updateGalleryAction>[1], undo: () => void) =>
@@ -99,7 +107,7 @@ export function GalleryHeader({
         </div>
       </div>
 
-      <div className="mt-3 flex items-center gap-2">
+      <div className="mt-3 flex flex-wrap items-center gap-2">
         <DatePicker
           label="Wedding date"
           value={date}
@@ -120,6 +128,17 @@ export function GalleryHeader({
             const prev = state
             setState(next)
             save({ status: next }, () => setState(prev))
+          }}
+        />
+        <MenuSelect
+          label="Cover style"
+          value={cover}
+          options={coverModes}
+          className="w-full sm:w-48"
+          onChange={(next) => {
+            const prev = cover
+            setCover(next)
+            save({ coverMode: next }, () => setCover(prev))
           }}
         />
         <span className="flex items-center gap-1.5 type-caption font-normal text-ink-muted" aria-live="polite">

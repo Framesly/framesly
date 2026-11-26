@@ -20,6 +20,8 @@ export type GalleryViewData = {
     brandColor?: string | null
   }
   couple: string
+  /** Cover: one photo, or a slideshow of the gallery's photos (live galleries) */
+  coverMode?: "single" | "slideshow"
   /** Line above the names on the cover, e.g. "Udaipur · 12 to 14 February 2026". */
   subtitle: string
   cover: Photo | null

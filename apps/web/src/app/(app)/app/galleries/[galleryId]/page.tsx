@@ -47,7 +47,7 @@ export default async function GalleryPage({ params, searchParams }: PageProps<"/
       )}
 
       <div className="mt-1">
-        <GalleryHeader id={gallery.id} title={gallery.title} eventDate={gallery.event_date} status={gallery.status} sections={sections} />
+        <GalleryHeader id={gallery.id} title={gallery.title} eventDate={gallery.event_date} status={gallery.status} coverMode={publish?.cover_mode ?? "single"} sections={sections} />
       </div>
 
       <div className="mt-5 space-y-3">

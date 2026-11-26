@@ -126,7 +126,7 @@ export function GoogleButton({ next, plan }: { next?: string; plan?: string }) {
 }
 
 /** Password input with a show/hide toggle. */
-export function PasswordField(props: Omit<ComponentProps<typeof Field>, "type" | "suffix">) {
+export function PasswordField({ what = "password", ...props }: Omit<ComponentProps<typeof Field>, "type" | "suffix"> & { /** Word used in the eye button's label */ what?: string }) {
   const [show, setShow] = useState(false)
   return (
     <Field
@@ -136,7 +136,7 @@ export function PasswordField(props: Omit<ComponentProps<typeof Field>, "type" |
         <button
           type="button"
           onClick={() => setShow((v) => !v)}
-          aria-label={show ? "Hide password" : "Show password"}
+          aria-label={show ? `Hide ${what}` : `Show ${what}`}
           aria-pressed={show}
           className="mr-1 grid h-full w-11 shrink-0 place-items-center rounded-[var(--radius-chip)] text-ink-muted transition-colors hover:text-ink"
         >

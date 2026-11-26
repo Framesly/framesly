@@ -39,6 +39,7 @@ function toViewData(g: ClientGalleryView): GalleryViewData {
   return {
     studio: { name: g.studio.name, logoUrl: g.studio.logoUrl, brandColor: g.studio.brandColor },
     couple: g.title,
+    coverMode: g.coverMode,
     subtitle: g.eventDate ? dateFmt.format(new Date(g.eventDate)) : "",
     cover,
     sections,
@@ -55,6 +56,70 @@ function downloadPhoto(p: GalleryPhoto) {
   document.body.appendChild(a)
   a.click()
   a.remove()
+}
+
+/** File names for a batch: the original names, with duplicates numbered ("DSC_0001 (2).jpg"). */
+function uniqueNames(photos: GalleryPhoto[]) {
+  const seen = new Map<string, number>()
+  return photos.map((p) => {
+    const name = p.alt || `photo-${p.frame}.jpg`
+    const n = (seen.get(name) ?? 0) + 1
+    seen.set(name, n)
+    if (n === 1) return name
+    const dot = name.lastIndexOf(".")
+    return dot > 0 ? `${name.slice(0, dot)} (${n})${name.slice(dot)}` : `${name} (${n})`
+  })
+}
+
+type SaveFilePicker = (options: { suggestedName: string; types: { description: string; accept: Record<string, string[]> }[] }) => Promise<{
+  createWritable: () => Promise<WritableStream>
+}>
+
+/**
+ * Download several originals. Where the browser can write a file directly
+ * (Chrome, Edge), they are zipped as they stream in and written straight to
+ * disk, so even a whole wedding never sits in memory. Elsewhere each photo
+ * downloads on its own, one after another.
+ */
+async function downloadMany(slug: string, photos: GalleryPhoto[], onProgress: (done: number, total: number) => void, toast: ReturnType<typeof useToast>) {
+  const files = photos.filter((p) => p.download)
+  if (files.length === 1) return downloadPhoto(files[0])
+  if (!files.length) return
+
+  const picker = (window as unknown as { showSaveFilePicker?: SaveFilePicker }).showSaveFilePicker
+  if (picker) {
+    let handle: Awaited<ReturnType<SaveFilePicker>>
+    try {
+      handle = await picker({ suggestedName: `${slug}-${files.length}-photos.zip`, types: [{ description: "ZIP archive", accept: { "application/zip": [".zip"] } }] })
+    } catch {
+      return // cancelled the save dialog
+    }
+    const { downloadZip } = await import("client-zip")
+    const names = uniqueNames(files)
+    let done = 0
+    async function* entries() {
+      for (const [i, p] of files.entries()) {
+        const res = await fetch(p.download!)
+        if (!res.ok) throw new Error(`Couldn't fetch ${names[i]}`)
+        yield { name: names[i], input: res }
+        onProgress(++done, files.length)
+      }
+    }
+    try {
+      await downloadZip(entries()).body!.pipeTo(await handle.createWritable())
+      toast({ title: `Saved ${files.length} photos`, body: "Full-size originals, in one ZIP.", tone: "success" })
+    } catch {
+      toast({ title: "The download stopped", body: "Check your connection and try again." })
+    }
+    return
+  }
+
+  toast({ title: `Downloading ${files.length} photos`, body: "If your browser asks, allow this page to download several files." })
+  for (const [i, p] of files.entries()) {
+    downloadPhoto(p)
+    onProgress(i + 1, files.length)
+    await new Promise((r) => setTimeout(r, 700))
+  }
 }
 
 /** The gallery stopped being viewable here: unpublished or unknown (404), expired (410), or its key changed (401). */
@@ -148,5 +213,8 @@ function LiveGalleryInner({ slug, initial }: { slug: string; initial: ClientGall
     }
   }, [recheck])
 
-  return <GalleryView data={data} favourites={favourites} onDownload={downloadPhoto} />
+  const toast = useToast()
+  const many = useCallback((photos: GalleryPhoto[], onProgress: (done: number, total: number) => void) => downloadMany(slug, photos, onProgress, toast), [slug, toast])
+
+  return <GalleryView data={data} favourites={favourites} onDownload={downloadPhoto} onDownloadMany={many} />
 }

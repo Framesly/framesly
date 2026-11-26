@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react"
 
-import { Aperture } from "@/components/auth/primitives"
+import { Aperture, PasswordField } from "@/components/auth/primitives"
 import { Button } from "@/components/ui/button"
 import { DatePicker } from "@/components/ui/date-picker"
 import { Dialog } from "@/components/ui/dialog"
@@ -61,6 +61,7 @@ function useCopy() {
 export function ShareBar({ galleryId, title, origin, initial }: { galleryId: string; title: string; origin: string; initial: ShareState }) {
   const [state, setState] = useState(initial)
   const [open, setOpen] = useState(false)
+  const [revealOpen, setRevealOpen] = useState(false)
   const [confirmReset, setConfirmReset] = useState(false)
   const [confirmUnpublish, setConfirmUnpublish] = useState(false)
   const [resetting, startReset] = useTransition()
@@ -135,11 +136,23 @@ export function ShareBar({ galleryId, title, origin, initial }: { galleryId: str
 
           <div className="flex min-w-0 items-center gap-3 bg-surface-raised px-4 py-3">
             <div className="min-w-0 flex-1">
-              <p className="type-caption font-normal text-ink-muted">Gallery key</p>
+              <p className="flex items-center gap-2 type-caption font-normal text-ink-muted">
+                Gallery key
+                {state.hasPassword && !expired && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-success/15 px-1.5 text-micro leading-5 text-success" title="Couples need this key to open the gallery">
+                    <span aria-hidden className="size-1.5 rounded-full bg-success" />
+                    Active
+                  </span>
+                )}
+              </p>
               {state.key ? (
                 <p className="truncate font-mono text-body leading-6 tracking-wide text-ink" translate="no">{state.key}</p>
+              ) : state.hasPassword ? (
+                <button type="button" onClick={() => setRevealOpen(true)} className="type-caption text-safelight-text underline-offset-2 hover:underline">
+                  Show key
+                </button>
               ) : (
-                <p className="truncate type-caption text-ink-muted">{state.hasPassword ? "Set before keys were visible" : "None: anyone with the link"}</p>
+                <p className="truncate type-caption text-ink-muted">None: anyone with the link</p>
               )}
             </div>
             {state.key && (
@@ -197,6 +210,16 @@ export function ShareBar({ galleryId, title, origin, initial }: { galleryId: str
         </div>
       )}
 
+      <Dialog open={revealOpen} onClose={() => setRevealOpen(false)} title="Show the gallery key">
+        <RevealKeyForm
+          galleryId={galleryId}
+          onRevealed={(key) => {
+            setState((s) => ({ ...s, key }))
+            setRevealOpen(false)
+          }}
+        />
+      </Dialog>
+
       <Dialog open={open} onClose={() => setOpen(false)} title={published ? "Sharing settings" : "Share this gallery"}>
         <ShareForm
           galleryId={galleryId}
@@ -210,6 +233,44 @@ export function ShareBar({ galleryId, title, origin, initial }: { galleryId: str
         />
       </Dialog>
     </section>
+  )
+}
+
+/**
+ * Keys set before keys were stored readably can't be read back from their
+ * hash. Typing the key once proves it and saves it encrypted, so it shows
+ * from then on; couples who already unlocked the gallery stay unlocked.
+ */
+function RevealKeyForm({ galleryId, onRevealed }: { galleryId: string; onRevealed: (key: string) => void }) {
+  const toast = useToast()
+  const [key, setKey] = useState("")
+  const [error, setError] = useState<string | null>(null)
+  const [pending, start] = useTransition()
+  return (
+    <form
+      noValidate
+      className="space-y-5"
+      onSubmit={(e) => {
+        e.preventDefault()
+        start(async () => {
+          setError(null)
+          const res = await fetch(`/api/galleries/${galleryId}/key`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key }) }).catch(() => null)
+          const data = res ? await res.json().catch(() => null) : null
+          if (!res?.ok || !data?.key) return setError(data?.error ?? "Couldn't check the key. Try again.")
+          onRevealed(data.key)
+          toast({ title: "Key confirmed", body: "It's active and will show here from now on.", tone: "success" })
+        })
+      }}
+    >
+      <p className="text-ink-muted">
+        This key was set before Framesly could show keys. Type it once and it will show here from now on. Forgotten it? Close this and use Reset to make a new one.
+      </p>
+      <PasswordField label="The key you set" name="key" what="key" value={key} autoComplete="off" spellCheck={false} autoCapitalize="none" maxLength={72} onChange={(e) => setKey(e.target.value)} error={error} />
+      <Button type="submit" disabled={pending || !key}>
+        {pending ? <Aperture className="size-4" /> : null}
+        Confirm key
+      </Button>
+    </form>
   )
 }
 
