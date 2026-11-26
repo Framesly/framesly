@@ -404,6 +404,24 @@ body[data-revealing="true"] > :not([data-pt-overlay]) {
   animation-play-state: paused !important;
 }
 
+/* Studio backdrop on the home page: the strobe fires a soft flash every few seconds. Opacity only. */
+@keyframes studio-flash {
+  0%, 86%, 100% { opacity: 0; }
+  88% { opacity: 1; }
+  93% { opacity: 0.25; }
+}
+@keyframes studio-lens {
+  0%, 86%, 100% { opacity: 0.35; }
+  88% { opacity: 0.9; }
+}
+.studio-flash {
+  opacity: 0;
+  animation: studio-flash 9s ease-out infinite;
+}
+.studio-lens {
+  animation: studio-lens 9s ease-out infinite;
+}
+
 @keyframes marquee-left {
   to {
     transform: translateX(-50%);

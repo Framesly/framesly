@@ -10,6 +10,7 @@ import { OneUpload } from "@/components/landing/one-upload"
 import { PhotoRibbon } from "@/components/landing/photo-ribbon"
 import { Proof } from "@/components/landing/proof"
 import { ScrollFilm } from "@/components/landing/scroll-film"
+import { StudioBackdrop } from "@/components/landing/studio-backdrop"
 import { StepStack } from "@/components/landing/step-stack"
 import { VideoTeaser } from "@/components/landing/video-teaser"
 import { RevealText } from "@/components/motion/reveal"
@@ -27,6 +28,7 @@ export const metadata: Metadata = {
 export default function LandingPage() {
   return (
     <>
+      <StudioBackdrop />
       <ScrollFilm />
       <HeroScatter />
       <PhotoRibbon />
