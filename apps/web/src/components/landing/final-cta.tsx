@@ -49,12 +49,28 @@ export function FinalCta() {
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] })
 
   return (
-    <section ref={ref} aria-labelledby="final-title" className="grain relative overflow-hidden border-t border-line py-28 md:py-36">
+    <section
+      ref={ref}
+      aria-labelledby="final-title"
+      className="grain relative overflow-hidden border-t border-line py-28 md:py-36"
+      // A safelight that follows the pointer on desktop; it rests in the middle elsewhere.
+      onPointerMove={(e) => {
+        if (reduce || e.pointerType !== "mouse") return
+        const r = e.currentTarget.getBoundingClientRect()
+        e.currentTarget.style.setProperty("--lx", `${e.clientX - r.left}px`)
+        e.currentTarget.style.setProperty("--ly", `${e.clientY - r.top}px`)
+      }}
+    >
       <div aria-hidden className="pointer-events-none absolute inset-0 flex flex-col justify-center gap-10 opacity-70">
         <PrintRow items={rowA} picks={[0, 2, 5, 7]} progress={scrollYProgress} from={reduce ? "-10%" : "0%"} to={reduce ? "-10%" : "-30%"} />
         <PrintRow items={rowB} picks={[1, 4, 6]} progress={scrollYProgress} from={reduce ? "-20%" : "-35%"} to={reduce ? "-20%" : "-5%"} />
       </div>
       <div aria-hidden className="absolute inset-0 bg-[radial-gradient(ellipse_55%_60%_at_center,var(--surface)_45%,transparent_100%)]" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 transition-[background-position] duration-300"
+        style={{ background: "radial-gradient(420px 340px at var(--lx, 50%) var(--ly, 45%), color-mix(in oklab, var(--safelight) 16%, transparent), transparent 70%)" }}
+      />
 
       <div className="gutter relative mx-auto flex max-w-[var(--container-content)] flex-col items-center text-center">
         <EdgeLabel tone="safelight">Ready when your next wedding is</EdgeLabel>

@@ -1,5 +1,7 @@
 import type { Metadata } from "next"
 
+import { CullCompare } from "@/components/landing/cull-compare"
+import { EventMarquee } from "@/components/landing/event-marquee"
 import { FaqList, landingFaqs } from "@/components/landing/faq"
 import { FinalCta } from "@/components/landing/final-cta"
 import { GalleryTrack } from "@/components/landing/gallery-track"
@@ -7,6 +9,7 @@ import { HeroScatter } from "@/components/landing/hero-scatter"
 import { OneUpload } from "@/components/landing/one-upload"
 import { PhotoRibbon } from "@/components/landing/photo-ribbon"
 import { Proof } from "@/components/landing/proof"
+import { ScrollFilm } from "@/components/landing/scroll-film"
 import { StepStack } from "@/components/landing/step-stack"
 import { VideoTeaser } from "@/components/landing/video-teaser"
 import { RevealText } from "@/components/motion/reveal"
@@ -24,9 +27,12 @@ export const metadata: Metadata = {
 export default function LandingPage() {
   return (
     <>
+      <ScrollFilm />
       <HeroScatter />
       <PhotoRibbon />
+      <EventMarquee />
       <Proof />
+      <CullCompare />
       <OneUpload />
       <StepStack />
       <GalleryTrack />
