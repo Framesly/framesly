@@ -271,12 +271,12 @@ export function HeroScatter() {
               className="absolute -inset-x-16 -inset-y-12 -z-10 rounded-full sm:-inset-x-24"
               style={{ background: "radial-gradient(closest-side, var(--surface) 55%, transparent)" }}
             />
-            <div className="flex items-center justify-center gap-3">
-              <span className="relative flex size-2">
+            <div className="flex items-start justify-center gap-3 sm:items-center">
+              <span className="relative mt-1 flex size-2 shrink-0 sm:mt-0">
                 <span className="absolute inset-0 animate-ping rounded-full bg-safelight opacity-60" />
                 <span className="relative size-2 rounded-full bg-safelight" />
               </span>
-              <EdgeLabel>A darkroom with the lights on</EdgeLabel>
+              <EdgeLabel className="max-w-[16rem] text-balance sm:max-w-none">A darkroom with the lights on for client galleries</EdgeLabel>
             </div>
             <h1 className="mt-5 type-display-l max-[359px]:text-[40px] max-[359px]:leading-[44px] sm:text-[64px] sm:leading-[64px] lg:type-display-xl">
               <span className="sr-only">Cull a wedding before dinner.</span>
