@@ -135,7 +135,7 @@ export function GalleryTrack() {
 
               {/* Cover */}
               <article className="relative w-[82vw] shrink-0 overflow-hidden rounded-[var(--radius-cover)] sm:w-[620px]">
-                <ParallaxPhoto photo={photos.gardenArch} progress={pin} sizes="620px" className="absolute inset-0" position="50% 35%" strength={10} />
+                <ParallaxPhoto photo={photos.courtyardTrain} progress={pin} sizes="620px" className="absolute inset-0" position="50% 35%" strength={10} />
                 <div className="absolute inset-0 bg-gradient-to-t from-[rgb(var(--scrim)/0.78)] via-[rgb(var(--scrim)/0.1)] to-[rgb(var(--scrim)/0.35)]" />
                 <p className="absolute top-5 left-5 font-heading text-caption font-bold tracking-[0.28em] text-white uppercase">Saffron Lane</p>
                 <span className="absolute top-5 right-5 rounded-full bg-white/85 px-2.5 py-0.5 type-label text-fixed-dark">Sample</span>
@@ -157,7 +157,7 @@ export function GalleryTrack() {
                   ))}
                 </div>
                 <div className="grid h-[calc(100%-45px)] grid-cols-3 grid-rows-2 gap-1 p-1">
-                  {[photos.tentDance, photos.brideDance, photos.sunglassesDance, photos.lakeDance, photos.receptionStage, photos.danceFloor].map((p) => (
+                  {[photos.tentDance, photos.brideDance, photos.sunglassesDance, photos.grandpaDance, photos.redDance, photos.groomDance].map((p) => (
                     <ParallaxPhoto key={p.id} photo={p} progress={pin} sizes="140px" className="h-full" strength={6} />
                   ))}
                 </div>

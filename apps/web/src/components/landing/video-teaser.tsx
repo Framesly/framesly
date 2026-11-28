@@ -11,14 +11,14 @@ import { useSitePhotos } from "@/components/site/site-photos"
 import { type SitePhotos } from "@/lib/photos"
 
 const buildReel = (photos: SitePhotos) => [
-  { p: photos.brickArches, t: "00:12", label: "Arrival" },
-  { p: photos.tentDance, t: "01:48", label: "Sangeet" },
-  { p: photos.hallEntrance, t: "03:10", label: "Anand Karaj" },
-  { p: photos.mandapCouple, t: "04:05", label: "Mandap" },
-  { p: photos.brideDance, t: "06:02", label: "Bride’s dance" },
+  { p: photos.carArrival, t: "00:12", label: "Arrival" },
+  { p: photos.auntiesDance, t: "01:48", label: "Sangeet" },
+  { p: photos.parkWalk, t: "03:10", label: "Anand Karaj" },
+  { p: photos.haldiRitual, t: "04:05", label: "Haldi" },
+  { p: photos.dancerSmile, t: "06:02", label: "Dance floor" },
   { p: photos.champagne, t: "07:22", label: "Toasts" },
-  { p: photos.receptionStage, t: "09:14", label: "Reception" },
-  { p: photos.duskShore, t: "10:02", label: "Send-off" },
+  { p: photos.cakeCut, t: "09:14", label: "Cake" },
+  { p: photos.beachRun, t: "10:02", label: "Send-off" },
 ]
 
 /** A film strip that slides sideways as the page scrolls down. */

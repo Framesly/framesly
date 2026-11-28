@@ -13,8 +13,8 @@ import { ContactEmail } from "@/components/site/social-links"
 import { type SitePhotos, type Photo } from "@/lib/photos"
 import { cn } from "@/lib/utils"
 
-const buildRowA = (photos: SitePhotos) => [photos.bridalLaugh, photos.closeEmbrace, photos.mandapCouple, photos.shawlCanopy, photos.bridalPortrait, photos.hallEntrance, photos.marigoldMandap, photos.avenueWalk, photos.nikahCouple]
-const buildRowB = (photos: SitePhotos) => [photos.receptionStage, photos.lakeDance, photos.steppingStones, photos.sunglassesDance, photos.seaBreeze, photos.brickArches, photos.veilLaugh, photos.horseMono, photos.jointLaugh]
+const buildRowA = (photos: SitePhotos) => [photos.avenueWalk, photos.domeProposal, photos.bridalPortrait, photos.glasshouseProposal, photos.horseMono, photos.roseCarry, photos.heartProposal, photos.hedgeEmbrace, photos.boatRide]
+const buildRowB = (photos: SitePhotos) => [photos.roseBouquet, photos.earringClose, photos.brickArches, photos.monoLaugh, photos.redAisle, photos.handReach, photos.candleTable, photos.oldTown, photos.brickWall]
 
 /** A row of prints that slides with the scroll; picks get brackets, rejects stay grey. */
 function PrintRow({ items, picks, progress, from, to }: { items: Photo[]; picks: number[]; progress: MotionValue<number>; from: string; to: string }) {

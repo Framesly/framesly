@@ -14,18 +14,18 @@ import { cn } from "@/lib/utils"
 type Frame = { photo: Photo; keep: boolean; reason?: string }
 
 const buildFrames = (p: SitePhotos): Frame[] => [
-  { photo: p.bridalLaugh, keep: true },
-  { photo: p.hennaHands, keep: false, reason: "Blur" },
+  { photo: p.brideSmile, keep: true },
+  { photo: p.sandHands, keep: false, reason: "Blur" },
   { photo: p.mandapCouple, keep: true },
-  { photo: p.ringHands, keep: false, reason: "Duplicate" },
-  { photo: p.closeEmbrace, keep: true },
-  { photo: p.pujaRitual, keep: false, reason: "Eyes closed" },
+  { photo: p.braceletClasp, keep: false, reason: "Duplicate" },
+  { photo: p.goldenHour, keep: true },
+  { photo: p.veilSmile, keep: false, reason: "Eyes closed" },
   { photo: p.veilLaugh, keep: true },
   { photo: p.baraat, keep: true },
-  { photo: p.bridalMirror, keep: false, reason: "Blur" },
-  { photo: p.jointLaugh, keep: true },
-  { photo: p.anandKaraj, keep: false, reason: "Eyes closed" },
-  { photo: p.receptionStage, keep: true },
+  { photo: p.veilSilhouette, keep: false, reason: "Blur" },
+  { photo: p.groomLaugh, keep: true },
+  { photo: p.foreheadTouch, keep: false, reason: "Eyes closed" },
+  { photo: p.sparklerEntry, keep: true },
 ]
 
 function Grid({ frames, culled }: { frames: Frame[]; culled: boolean }) {

@@ -23,20 +23,20 @@ import { frameNo } from "@/lib/utils"
 type Item = { photo: Photo; label: string; frame: number }
 
 const buildRowA = (photos: SitePhotos): Item[] => [
-  { photo: photos.bridalLaugh, label: "Getting ready", frame: 112 },
-  { photo: photos.hallEntrance, label: "Anand Karaj", frame: 1204 },
-  { photo: photos.tentDance, label: "Sangeet", frame: 604 },
-  { photo: photos.emeraldAttire, label: "Engagement", frame: 318 },
-  { photo: photos.mandapCouple, label: "Mandap", frame: 1288 },
-  { photo: photos.jointLaugh, label: "Candids", frame: 742 },
-  { photo: photos.baraat, label: "Baraat", frame: 1530 },
+  { photo: photos.bridalHair, label: "Getting ready", frame: 112 },
+  { photo: photos.gurdwaraVows, label: "Anand Karaj", frame: 1204 },
+  { photo: photos.sangeetDance, label: "Sangeet", frame: 604 },
+  { photo: photos.lilacHug, label: "Engagement", frame: 318 },
+  { photo: photos.ritualElders, label: "Mandap", frame: 1288 },
+  { photo: photos.castleCheer, label: "Candids", frame: 742 },
+  { photo: photos.flowerCanopy, label: "Bride’s entry", frame: 1530 },
   { photo: photos.nikahCouple, label: "Nikah", frame: 1366 },
 ]
 const buildRowB = (photos: SitePhotos): Item[] => [
-  { photo: photos.receptionStage, label: "Reception", frame: 2101 },
-  { photo: photos.hennaHands, label: "Mehendi", frame: 287 },
-  { photo: photos.ceremonyBow, label: "Vows", frame: 1250 },
-  { photo: photos.shawlCanopy, label: "Couple shoot", frame: 980 },
+  { photo: photos.danceFloor, label: "Reception", frame: 2101 },
+  { photo: photos.mehendiCouple, label: "Mehendi", frame: 287 },
+  { photo: photos.marigoldVows, label: "Vows", frame: 1250 },
+  { photo: photos.cabinLift, label: "Couple shoot", frame: 980 },
   { photo: photos.lakeDance, label: "First dance", frame: 1873 },
   { photo: photos.redDressKiss, label: "Pre-wedding", frame: 64 },
   { photo: photos.marigoldMandap, label: "Ceremony", frame: 911 },

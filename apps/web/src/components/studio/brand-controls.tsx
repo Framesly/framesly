@@ -211,7 +211,7 @@ export function GalleryCoverPreview({
         </span>
       </div>
       <div className={cn("relative", compact ? "h-40" : "h-[300px] lg:h-[360px]")}>
-        <Image src={photos.skyEmbrace.src} alt="" fill sizes="(min-width: 1024px) 560px, 100vw" className="object-cover object-[50%_40%]" priority />
+        <Image src={photos.fountainRun.src} alt="" fill sizes="(min-width: 1024px) 560px, 100vw" className="object-cover object-[50%_40%]" priority />
         <div className="absolute inset-0 bg-gradient-to-t from-[rgb(20_16_14/0.82)] via-[rgb(20_16_14/0.15)] to-[rgb(20_16_14/0.4)]" />
         <div className="absolute top-4 left-4 flex items-center gap-2 text-white">
           <StudioLogo

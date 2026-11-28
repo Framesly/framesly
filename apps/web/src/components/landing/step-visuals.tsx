@@ -115,9 +115,9 @@ function DropStatus({ delayMs, active }: { delayMs: number; active: boolean }) {
 /* -------------------------------------------------------------------------- */
 
 const buildThumbs = (photos: SitePhotos) => [
-  photos.bridalLaugh, photos.mandapCouple, photos.beachTwirl, photos.hennaHands, photos.forestPortrait, photos.pujaRitual,
-  photos.bridalMirror, photos.ringHands, photos.gardenProcession, photos.anandKaraj, photos.gardenArch, photos.bridalPortrait,
-  photos.afghanLaugh, photos.pathTogether, photos.avenueWalk, photos.dupattaDance, photos.sunglassesDance, photos.lakeDance,
+  photos.orchardPath, photos.prayerSmile, photos.letterLaugh, photos.lilacDoorway, photos.gardenBride, photos.stoneSteps,
+  photos.forestMono, photos.haldiColour, photos.bridesmaids, photos.groomBridge, photos.stableKiss, photos.shoreHug,
+  photos.haldiGroom, photos.brideFriend, photos.willowBridge, photos.castleGate, photos.archSeat, photos.colonnade,
 ]
 
 export function CullVisual() {
@@ -205,7 +205,7 @@ export function CullVisual() {
 
 export function DeliverVisual() {
   const photos = useSitePhotos()
-  const grid = [photos.gardenProcession, photos.closeEmbrace, photos.mandapCouple, photos.marigoldMandap, photos.bridalPortrait, photos.familyCheer]
+  const grid = [photos.gardenProcession, photos.earringSmile, photos.stairSeat, photos.lakeTwirl, photos.palaceArch, photos.familyCheer]
   return (
     <div className="relative mx-auto flex max-w-[420px] justify-center pt-20 pb-10" aria-label="Sample client gallery on a phone, with a delivery email" role="img">
       {/* Phone */}

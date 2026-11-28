@@ -55,7 +55,7 @@ type PrintDef = {
 const buildPrints = (photos: SitePhotos): PrintDef[] => [
   { photo: photos.bridalLaugh, frame: 408, pick: true, d: [-0.84, -0.42], m: [-0.82, -0.74], rotate: -7, depth: 1 },
   { photo: photos.hennaHands, frame: 409, pick: false, reason: "Blur", d: [-0.5, -0.66], m: [-0.3, -0.8], rotate: 5, depth: 0.5 },
-  { photo: photos.mandapCouple, frame: 410, pick: true, d: [0.52, -0.64], m: [0.22, -0.72], rotate: -4, depth: 0.8, crop: "50% 50%" },
+  { photo: photos.courtyardPair, frame: 410, pick: true, d: [0.52, -0.64], m: [0.22, -0.72], rotate: -4, depth: 0.8, crop: "50% 50%" },
   { photo: photos.closeEmbrace, frame: 412, pick: true, d: [0.86, -0.34], m: [0.78, -0.78], rotate: 8, depth: 1.2 },
   { photo: photos.pujaRitual, frame: 413, pick: false, reason: "Eyes closed", d: [0.62, 0.08], m: [0.5, -0.6], rotate: -3, depth: 0.6 },
   { photo: photos.receptionStage, frame: 416, pick: true, d: [0.84, 0.62], m: [0.84, 0.76], rotate: 6, depth: 1.1 },
@@ -63,9 +63,9 @@ const buildPrints = (photos: SitePhotos): PrintDef[] => [
   { photo: photos.bridalMirror, frame: 414, pick: true, d: [-0.12, 0.9], m: [-0.06, 0.8], rotate: 3, depth: 0.9, crop: "50% 30%" },
   { photo: photos.anandKaraj, frame: 419, pick: false, reason: "Eyes closed", d: [-0.44, 0.82], m: [-0.46, 0.88], rotate: 7, depth: 0.6 },
   { photo: photos.jointLaugh, frame: 418, pick: true, d: [-0.86, 0.48], m: [-0.84, 0.74], rotate: -5, depth: 1.2, crop: "50% 60%" },
-  { photo: photos.mandapCouple, frame: 411, pick: false, reason: "Dup of 0410", d: [-0.64, 0.02], m: [-0.56, -0.58], rotate: 4, depth: 0.5, crop: "64% 40%" },
-  { photo: photos.shawlCanopy, frame: 421, pick: true, d: [0.4, -0.86], m: [0.56, 0.62], rotate: -2, depth: 0.7, crop: "50% 40%" },
-  { photo: photos.shawlCanopy, frame: 422, pick: false, reason: "Dup of 0421", d: [-0.38, -0.9], m: [-0.62, 0.6], rotate: 9, depth: 0.4, crop: "40% 70%" },
+  { photo: photos.courtyardPairAlt, frame: 411, pick: false, reason: "Dup of 0410", d: [-0.64, 0.02], m: [-0.56, -0.58], rotate: 4, depth: 0.5, crop: "64% 40%" },
+  { photo: photos.forestPair, frame: 421, pick: true, d: [0.4, -0.86], m: [0.56, 0.62], rotate: -2, depth: 0.7, crop: "50% 40%" },
+  { photo: photos.forestPairAlt, frame: 422, pick: false, reason: "Dup of 0421", d: [-0.38, -0.9], m: [-0.62, 0.6], rotate: 9, depth: 0.4, crop: "40% 70%" },
   { photo: photos.hallEntrance, frame: 425, pick: true, d: [0.4, 0.74], m: [0.1, 0.92], rotate: 5, depth: 0.9, crop: "50% 60%" },
 ]
 

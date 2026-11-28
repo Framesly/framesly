@@ -30,12 +30,12 @@ export type GalleryViewData = {
 }
 
 const raw: { id: string; name: string; day: string; keys: SitePhotoKey[] }[] = [
-  { id: "getting-ready", name: "Getting ready", day: "Day 1 · Morning", keys: ["bridalMirror", "bridalLaugh", "bridalPortrait", "ringHands", "tealDoor"] },
-  { id: "mehendi", name: "Mehendi", day: "Day 1 · Evening", keys: ["hennaHands", "afghanLaugh", "emeraldAttire", "shawlCanopy", "pathTogether"] },
-  { id: "sangeet", name: "Sangeet", day: "Day 2 · Night", keys: ["tentDance", "dupattaDance", "sunglassesDance", "danceFloor", "brideDance", "familyCheer"] },
-  { id: "ceremony", name: "Ceremony", day: "Day 3 · Afternoon", keys: ["baraat", "mandapCouple", "marigoldMandap", "pujaRitual", "anandKaraj", "ceremonyBow", "hallEntrance", "gardenProcession"] },
-  { id: "portraits", name: "Portraits", day: "Day 3 · Golden hour", keys: ["gardenArch", "lakeDance", "avenueWalk", "brickArches", "veilLaugh", "steppingStones", "closeEmbrace", "forestPortrait"] },
-  { id: "reception", name: "Reception", day: "Day 3 · Night", keys: ["receptionStage", "redAisle", "candleTable", "champagne", "jointLaugh", "nikahCouple"] },
+  { id: "getting-ready", name: "Getting ready", day: "Day 1 · Morning", keys: ["lehengaSpread", "jewelleryTray", "giftTrays", "greenDoorBride", "guestSelfie"] },
+  { id: "mehendi", name: "Mehendi", day: "Day 1 · Evening", keys: ["mehendiStage", "mehendiSwing", "closeLaugh", "parkTwirl", "lilacLean"] },
+  { id: "sangeet", name: "Sangeet", day: "Day 2 · Night", keys: ["danceCircle", "partyJoy", "clappingGuests", "fatherHug", "dupattaDance", "groomShades"] },
+  { id: "ceremony", name: "Ceremony", day: "Day 3 · Afternoon", keys: ["gurdwaraFamily", "garlandExchange", "ritualFire", "groomBlessing", "ceremonyBow", "familyStage", "friendsGroup"] },
+  { id: "portraits", name: "Portraits", day: "Day 3 · Golden hour", keys: ["riverRail", "lakeGaze", "horseNuzzle", "forestWide", "ruinGardens", "laughHug", "seaWave", "proposalHug", "ringReveal", "proposalGaze"] },
+  { id: "reception", name: "Reception", day: "Day 3 · Night", keys: ["cakeBite", "grillFood", "candleNight", "carousel", "violinist", "photoBook", "sandPicnic"] },
 ]
 
 /** Fixed details of the demo wedding (no photos), safe for metadata. */
@@ -59,5 +59,5 @@ export function buildSampleGallery(photos: SitePhotos): SampleGallery {
     day: s.day,
     photos: s.keys.map((k) => ({ ...photos[k], frame: (frame += 7), section: s.id })),
   }))
-  return { ...sampleGalleryInfo, cover: photos.skyEmbrace, sections, all: sections.flatMap((s) => s.photos) }
+  return { ...sampleGalleryInfo, cover: photos.archLounge, sections, all: sections.flatMap((s) => s.photos) }
 }

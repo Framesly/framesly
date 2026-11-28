@@ -22,12 +22,26 @@ export type Photo = {
 
 export const SITE_PHOTO_KEYS = [
   "bridalLaugh", "mandapCouple", "hennaHands", "beachTwirl", "forestPortrait", "avenueWalk", "pujaRitual",
-  "bridalMirror", "ringHands", "bridalPortrait", "gardenArch", "anandKaraj", "gardenProcession", "afghanLaugh",
-  "pathTogether", "tentDance", "dupattaDance", "sunglassesDance", "lakeDance", "candleTable", "champagne",
-  "redAisle", "brickArches", "skyEmbrace", "tealDoor", "roseBouquet", "duskShore", "beachRun", "horseMono",
-  "heartProposal", "boatRide", "danceFloor", "closeEmbrace", "veilLaugh", "shawlCanopy", "emeraldAttire",
-  "steppingStones", "receptionStage", "seaBreeze", "redDressKiss", "baraat", "hallEntrance", "ceremonyBow",
-  "familyCheer", "jointLaugh", "marigoldMandap", "brideDance", "nikahCouple",
+  "bridalMirror", "ringHands", "bridalPortrait", "anandKaraj", "gardenProcession", "tentDance", "dupattaDance",
+  "sunglassesDance", "lakeDance", "candleTable", "champagne", "redAisle", "brickArches", "skyEmbrace", "tealDoor",
+  "roseBouquet", "duskShore", "beachRun", "horseMono", "heartProposal", "boatRide", "danceFloor", "closeEmbrace",
+  "veilLaugh", "receptionStage", "seaBreeze", "redDressKiss", "baraat", "hallEntrance", "ceremonyBow",
+  "familyCheer", "jointLaugh", "marigoldMandap", "brideDance", "nikahCouple", "orchardPath", "cabinLift",
+  "prayerSmile", "letterLaugh", "lilacDoorway", "lilacHug", "gurdwaraVows", "gardenBride", "stoneSteps",
+  "veilSmile", "veilSilhouette", "forestMono", "forestPair", "forestPairAlt", "haldiColour", "castleCheer",
+  "marigoldVows", "bridesmaids", "cakeCut", "auntiesDance", "groomBridge", "cakeBite", "stableKiss", "shoreHug",
+  "sandHands", "mehendiSwing", "haldiGroom", "mehendiCouple", "brideSmile", "grillFood", "haldiRitual",
+  "guestSelfie", "giftTrays", "sangeetDance", "redDance", "groomDance", "carArrival", "brideFriend",
+  "groomBlessing", "ritualElders", "goldenHour", "willowBridge", "bridalHair", "grandpaDance", "castleGate",
+  "violinist", "domeProposal", "ringReveal", "proposalHug", "archSeat", "glasshouseProposal", "roseCarry",
+  "hedgeEmbrace", "friendsGroup", "colonnade", "earringSmile", "stairSeat", "lakeTwirl", "foreheadTouch",
+  "palaceArch", "brickWall", "oldTown", "monoLaugh", "handReach", "carousel", "fountainRun", "courtyardPair",
+  "courtyardPairAlt", "lehengaSpread", "greenDoorBride", "lakeDeck", "flowerCanopy", "sparklerEntry",
+  "jewelleryTray", "earringClose", "sandPicnic", "candleNight", "parkTwirl", "closeLaugh", "lilacLean", "parkWalk",
+  "gurdwaraFamily", "forestWide", "garlandExchange", "partyJoy", "groomShades", "fatherHug", "familyStage",
+  "horseNuzzle", "seaWave", "dancerSmile", "danceCircle", "proposalGaze", "laughHug", "ruinGardens",
+  "braceletClasp", "whiteDressSmile", "bridalPose", "lakeGaze", "riverRail", "archLounge", "courtyardTrain",
+  "groomLaugh", "ritualFire", "clappingGuests", "mehendiStage", "photoBook",
 ] as const
 
 export type SitePhotoKey = (typeof SITE_PHOTO_KEYS)[number]
