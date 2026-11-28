@@ -17,9 +17,9 @@ export default function OnboardingPage() {
 
 /** Signed in, no studio yet → the wizard. Already onboarded → dashboard. */
 async function OnboardingGate() {
-  const user = await requireUser("/app/onboarding")
+  const user = await requireUser("/onboarding")
   const membership = await getMembership()
-  if (membership) redirect("/app")
+  if (membership) redirect("/galleries")
   return <OnboardingWizard firstName={user.fullName.split(" ")[0] ?? ""} />
 }
 

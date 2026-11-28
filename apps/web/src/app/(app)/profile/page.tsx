@@ -73,7 +73,7 @@ export default async function ProfilePage() {
           </section>
 
           <section aria-label="Studio and session" className="divide-y divide-line overflow-hidden rounded-[var(--radius-cover)] border border-line bg-surface-raised">
-            <Link href="/app/settings/studio" className="group flex items-center gap-3 px-5 py-4 transition-colors hover:bg-surface-overlay sm:px-6">
+            <Link href="/studio" className="group flex items-center gap-3 px-5 py-4 transition-colors hover:bg-surface-overlay sm:px-6">
               <Icon name="settings" className="size-5 text-ink-muted" />
               <span className="min-w-0 flex-1">
                 <span className="block text-ink">Studio and branding</span>

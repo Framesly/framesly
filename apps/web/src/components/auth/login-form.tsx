@@ -20,7 +20,7 @@ const linkErrors: Record<string, string> = {
 
 export function LoginForm() {
   const params = useSearchParams()
-  const next = params.get("next") ?? "/app"
+  const next = params.get("next") ?? "/galleries"
   const linkError = linkErrors[params.get("error") ?? ""]
   const signedOut = params.has("signed-out")
   const confirmed = params.has("confirmed")

@@ -11,7 +11,7 @@ import { fieldErrors, profileSchema } from "@/lib/validation"
 /** The photographer's own profile (their name, shown to teammates later). */
 export async function updateProfileAction(_: ActionState, formData: FormData): Promise<ActionState> {
   const values = formValues(formData, ["fullName"])
-  const user = await requireUser("/app/settings/profile")
+  const user = await requireUser("/profile")
   const parsed = profileSchema.safeParse(Object.fromEntries(formData))
   if (!parsed.success) return { status: "error", fieldErrors: fieldErrors(parsed.error), values }
 
@@ -22,7 +22,7 @@ export async function updateProfileAction(_: ActionState, formData: FormData): P
   ])
   const error = profile.error ?? auth.error
   if (error) return { status: "error", message: error.message, values }
-  revalidatePath("/app", "layout")
+  revalidatePath("/", "layout")
   return { status: "success", message: "Profile saved.", values }
 }
 
@@ -31,7 +31,7 @@ export async function updateProfileAction(_: ActionState, formData: FormData): P
  * Only accepts a path inside the user's own folder, and removes the old file.
  */
 export async function setAvatarAction(path: string | null): Promise<{ ok: boolean; message?: string }> {
-  const user = await requireUser("/app/settings/profile")
+  const user = await requireUser("/profile")
   if (path !== null && !path.startsWith(`users/${user.id}/avatar/`)) return { ok: false, message: "That file isn't yours." }
 
   const supabase = await createClient()
@@ -41,6 +41,6 @@ export async function setAvatarAction(path: string | null): Promise<{ ok: boolea
 
   const old = current?.avatar_path
   if (old && old !== path) await supabase.storage.from(STUDIO_ASSETS_BUCKET).remove([old])
-  revalidatePath("/app", "layout")
+  revalidatePath("/", "layout")
   return { ok: true }
 }

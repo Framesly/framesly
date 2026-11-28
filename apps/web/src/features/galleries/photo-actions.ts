@@ -44,8 +44,8 @@ export async function setCoverAction(galleryId: string, photoId: string): Promis
   if (!photo) return { ok: false, message: "Only finished photos can be the cover." }
   const { error } = await own.supabase.from("galleries").update({ cover_photo_id: photoId }).eq("id", galleryId)
   if (error) return { ok: false, message: error.message }
-  revalidatePath(`/app/galleries/${galleryId}`)
-  revalidatePath("/app")
+  revalidatePath(`/galleries/${galleryId}`)
+  revalidatePath("/galleries")
   return { ok: true }
 }
 
@@ -60,7 +60,7 @@ export async function assignSectionAction(galleryId: string, photoIds: string[],
   }
   const { error } = await own.supabase.from("photos").update({ section_id: sectionId }).eq("gallery_id", galleryId).in("id", parsed.data)
   if (error) return { ok: false, message: error.message }
-  revalidatePath(`/app/galleries/${galleryId}`)
+  revalidatePath(`/galleries/${galleryId}`)
   return { ok: true }
 }
 
@@ -78,8 +78,8 @@ export async function deletePhotosAction(galleryId: string, photoIds: string[]):
   }
   const { error } = await own.supabase.from("photos").delete().eq("gallery_id", galleryId).in("id", rows.map((r) => r.id))
   if (error) return { ok: false, message: error.message }
-  revalidatePath(`/app/galleries/${galleryId}`)
-  revalidatePath("/app")
+  revalidatePath(`/galleries/${galleryId}`)
+  revalidatePath("/galleries")
   return { ok: true }
 }
 
@@ -99,6 +99,6 @@ export async function movePhotoAction(galleryId: string, photoId: string, to: "s
     const missing = error.code === "42883" || error.code === "PGRST202" || /reorder_photos/.test(error.message)
     return { ok: false, message: missing ? "Reordering needs the latest database update. Ask your developer to run the newest migration." : error.message }
   }
-  revalidatePath(`/app/galleries/${galleryId}`)
+  revalidatePath(`/galleries/${galleryId}`)
   return { ok: true }
 }

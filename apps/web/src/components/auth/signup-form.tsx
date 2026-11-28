@@ -41,7 +41,7 @@ export function SignupForm() {
             {isGoogleAuthEnabled && (
               <>
                 <motion.div variants={item} className="mt-8">
-                  <GoogleButton next="/app/onboarding" plan={plan || undefined} />
+                  <GoogleButton next="/onboarding" plan={plan || undefined} />
                 </motion.div>
                 <motion.div variants={item}>
                   <OrDivider />

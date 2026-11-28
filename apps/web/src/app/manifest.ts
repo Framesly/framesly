@@ -8,7 +8,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: siteConfig.name,
     short_name: siteConfig.name,
     description: siteConfig.description,
-    start_url: "/app",
+    start_url: "/galleries",
     scope: "/",
     display: "standalone",
     orientation: "portrait",

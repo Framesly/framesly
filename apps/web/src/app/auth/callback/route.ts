@@ -29,5 +29,5 @@ export async function GET(request: NextRequest) {
 }
 
 function sanitize(next: string | null) {
-  return next && next.startsWith("/") && !next.startsWith("//") ? next : "/app"
+  return next && next.startsWith("/") && !next.startsWith("//") ? next : "/galleries"
 }

@@ -67,7 +67,7 @@ function Meta({ gallery }: { gallery: GalleryOverview }) {
  * photos the cover is a placeholder tinted with the studio colour.
  */
 export function GalleryCard({ gallery, brandColor, cover, view = "grid" }: { gallery: GalleryOverview; brandColor: string; cover: CoverUrls | null; view?: GalleryView }) {
-  const href = `/app/galleries/${gallery.id}`
+  const href = `/galleries/${gallery.id}`
 
   if (view === "list") {
     return (

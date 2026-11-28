@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server"
 
+import { isAppPath } from "@/lib/app-paths"
 import { updateSession } from "@/lib/supabase/proxy"
 
 const AUTH_PAGES = ["/login", "/signup", "/forgot-password"]
@@ -9,8 +10,8 @@ const VISITOR_COOKIE = "fv"
 /**
  * Runs before the app and auth pages (Next.js 16 "proxy", formerly middleware):
  * - refreshes the Supabase session cookie
- * - signed out + /app/* or /reset-password → /login?next=<where they were going>
- * - signed in + login/signup → /app
+ * - signed out + an app page or /reset-password → /login?next=<where they were going>
+ * - signed in + login/signup → /galleries
  *
  * This is an optimistic check for fast redirects. Real access control is RLS
  * in the database plus requireUser() in every server action and page.
@@ -38,7 +39,7 @@ export async function proxy(request: NextRequest) {
 
   const { response, signedIn } = await updateSession(request)
 
-  const needsSession = pathname === "/app" || pathname.startsWith("/app/") || pathname === "/reset-password"
+  const needsSession = isAppPath(pathname) || pathname === "/reset-password"
   if (needsSession && !signedIn) {
     const url = request.nextUrl.clone()
     url.pathname = "/login"
@@ -47,7 +48,7 @@ export async function proxy(request: NextRequest) {
   }
   if (signedIn && AUTH_PAGES.includes(pathname)) {
     const url = request.nextUrl.clone()
-    url.pathname = "/app"
+    url.pathname = "/galleries"
     url.search = ""
     return withCookies(NextResponse.redirect(url), response)
   }
@@ -62,5 +63,19 @@ function withCookies(redirect: NextResponse, from: NextResponse) {
 
 export const config = {
   // The upload routes are listed so a long upload session keeps its token fresh.
-  matcher: ["/app", "/app/:path*", "/login", "/signup", "/forgot-password", "/reset-password", "/api/uploads/:path*", "/api/photos", "/api/galleries/:path*", "/g/:path*"],
+  matcher: [
+    "/galleries/:path*",
+    "/uploads/:path*",
+    "/studio/:path*",
+    "/profile/:path*",
+    "/onboarding/:path*",
+    "/login",
+    "/signup",
+    "/forgot-password",
+    "/reset-password",
+    "/api/uploads/:path*",
+    "/api/photos",
+    "/api/galleries/:path*",
+    "/g/:path*",
+  ],
 }

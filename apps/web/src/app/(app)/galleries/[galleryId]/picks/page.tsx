@@ -16,7 +16,7 @@ export const metadata: Metadata = { title: "Client picks" }
  * The photos a couple hearted, refreshed every few seconds.
  * RLS limits selections to the signed-in photographer's studio.
  */
-export default async function PicksPage({ params }: PageProps<"/app/galleries/[galleryId]/picks">) {
+export default async function PicksPage({ params }: PageProps<"/galleries/[galleryId]/picks">) {
   const [{ galleryId }, { studio }] = await Promise.all([params, requireStudio()])
   const data = await getGalleryWithSections(galleryId)
   if (!data || data.gallery.studio_id !== studio.id) notFound()
@@ -42,7 +42,7 @@ export default async function PicksPage({ params }: PageProps<"/app/galleries/[g
   return (
     <div className="mx-auto max-w-[var(--container-content)]">
       <AutoRefresh seconds={5} />
-      <Link href={`/app/galleries/${galleryId}`} className="inline-flex h-11 items-center gap-2 type-caption text-ink-muted hover:text-ink">
+      <Link href={`/galleries/${galleryId}`} className="inline-flex h-11 items-center gap-2 type-caption text-ink-muted hover:text-ink">
         <Icon name="chevron-left" className="size-4" />
         {data.gallery.title}
       </Link>

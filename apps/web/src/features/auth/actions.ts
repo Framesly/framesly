@@ -28,7 +28,7 @@ export async function signUpAction(_: ActionState, formData: FormData): Promise<
     email,
     password,
     options: {
-      emailRedirectTo: `${origin}/auth/confirm?next=/app/onboarding`,
+      emailRedirectTo: `${origin}/auth/confirm?next=/onboarding`,
       data: { full_name: fullName, ...(plan ? { plan } : {}) },
     },
   })
@@ -44,7 +44,7 @@ export async function signUpAction(_: ActionState, formData: FormData): Promise<
   }
 
   // Email confirmations off (local dev): already signed in.
-  if (data.session) redirect("/app/onboarding")
+  if (data.session) redirect("/onboarding")
   return { status: "success", message: email, values }
 }
 
@@ -102,7 +102,7 @@ export async function resendConfirmationAction(_: ActionState, formData: FormDat
   const { error } = await supabase.auth.resend({
     type: "signup",
     email: email.data,
-    options: { emailRedirectTo: `${origin}/auth/confirm?next=/app/onboarding` },
+    options: { emailRedirectTo: `${origin}/auth/confirm?next=/onboarding` },
   })
   if (error) return { status: "error", message: error.message }
   return { status: "success", message: "Sent. Check your inbox and spam folder." }
@@ -134,7 +134,7 @@ export async function updatePasswordAction(_: ActionState, formData: FormData): 
     const msg = error.code === "same_password" ? "Choose a password you haven't used here before." : error.message
     return { status: "error", fieldErrors: { password: msg } }
   }
-  if (formData.get("redirect") === "app") redirect("/app?password=updated")
+  if (formData.get("redirect") === "app") redirect("/galleries?password=updated")
   return { status: "success", message: "Password updated." }
 }
 

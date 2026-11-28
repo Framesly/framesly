@@ -16,6 +16,7 @@ import {
 } from "react"
 
 import { Wordmark } from "@/components/site/wordmark"
+import { isAppPath } from "@/lib/app-paths"
 import { scrollToHash } from "@/lib/smooth-scroll"
 
 /* -------------------------------------------------------------------------- */
@@ -40,9 +41,6 @@ const labels: Record<string, string> = {
   "/legal/privacy": "Privacy",
 }
 
-/** True for the photographer's app (/app and everything under it). */
-const isAppPath = (pathname: string) => pathname === "/app" || pathname.startsWith("/app/")
-
 const shutter = [0.7, 0, 0.2, 1] as const
 const curtain = [0.76, 0, 0.24, 1] as const
 
@@ -56,7 +54,7 @@ const curtain = [0.76, 0, 0.24, 1] as const
  *
  * Works in every browser (no View Transitions API dependency). Skipped for
  * reduced motion, modified clicks, external links, same-page anchors and any
- * navigation that starts inside the app (/app/*).
+ * navigation that starts inside the photographer's app.
  */
 export function PageTransitionProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()

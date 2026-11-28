@@ -2,7 +2,7 @@ import { Wordmark } from "@/components/site/wordmark"
 import { signOutAction } from "@/features/auth/actions"
 
 /** Focused first-run layout: no app chrome until the studio exists. */
-export default function OnboardingLayout({ children }: LayoutProps<"/app/onboarding">) {
+export default function OnboardingLayout({ children }: LayoutProps<"/onboarding">) {
   return (
     <div className="grain flex min-h-dvh flex-col">
       <header className="flex h-16 items-center justify-between gap-4 px-4 sm:px-8">

@@ -46,7 +46,7 @@ export async function createStudioAction(input: {
   region: string
   acceptedTerms: boolean
 }): Promise<CreateStudioResult> {
-  const user = await requireUser("/app/onboarding")
+  const user = await requireUser("/onboarding")
   if (input.acceptedTerms !== true) {
     return { ok: false, fieldErrors: { terms: "Please read and accept the Terms of service and Privacy policy to continue." } }
   }
@@ -78,7 +78,7 @@ export async function createStudioAction(input: {
     if (error.code === "23514") return { ok: false, fieldErrors: { slug: "That address isn't allowed. Try another." } }
     return { ok: false, message: error.message }
   }
-  revalidatePath("/app", "layout")
+  revalidatePath("/", "layout")
   return { ok: true, studioId: data.id }
 }
 
@@ -95,7 +95,7 @@ export async function setStudioLogoAction(path: string | null): Promise<{ ok: bo
   if (previous && previous !== path) {
     await supabase.storage.from(STUDIO_ASSETS_BUCKET).remove([previous])
   }
-  revalidatePath("/app", "layout")
+  revalidatePath("/", "layout")
   return { ok: true }
 }
 
@@ -117,6 +117,6 @@ export async function updateStudioAction(_: ActionState, formData: FormData): Pr
     if (error.code === "23505") return { status: "error", fieldErrors: { slug: "That URL is taken. Try another." }, values }
     return { status: "error", message: error.message, values }
   }
-  revalidatePath("/app", "layout")
+  revalidatePath("/", "layout")
   return { status: "success", message: "Studio saved.", values }
 }

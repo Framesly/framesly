@@ -56,9 +56,11 @@ Open http://localhost:3000. Sign up with any email (no confirmation email in thi
 | `/pricing` | Plans and billing FAQ |
 | `/sample` | Sample client gallery |
 | `/signup`, `/login`, `/forgot-password` | Auth (Supabase) |
-| `/app/onboarding` | Studio setup after first sign-up |
-| `/app` | Dashboard: galleries |
-| `/app/settings/studio`, `/app/settings/profile` | Studio branding, photographer profile |
+| `/onboarding` | Studio setup after first sign-up |
+| `/galleries` | Dashboard: your galleries |
+| `/galleries/[id]`, `/galleries/[id]/picks` | One gallery, and the couple's picks |
+| `/uploads` | Pick a gallery to upload into |
+| `/studio`, `/profile` | Studio branding, photographer profile |
 
 ### Troubleshooting
 

@@ -9,10 +9,10 @@ import { Icon } from "@/components/ui/icon"
 import { cn } from "@/lib/utils"
 
 const items = [
-  { href: "/app", label: "Galleries", icon: "images" },
-  { href: "/app/upload", label: "Uploads", icon: "upload" },
-  { href: "/app/settings/studio", label: "Studio", icon: "settings" },
-  { href: "/app/settings/profile", label: "Profile", icon: "user" },
+  { href: "/galleries", label: "Galleries", icon: "images" },
+  { href: "/uploads", label: "Uploads", icon: "upload" },
+  { href: "/studio", label: "Studio", icon: "settings" },
+  { href: "/profile", label: "Profile", icon: "user" },
 ] as const
 
 type Variant = "sidebar" | "tabs"
@@ -37,7 +37,7 @@ function ActiveNav({ variant }: { variant: Variant }) {
 function NavLinks({ variant, pathname }: { variant: Variant; pathname: string | null }) {
   const isActive = (href: string) =>
     pathname !== null &&
-    (href === "/app" ? pathname === "/app" || pathname.startsWith("/app/galleries") : pathname.startsWith(href))
+    (pathname === href || pathname.startsWith(`${href}/`))
 
   if (variant === "sidebar") {
     return (

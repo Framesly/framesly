@@ -24,7 +24,7 @@ export const metadata: Metadata = {
  * Components requires (next/docs: authentication-with-cache-components).
  * <StudioGate> sends signed-out users to /login and new users to onboarding.
  */
-export default function AppLayout({ children }: LayoutProps<"/app">) {
+export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <ToastProvider>
       <SkipLink />

@@ -34,7 +34,7 @@ export const getUser = cache(async (): Promise<SessionUser | null> => {
   }
 })
 
-export async function requireUser(next = "/app"): Promise<SessionUser> {
+export async function requireUser(next = "/galleries"): Promise<SessionUser> {
   const user = await getUser()
   if (!user) redirect(`/login?next=${encodeURIComponent(next)}`)
   return user
@@ -62,7 +62,7 @@ export const getMembership = cache(async (): Promise<Membership | null> => {
 export async function requireStudio(): Promise<Membership & { user: SessionUser }> {
   const user = await requireUser()
   const membership = await getMembership()
-  if (!membership) redirect("/app/onboarding")
+  if (!membership) redirect("/onboarding")
   return { ...membership, user }
 }
 

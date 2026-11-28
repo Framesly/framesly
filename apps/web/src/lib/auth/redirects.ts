@@ -3,7 +3,7 @@ import "server-only"
 import { headers } from "next/headers"
 
 /** Only same-site paths are allowed as ?next= targets (no open redirects). */
-export function safeNext(next: unknown, fallback = "/app") {
+export function safeNext(next: unknown, fallback = "/galleries") {
   if (typeof next !== "string") return fallback
   if (!next.startsWith("/") || next.startsWith("//") || next.startsWith("/\\")) return fallback
   return next

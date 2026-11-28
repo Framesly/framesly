@@ -36,8 +36,8 @@ export async function createGalleryAction(_: ActionState, formData: FormData): P
   })
   if (error || !id) return { status: "error", message: error?.message ?? "Couldn't create the gallery. Try again.", values }
 
-  revalidatePath("/app")
-  redirect(`/app/galleries/${id}?created=1`)
+  revalidatePath("/galleries")
+  redirect(`/galleries/${id}?created=1`)
 }
 
 export async function updateGalleryAction(
@@ -58,8 +58,8 @@ export async function updateGalleryAction(
     })
     .eq("id", galleryId)
   if (error) return { ok: false, message: error.message }
-  revalidatePath(`/app/galleries/${galleryId}`)
-  revalidatePath("/app")
+  revalidatePath(`/galleries/${galleryId}`)
+  revalidatePath("/galleries")
   return { ok: true }
 }
 
@@ -77,8 +77,8 @@ export async function deleteGalleryAction(galleryId: string) {
   }
   const { error } = await supabase.from("galleries").delete().eq("id", galleryId)
   if (error) return { ok: false, message: error.message }
-  revalidatePath("/app")
-  redirect("/app?deleted=1")
+  revalidatePath("/galleries")
+  redirect("/galleries?deleted=1")
 }
 
 export async function addSectionAction(galleryId: string, name: string) {
@@ -95,7 +95,7 @@ export async function addSectionAction(galleryId: string, name: string) {
     .maybeSingle()
   const { error } = await supabase.from("sections").insert({ gallery_id: galleryId, name: parsed.data, sort_order: (last?.sort_order ?? -1) + 1 })
   if (error) return { ok: false, message: error.message }
-  revalidatePath(`/app/galleries/${galleryId}`)
+  revalidatePath(`/galleries/${galleryId}`)
   return { ok: true }
 }
 
@@ -106,7 +106,7 @@ export async function renameSectionAction(galleryId: string, sectionId: string, 
   const supabase = await createClient()
   const { error } = await supabase.from("sections").update({ name: parsed.data }).eq("id", sectionId).eq("gallery_id", galleryId)
   if (error) return { ok: false, message: error.message }
-  revalidatePath(`/app/galleries/${galleryId}`)
+  revalidatePath(`/galleries/${galleryId}`)
   return { ok: true }
 }
 
@@ -116,7 +116,7 @@ export async function deleteSectionAction(galleryId: string, sectionId: string) 
   // Photos in the section are kept and become unsorted (section_id set null).
   const { error } = await supabase.from("sections").delete().eq("id", sectionId).eq("gallery_id", galleryId)
   if (error) return { ok: false, message: error.message }
-  revalidatePath(`/app/galleries/${galleryId}`)
+  revalidatePath(`/galleries/${galleryId}`)
   return { ok: true }
 }
 
@@ -141,6 +141,6 @@ export async function moveSectionAction(galleryId: string, sectionId: string, di
       .map((s, k) => (k !== i && k !== j && s.sort_order !== k ? supabase.from("sections").update({ sort_order: k }).eq("id", s.id) : null))
       .filter(Boolean)
   )
-  revalidatePath(`/app/galleries/${galleryId}`)
+  revalidatePath(`/galleries/${galleryId}`)
   return { ok: true }
 }

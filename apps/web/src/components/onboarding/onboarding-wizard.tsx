@@ -123,7 +123,7 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
       }
       if (res.message) {
         setError(res.message)
-        if (/already have a studio/i.test(res.message)) router.replace("/app")
+        if (/already have a studio/i.test(res.message)) router.replace("/galleries")
       }
       return
     }
@@ -136,7 +136,7 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
       }
     }
     setPhase("done")
-    setTimeout(() => router.replace("/app?welcome=1"), 1100)
+    setTimeout(() => router.replace("/galleries?welcome=1"), 1100)
   }
 
   if (phase === "done") {

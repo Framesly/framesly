@@ -21,7 +21,7 @@ export const metadata: Metadata = { title: "Gallery" }
  * then the photos. All reads start together; RLS limits each one to the
  * signed-in member's studio, and the studio check below guards the page.
  */
-export default async function GalleryPage({ params, searchParams }: PageProps<"/app/galleries/[galleryId]">) {
+export default async function GalleryPage({ params, searchParams }: PageProps<"/galleries/[galleryId]">) {
   const [{ galleryId }, query] = await Promise.all([params, searchParams])
   const [{ studio }, data, photos, publish, origin] = await Promise.all([
     requireStudio(),
@@ -36,7 +36,7 @@ export default async function GalleryPage({ params, searchParams }: PageProps<"/
 
   return (
     <div className="mx-auto max-w-[var(--container-content)]">
-      <Link href="/app" className="-ml-1 inline-flex h-10 items-center gap-1.5 rounded-full pr-3 pl-1 type-caption text-ink-muted hover:text-ink">
+      <Link href="/galleries" className="-ml-1 inline-flex h-10 items-center gap-1.5 rounded-full pr-3 pl-1 type-caption text-ink-muted hover:text-ink">
         <Icon name="chevron-left" className="size-4" />
         All galleries
       </Link>
@@ -69,7 +69,7 @@ export default async function GalleryPage({ params, searchParams }: PageProps<"/
             { label: "Ready", value: gallery.ready_count },
             { label: "Failed", value: gallery.failed_count, tone: "danger" },
           ]}
-          link={{ href: `/app/galleries/${gallery.id}/picks`, label: "Client picks" }}
+          link={{ href: `/galleries/${gallery.id}/picks`, label: "Client picks" }}
         />
         <PhotoUploader galleryId={gallery.id} unfinished={Math.max(0, gallery.photo_count - gallery.ready_count)} />
       </div>
