@@ -4,9 +4,11 @@ import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "motion/
 import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
 
+import { useSignedIn } from "@/components/site/use-signed-in"
 import { Wordmark } from "@/components/site/wordmark"
 import { TransitionLink as Link } from "@/components/transition/page-transition"
 import { ButtonLink, buttonVariants } from "@/components/ui/button"
+import { Icon } from "@/components/ui/icon"
 import { marketingNav } from "@/lib/site"
 import { cn } from "@/lib/utils"
 
@@ -14,12 +16,27 @@ import { cn } from "@/lib/utils"
  * Transparent over the hero. Once scrolled it gets the raised background and
  * a bottom border. The header's "Start free" is a secondary button: each
  * section already has its own safelight button, and a screen has only one.
+ *
+ * Signed-in photographers get "Dashboard" and "Log out" instead of "Log in"
+ * and "Start free". Until the session is known the signed-out buttons hold
+ * their place invisibly, so nothing jumps or flashes.
  */
 export function SiteHeader() {
   const pathname = usePathname()
   const { scrollY } = useScroll()
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
+  const { signedIn, signOut } = useSignedIn()
+  const [signingOut, setSigningOut] = useState(false)
+  const logOut = async () => {
+    setSigningOut(true)
+    try {
+      await signOut()
+      setOpen(false)
+    } finally {
+      setSigningOut(false)
+    }
+  }
 
   useMotionValueEvent(scrollY, "change", (y) => setScrolled(y > 8))
 
@@ -76,21 +93,46 @@ export function SiteHeader() {
           </nav>
 
           <div className="ml-auto flex items-center gap-2">
-            <Link
-              href="/login"
-              className="hidden h-11 items-center rounded-[var(--radius-chip)] px-3 type-caption text-ink-muted transition-colors hover:text-ink sm:flex"
-            >
-              Log in
-            </Link>
-            <ButtonLink
-              href="/signup"
-              data-cta="header-start-free"
-              size="sm"
-              variant="secondary"
-              className="hidden sm:inline-flex"
-            >
-              Start free
-            </ButtonLink>
+            {signedIn ? (
+              <>
+                <button
+                  type="button"
+                  onClick={logOut}
+                  disabled={signingOut}
+                  className="hidden h-11 items-center rounded-[var(--radius-chip)] px-3 type-caption text-ink-muted transition-colors hover:text-ink disabled:opacity-60 sm:flex"
+                >
+                  {signingOut ? "Logging out…" : "Log out"}
+                </button>
+                <ButtonLink href="/galleries" data-cta="header-dashboard" size="sm" variant="secondary" className="hidden sm:inline-flex">
+                  Dashboard
+                </ButtonLink>
+                {/* Phones: an icon keeps the bar within the screen. The menu lists Dashboard too (the only place on very narrow screens). */}
+                <ButtonLink href="/galleries" aria-label="Dashboard" size="icon" variant="secondary" className="sm:hidden max-[359px]:hidden">
+                  <Icon name="images" />
+                </ButtonLink>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className={cn(
+                    "hidden h-11 items-center rounded-[var(--radius-chip)] px-3 type-caption text-ink-muted transition-colors hover:text-ink sm:flex",
+                    signedIn === null && "invisible"
+                  )}
+                >
+                  Log in
+                </Link>
+                <ButtonLink
+                  href="/signup"
+                  data-cta="header-start-free"
+                  size="sm"
+                  variant="secondary"
+                  className={cn("hidden sm:inline-flex", signedIn === null && "invisible")}
+                >
+                  Start free
+                </ButtonLink>
+              </>
+            )}
             <button
               type="button"
               onClick={() => setOpen((v) => !v)}
@@ -129,7 +171,7 @@ export function SiteHeader() {
             transition={{ duration: 0.45, ease: [0.7, 0, 0.2, 1] }}
           >
             <nav aria-label="Mobile" className="gutter flex flex-1 flex-col pt-6">
-              {[...marketingNav, { href: "/login", label: "Log in" }].map((item, i) => (
+              {[...marketingNav, signedIn ? { href: "/galleries", label: "Dashboard" } : { href: "/login", label: "Log in" }].map((item, i) => (
                 <motion.div
                   key={item.href}
                   initial={{ opacity: 0, y: 16 }}
@@ -145,9 +187,20 @@ export function SiteHeader() {
               ))}
             </nav>
             <div className="gutter space-y-3 pt-4 pb-[max(24px,env(safe-area-inset-bottom))]">
-              <ButtonLink href="/signup" size="lg" className="w-full" onClick={() => setOpen(false)}>
-                Start free
-              </ButtonLink>
+              {signedIn ? (
+                <button
+                  type="button"
+                  onClick={logOut}
+                  disabled={signingOut}
+                  className={cn(buttonVariants({ variant: "secondary", size: "lg" }), "w-full")}
+                >
+                  {signingOut ? "Logging out…" : "Log out"}
+                </button>
+              ) : (
+                <ButtonLink href="/signup" size="lg" className="w-full" onClick={() => setOpen(false)}>
+                  Start free
+                </ButtonLink>
+              )}
             </div>
           </motion.div>
         )}
